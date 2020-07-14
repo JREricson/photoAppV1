@@ -18,12 +18,12 @@ const PhotoSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
    },
-   //    dateTaken: {
-   //       type: Date,
-   //       required: false,
-   //    },
+   fileLocation: {
+      type: String,
+      required: false,
+   },
    dateTaken: {
-      type: Date,
+      type: String,
       required: false,
    },
    photoLocation: {

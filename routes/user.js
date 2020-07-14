@@ -11,6 +11,17 @@ const multer = require('multer');
 var exifr = require('exifr');
 // const exif = require('exif-js');
 
+//////////////middle wear TODO -- bring to seperate file
+
+//  async function extractExif(fileLocation) {
+//   exifr
+//   .parse('./uploads/userImage-1594674350552-_DSC0169.jpg')
+//   .then((output) => {
+//     return output;
+//   })
+
+// }
+
 //multer uploads
 
 var storage = multer.diskStorage({
@@ -266,17 +277,87 @@ router.get('/:id/test', (req, res) => {
 
 ///////////////
 //////////////
+
+//TODO -- extract middleware
 router.post(
    '/:id/photos/upload',
-   upload.single('userImage'),
+   upload.array('userImage'),
+   //TODO -- make sure no images are save without being added database
 
    (req, res, next) => {
-      console.log(req.file);
-      // var img = new Image();
-      // img.src = '../../uploads/userImage-1594674350552-_DSC0169.jpg';
-      // var testExif = EXIF.getAllTags(req.file);
+      const newPhoto = new Photo({
+         author: 'developer',
+         SubmittedByID: 'none',
+         fileLocation: path.join(req.file.destination, req.file.filename),
+      });
+      var exifData = exifr
+         .parse(path.join(req.file.destination, '/', req.file.filename)) //TODO fix
+         .then((output) => {
+            newPhoto.dateTaken = output.DateTimeOriginal;
 
-      // console.log(testExif);
+            newPhoto
+               .save()
+               .then((photo) => {
+                  console.log('submitted');
+                  res.send('success');
+               })
+               .catch((err) => {
+                  console.log(err);
+                  res.send('failed');
+               });
+         });
+
+      console.log('//////////////// exif data\n' + exifData);
+
+      res.send('sent');
+      //get submitter, date
+
+      // const photo = new Photo({
+      //    author: 'developer',
+      //    SubmittedByID: 'none',
+      // });
+   },
+);
+
+//////////////////////////
+///multiple uploads
+/////////////////////////
+//TODO -- extract middleware
+
+router.get('/:id/photos/uploads', (req, res) => {
+   res.render('users/upload');
+});
+
+router.post(
+   '/:id/photos/uploads',
+   upload.array('userImage'),
+   //TODO -- make sure no images are save without being added database
+
+   (req, res, next) => {
+      const newPhoto = new Photo({
+         author: 'developer',
+         SubmittedByID: 'none',
+         fileLocation: path.join(req.file.destination, req.file.filename),
+      });
+      var exifData = exifr
+         .parse(path.join(req.file.destination, '/', req.file.filename)) //TODO fix
+         .then((output) => {
+            newPhoto.dateTaken = output.DateTimeOriginal;
+
+            newPhoto
+               .save()
+               .then((photo) => {
+                  console.log('submitted');
+                  res.send('success');
+               })
+               .catch((err) => {
+                  console.log(err);
+                  res.send('failed');
+               });
+         });
+
+      console.log('//////////////// exif data\n' + exifData);
+
       res.send('sent');
       //get submitter, date
 
