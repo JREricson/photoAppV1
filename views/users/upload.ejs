@@ -1,0 +1,45 @@
+<%- include("headerUser") %>
+<!-- TODO --//site nav bar??? -->
+
+<!-- script tage for obtainging EXIF data -->
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
+<body>
+   <img
+      id="testImage"
+      src="https://free-images.com/or/269b/bry.jpg"
+      alt="cannot display"
+   />
+   <div class="container">
+      <div class="row">
+         <div class="col-md-6 m-auto">
+            <h1 class="text-center display-4 my-4">Mongo File Uploads</h1>
+            <form
+               action="/users/:id/photos/upload"
+               method="POST"
+               enctype="multipart/form-data"
+            >
+               <div class="custom-file mb-3">
+                  <input
+                     type="file"
+                     name="userImage"
+                     id="file"
+                     class="custom-file-input"
+                  />
+                  <label for="file" class="custom-file-label"
+                     >Choose File</label
+                  >
+               </div>
+               <input
+                  type="submit"
+                  value="Submit"
+                  class="btn btn-primary btn-block"
+               />
+            </form>
+            <hr />
+         </div>
+      </div>
+   </div>
+
+   <%- include("footerUser") %>
+</body>

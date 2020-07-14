@@ -1,0 +1,10 @@
+<h1>All users</h1>
+
+<h2>found a user</h2>
+<% allUsers.forEach((user) =>{ %>
+
+<p><%= user.name %></p>
+
+<a href="/users/<%= user._id %>">Go to Profile</a>
+
+<%}); %>
