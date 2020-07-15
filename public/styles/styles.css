@@ -8,7 +8,7 @@ max-width:100%;
 
 } */
 .caroImg {
-   width: 100%;
+   width: 100vw;
    /* todo--set max height */
 }
 

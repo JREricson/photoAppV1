@@ -30,8 +30,8 @@ const PhotoSchema = new mongoose.Schema({
       type: String, //Change to GPS coord?
       required: false,
    },
-   metadataJSON: {
-      type: JSON,
+   exifMetaData: {
+      type: Object,
       required: false,
    },
 });

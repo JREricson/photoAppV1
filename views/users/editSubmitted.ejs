@@ -1,0 +1,31 @@
+<h1>
+   Edit Submitted photos
+</h1>
+
+<form action="/users/:id/profile">
+   <% newPhotos.forEach((photo, ndx) =>{ %>
+   <p><%= JSON.stringify(exifDataForID[ndx].Model) %></p>
+   <P>hi</P>
+   <img src="<%=photo.fileLocation %>" alt="cannot display image" />
+   <input name="author" type="text" placeholder="<%=photo.author %>" />
+   <input name="camera" type="text" value=" <%= exifDataForID[ndx].Model %>" />
+
+   <input name="author" type="text" placeholder="some guy" value="test" />
+
+   <input name="author" type="text" placeholder="some guy" />
+
+   <input name="author" type="text" placeholder="some guy" />
+
+   <input
+      name="description"
+      type="textarea"
+      placeholder="enter a description here"
+   />
+
+   <p><%= JSON.stringify(photo.exifMetaData) %></p>
+   <% }); %>
+
+   <button class="btn btn-primary" type="submit">submit Changes</button>
+
+   <p>transfered data<%= JSON.stringify(exifDataForID) %></p>
+</form>

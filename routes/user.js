@@ -59,6 +59,7 @@ const upload = multer({
 const User = require('../models/user');
 const Photo = require('../models/photo');
 const { Mongoose } = require('mongoose');
+const { resolve } = require('path');
 
 /////////////////
 //routes
@@ -184,8 +185,107 @@ router.get('/', (req, res) => {
 //User photo Routes
 /////////////////////////
 
+testFunc = () => {
+   return new Promise((resolve, reject) => {
+      setTimeout(() => {
+         console.log('test');
+
+         resolve();
+      }, 1000);
+   });
+
+   resolve();
+};
+
+//upload routes
+///////////////
 router.get('/:id/photos/upload', (req, res) => {
    res.render('users/upload');
+});
+
+//TODO -- extract middleware //add curent user to photoDB
+//add photos to users photos
+//save photes references to list to be edited in redirect
+router.post(
+   '/:id/photos/upload',
+   upload.array('userImage'), //TODO remname all userimage
+   //TODO -- make sure no images are saved without being added database
+
+   (postReq = async (req, res, next) => {
+      var errors = [];
+      var newPhotos = [];
+      var exifDataForID = [];
+
+      if (req.files.length === 0) {
+         errors.push('no files submitted');
+         res.redirect('/:id/photos/upload');
+      }
+
+      //testFunc().then(console.log('testing then'));
+
+      req.files.forEach((img) => {
+         var newPhoto = new Photo({
+            author: 'developer',
+            SubmittedByID: 'none',
+            fileLocation: path.join(img.destination, img.filename),
+         });
+
+         newPhotos.push(Photo.findById(newPhoto._id));
+
+         var exifData = exifr
+            .parse(path.join(img.destination, img.filename))
+            .then((output) => {
+               //TODO -- add other options not upto user
+               newPhoto.dateTaken = output.DateTimeOriginal;
+               newPhoto.exifMetaData = output;
+
+               newPhoto
+                  .save()
+                  .then((photo) => {
+                     console.log(
+                        `submitted img with location ${newPhoto.fileLocation}`,
+                     );
+                  })
+                  .catch((err) => {
+                     console.log(err);
+                     errors.push('error saving photo to db');
+                  });
+
+               // console.log(
+               //    '////////printing original' + JSON.stringify(output),
+               // );
+
+               exifDataForID.push(output);
+               console.log(
+                  '////////printing exifdata' + JSON.stringify(exifDataForID),
+               );
+            })
+
+            .catch((err) => {
+               console.log(err);
+               errors.push('error saving photo to db');
+            });
+
+         // console.log(
+         //    '////////printing exifdata' + JSON.stringify(exifDataForID),
+         // );
+
+         // console.log('//////////////// exif data\n' + exifData);
+      });
+
+      await testFunc();
+      ///make sure following only only comes up when async done
+      if (errors.length > 0) {
+         res.send(errors);
+      } else {
+         res.render('users/editSubmitted', { newPhotos, exifDataForID }); //better way to do this??
+      }
+   }),
+);
+
+//edit upload routes
+router.get('/:id/photos/upload/edit', (req, res) => {
+   res.render('users/editSubmitted');
 });
 
 //temp routes
@@ -201,171 +301,5 @@ router.get('/:id/test', (req, res) => {
       });
    res.send('test');
 });
-
-//single file
-// router.post('/uploadfile', upload.single('myFile'), (req, res, next) => {
-//    const file = req.file;
-//    if (!file) {
-//       const error = new Error('Please upload a file');
-//       error.httpStatusCode = 400;
-//       return next(error);
-//    }
-//    res.send(file);
-// });
-
-// //uploading a file
-// router.post('/uploadphoto', upload.single('picture'), (req, res) => {
-//    var img = fs.readFileSync(req.file.path);
-//    var encode_image = img.toString('base64');
-//    // Define a JSONobject for the image attributes for saving to database
-
-//    var finalImg = {
-//       contentType: req.file.mimetype,
-//       image: new Buffer(encode_image, 'base64'),
-//    };
-//    db.collection('quotes').insertOne(finalImg, (err, result) => {
-//       console.log(result);
-
-//       if (err) return console.log(err);
-
-//       console.log('saved to database');
-//       res.redirect('/');
-//    });
-// });
-
-//Uploading multiple files
-// router.post(
-//    '/uploadmultiple',
-//    upload.array('myFiles', 12),
-//    (req, res, next) => {
-//       const files = req.files;
-//       if (!files) {
-//          const error = new Error('Please choose files');
-//          error.httpStatusCode = 400;
-//          return next(error);
-//       }
-
-//       res.send(files);
-//    },
-// );
-
-// router.get('/:id/photos', (req, res) => {
-//    db.collection('mycollection')
-//       .find()
-//       .toArray((err, result) => {
-//          const imgArray = result.map((element) => element._id);
-//          console.log(imgArray);
-
-//          if (err) return console.log(err);
-//          res.send(imgArray);
-//       });
-// });
-
-// router.get('/photo/:photoID', (req, res) => {
-//    var filename = req.params.photoID;
-
-//    db.collection('mycollection').findOne(
-//       { _id: ObjectId(filename) },
-//       (err, result) => {
-//          if (err) return console.log(err);
-
-//          res.contentType('image/jpeg');
-//          res.send(result.image.buffer);
-//       },
-//    );
-// });
-
-///////////////
-//////////////
-
-//TODO -- extract middleware
-router.post(
-   '/:id/photos/upload',
-   upload.array('userImage'),
-   //TODO -- make sure no images are save without being added database
-
-   (req, res, next) => {
-      const newPhoto = new Photo({
-         author: 'developer',
-         SubmittedByID: 'none',
-         fileLocation: path.join(req.file.destination, req.file.filename),
-      });
-      var exifData = exifr
-         .parse(path.join(req.file.destination, '/', req.file.filename)) //TODO fix
-         .then((output) => {
-            newPhoto.dateTaken = output.DateTimeOriginal;
-
-            newPhoto
-               .save()
-               .then((photo) => {
-                  console.log('submitted');
-                  res.send('success');
-               })
-               .catch((err) => {
-                  console.log(err);
-                  res.send('failed');
-               });
-         });
-
-      console.log('//////////////// exif data\n' + exifData);
-
-      res.send('sent');
-      //get submitter, date
-
-      // const photo = new Photo({
-      //    author: 'developer',
-      //    SubmittedByID: 'none',
-      // });
-   },
-);
-
-//////////////////////////
-///multiple uploads
-/////////////////////////
-//TODO -- extract middleware
-
-router.get('/:id/photos/uploads', (req, res) => {
-   res.render('users/upload');
-});
-
-router.post(
-   '/:id/photos/uploads',
-   upload.array('userImage'),
-   //TODO -- make sure no images are save without being added database
-
-   (req, res, next) => {
-      const newPhoto = new Photo({
-         author: 'developer',
-         SubmittedByID: 'none',
-         fileLocation: path.join(req.file.destination, req.file.filename),
-      });
-      var exifData = exifr
-         .parse(path.join(req.file.destination, '/', req.file.filename)) //TODO fix
-         .then((output) => {
-            newPhoto.dateTaken = output.DateTimeOriginal;
-
-            newPhoto
-               .save()
-               .then((photo) => {
-                  console.log('submitted');
-                  res.send('success');
-               })
-               .catch((err) => {
-                  console.log(err);
-                  res.send('failed');
-               });
-         });
-
-      console.log('//////////////// exif data\n' + exifData);
-
-      res.send('sent');
-      //get submitter, date
-
-      // const photo = new Photo({
-      //    author: 'developer',
-      //    SubmittedByID: 'none',
-      // });
-   },
-);
 
 module.exports = router;
