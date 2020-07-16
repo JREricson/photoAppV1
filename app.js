@@ -64,9 +64,11 @@ mongoose.set('useCreateIndex', true);
 
 //Routes
 app.use('/', require('./routes/index'));
+app.use('/allusers', require('./routes/index'));
 app.use('/users', require('./routes/user'));
+
 app.use((req, res, next) => {
-   res.status(404).send('page not found');
+   res.status(404).render('404');
 });
 
 const PORT = process.env.PORT || 3001;

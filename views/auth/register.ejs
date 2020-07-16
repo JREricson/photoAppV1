@@ -1,4 +1,4 @@
-<%- include("partials/header") %>
+<%- include("../partials/header") %> <%- include("../partials/navbar") %>
 
 <div class="row mt-5">
    <div class="col-md-6 m-auto">
@@ -6,7 +6,7 @@
          <h1 class="text-center mb-3">
             <i class="fas fa-user-plus"></i> Register
          </h1>
-         <%- include('./partials/messages') %>
+         <%- include('../partials/messages') %>
          <form action="/register" method="POST">
             <div class="form-group">
                <label for="name">Name</label>
@@ -61,4 +61,4 @@
    </div>
 </div>
 
-<%- include("partials/footer") %>
+<%- include("../partials/footer") %>

@@ -12,10 +12,10 @@ const passport = require('passport');
 const User = require('../models/user');
 
 //landing
-router.get('/', (req, res) => res.render('landing'));
+router.get('/', (req, res) => res.render('auth/landing'));
 
 //login
-router.get('/login', (req, res) => res.render('login'));
+router.get('/login', (req, res) => res.render('auth/login'));
 
 router.post('/login', (req, res, next) => {
    passport.authenticate('local', {
@@ -33,7 +33,7 @@ router.get('/logout', (req, res) => {
 });
 
 //Register
-router.get('/register', (req, res) => res.render('register'));
+router.get('/register', (req, res) => res.render('auth/register'));
 
 router.post('/register', (req, res) => {
    let errors = [];
@@ -61,7 +61,7 @@ router.post('/register', (req, res) => {
    }
 
    if (errors.length > 0) {
-      res.render('register', {
+      res.render('auth/register', {
          errors,
          name,
          email,
@@ -73,7 +73,7 @@ router.post('/register', (req, res) => {
          if (user) {
             errors.push({ msg: 'Email is already registered' });
             //rerendering page with saved valus
-            res.render('register', {
+            res.render('auth/register', {
                errors,
                name,
                email,
@@ -111,6 +111,10 @@ router.post('/register', (req, res) => {
          }
       });
    }
+});
+
+router.get('/teapot', (req, res) => {
+   res.status(418).send('I am a teapot---you found an easter egg!!');
 });
 
 module.exports = router;
