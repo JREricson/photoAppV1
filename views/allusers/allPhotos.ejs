@@ -1,2 +1,10 @@
+<%- include("../partials/header") %> <%- include("../partials/navbar") %> <%
+photosFound.forEach((photo, ndx) =>{%>
+<img
+   class="thumbnail galleryThumb"
+   class="editThumbnail"
+   src="\uploads\<%=photo.fileName %>"
+   alt="cannot display image"
+/>
 
-
+<% }) %> <%- include("../partials/footer") %>

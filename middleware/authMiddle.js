@@ -12,13 +12,12 @@ middlewareObj.isCurUserContentOwner = function (req, res, next) {
          console.log('pased validation');
          next();
       } else {
-         //res.redirect('/users/login'); //TODO give status???
          req.flash('you need to be logged in as the owner to go there');
-         res.redirect('/users/login');
+         res.redirect('/login');
       }
    } else {
       req.flash('you need to be logged in as the owner to go there');
-      res.redirect('/users/login');
+      res.redirect('/login');
    }
 };
 

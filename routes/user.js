@@ -7,7 +7,9 @@ const path = require('path');
 const multer = require('multer');
 var exifr = require('exifr');
 
+//middleware
 const authMidware = require('../middleware/authMiddle');
+const userMidware = require('../middleware/userMiddle');
 
 // const exif = require('exif-js');
 
@@ -66,9 +68,10 @@ const { resolve } = require('path');
 /////////////////
 
 router.get('/:id/profile', (req, res) => {
-   res.render('users/profile');
+   userMidware.renderPage(req, res, 'users/profile');
 });
 
+//TODO -- move to all users????
 router.get('/', (req, res) => {
    User.find({}, (err, allUsers) => {
       if (err) {
@@ -103,7 +106,7 @@ router.get(
    '/:id/photos/upload',
    authMidware.isCurUserContentOwner,
    (req, res) => {
-      res.render('users/upload');
+      userMidware.renderPage(req, res, 'users/upload');
    },
 );
 
@@ -155,27 +158,13 @@ router.post(
                      console.log(err);
                      errors.push('error saving photo to db');
                   });
-
-               // console.log(
-               //    '////////printing original' + JSON.stringify(output),
-               // );
-
                exifDataForID.push(output);
-               // console.log(
-               //    '////////printing exifdata' + JSON.stringify(exifDataForID),
-               // );
             })
 
             .catch((err) => {
                console.log(err);
                errors.push('error saving photo to db');
             });
-
-         // console.log(
-         //    '////////printing exifdata' + JSON.stringify(exifDataForID),
-         // );
-
-         // console.log('//////////////// exif data\n' + exifData);
       });
 
       await testFunc();
@@ -183,7 +172,11 @@ router.post(
       if (errors.length > 0) {
          res.send(errors);
       } else {
-         res.render('users/editSubmitted', { newPhotos, exifDataForID }); //better way to do this??
+         userMidware.renderPage(req, res, 'users/editSubmitted', {
+            newPhotos,
+            exifDataForID,
+         });
+         //res.render('users/editSubmitted', { newPhotos, exifDataForID }); //better way to do this??
       }
    }),
 );
@@ -201,22 +194,24 @@ router.get('/:id/test', (req, res) => {
    res.send('test');
 });
 
-router.get('/:id/photos', (req, res) => {
-   User.findById(req.params.id, (err, profileOwner) => {
-      if (err) {
-         console.log(err);
-         res.status(404).send('page not found');
-      } else {
-         currentUser = req.user;
+router.get(
+   '/:id/photos',
 
-         res.render('users/photos', { profileOwner, currentUser });
-      }
-   });
-
-   //getting Current user
-
-   // while()
-});
+   (req, res) => {
+      userMidware.renderPage(req, res, 'users/photos');
+      // User.findById(req.params.id, (err, profileOwner) => {
+      //    if (err) {
+      //       console.log(err);
+      //       res.status(404).send('page not found');
+      //    } else {
+      //       currentUser = req.user;
+      //       res.render('users/photos', { profileOwner, currentUser });
+      //    }
+      // });
+      //getting Current user
+      // while()
+   },
+);
 
 router.put('/:id/photos', (req, res) => {
    var ndx = 0;

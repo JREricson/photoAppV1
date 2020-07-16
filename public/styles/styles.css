@@ -81,6 +81,11 @@ seenOnlyByUser {
    max-height: 40vh;
 }
 
+.galleryThumb {
+   max-width: 60vw;
+   max-height: 40vh;
+}
+
 /* @media only screen and (max-width: 720) {
    .formWithImg {
       display: none;

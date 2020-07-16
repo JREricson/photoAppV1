@@ -45,14 +45,16 @@ app.use(flash());
 
 //Global vars
 app.use((req, res, next) => {
+   //flash
    res.locals.success_msg = req.flash('success_msg');
    res.locals.error_msg = req.flash('error_msg');
    res.locals.error = req.flash('error');
+   //path dir for ejs templates
+   res.locals.appDir = path.dirname(require.main.filename);
    next();
 });
 
 //setting up mongoDB
-//setting up mongodb
 mongoose
    .connect('mongodb://localhost:27017/photoAppV1', {
       useNewUrlParser: true,
@@ -64,7 +66,7 @@ mongoose.set('useCreateIndex', true);
 
 //Routes
 app.use('/', require('./routes/index'));
-app.use('/allusers', require('./routes/index'));
+app.use('/allusers', require('./routes/allUsers'));
 app.use('/users', require('./routes/user'));
 
 app.use((req, res, next) => {

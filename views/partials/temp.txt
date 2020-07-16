@@ -20,12 +20,12 @@ middlewareObj.isCurUserContentOwner = function (req, res, next) {
    //       if (params.user._id.equals(req.user._id)) {
    //          next();
    //       } else {
-   //          //res.redirect('/users/login'); //TODO give status???
+   //          //res.redirect('/login'); //TODO give status???
    //          res.send('oh snap');
    //       }
    //    } else {
    //       res.send('oh snap');
-   //       //res.redirect('/users/login');
+   //       //res.redirect('/login');
    //    }
 };
 

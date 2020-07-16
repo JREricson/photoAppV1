@@ -6,11 +6,11 @@
 <h1>user's photos</h1>
 <h1>user's photos</h1>
 
-<h1>ID: <%= profileOwner._id %></h1>
+<h1>ID: <%= contentOwner._id %></h1>
 
 <% if(currentUser){ %>
 <h1>ID of cur user: <%= currentUser._id %></h1>
-<% } %> <% if(currentUser && currentUser._id.equals(profileOwner._id)){ %>
+<% } %> <% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
 
 <a href="./photos/upload" class="btn btn-info">Add to Portfolio</a>
 <% } %> <%- include("footerUser") %>
