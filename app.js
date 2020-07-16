@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const flash = require('connect-flash');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
 
 const passport = require('passport');
 const path = require('path');
@@ -33,6 +34,9 @@ app.use(
    }),
 );
 
+//method methodOverride
+app.use(methodOverride('_method'));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -54,13 +58,16 @@ mongoose
       useNewUrlParser: true,
       useUnifiedTopology: true,
    })
-   .then(() => console.log('MOngoDB connected'))
+   .then(() => console.log('MongoDB connected'))
    .catch((err) => console.log(err));
 mongoose.set('useCreateIndex', true);
 
 //Routes
 app.use('/', require('./routes/index'));
 app.use('/users', require('./routes/user'));
+app.use((req, res, next) => {
+   res.status(404).send('page not found');
+});
 
 const PORT = process.env.PORT || 3001;
 var today = new Date();

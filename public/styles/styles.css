@@ -73,6 +73,13 @@ img {
 seenOnlyByUser {
    color: blue;
 }
+.test {
+   font-size: 300px;
+}
+.editThumbnail {
+   max-width: 80vw;
+   max-height: 40vh;
+}
 
 /* @media only screen and (max-width: 720) {
    .formWithImg {

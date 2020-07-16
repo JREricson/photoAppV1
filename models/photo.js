@@ -20,7 +20,11 @@ const PhotoSchema = new mongoose.Schema({
    },
    fileLocation: {
       type: String,
-      required: false,
+      required: true,
+   },
+   fileName: {
+      type: String,
+      required: true,
    },
    dateTaken: {
       type: String,

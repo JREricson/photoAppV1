@@ -1,31 +1,47 @@
-<h1>
+<%- include("headerUser") %>
+
+<h1 class="photoSubmissionTitle">
    Edit Submitted photos
 </h1>
 
-<form action="/users/:id/profile">
-   <% newPhotos.forEach((photo, ndx) =>{ %>
-   <p><%= JSON.stringify(exifDataForID[ndx].Model) %></p>
+<form action="/users/:id/photos?_method=PUT" method="post">
+   <input type="text" id="testytest" name="testytest" value="yay" />
+   <% newPhotos.forEach(function(p, ndx) { %>
+
+   <p>file located at <%= p._id %></p>
    <P>hi</P>
-   <img src="<%=photo.fileLocation %>" alt="cannot display image" />
-   <input name="author" type="text" placeholder="<%=photo.author %>" />
-   <input name="camera" type="text" value=" <%= exifDataForID[ndx].Model %>" />
+   <img
+      class="editThumbnail"
+      src="\uploads\<%=p.fileName %>"
+      alt="cannot display image"
+   />
+   <label for="author">Author </label>
+   <input name="author" type="text" placeholder="<%= p.author %>" />
 
-   <input name="author" type="text" placeholder="some guy" value="test" />
+   <label for="dateTaken">Date taken (format) </label>
+   <input
+      name="dateTaken"
+      type="text"
+      placeholder="enter a date in (..) format"
+   />
+   <label for="Latitude">Latitude </label>
+   <input name="Latitude" type="text" value="<%= p.exifMetaData.latitude %>" />"
 
-   <input name="author" type="text" placeholder="some guy" />
-
-   <input name="author" type="text" placeholder="some guy" />
-
+   <label for="tags">enter tags -- no need for the ugly octothorp (#) </label>
+   <input name="tags" type="text" placeholder="ex: macro insect nature" />
+   <label for="description">Enter a caption for your photo </label>
    <input
       name="description"
       type="textarea"
       placeholder="enter a description here"
    />
 
-   <p><%= JSON.stringify(photo.exifMetaData) %></p>
+   <p><%= JSON.stringify(p.exifMetaData) %></p>
    <% }); %>
 
    <button class="btn btn-primary" type="submit">submit Changes</button>
 
    <p>transfered data<%= JSON.stringify(exifDataForID) %></p>
 </form>
+
+<%- include("footerUser") %>

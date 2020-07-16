@@ -4,11 +4,11 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 
-const bcrypt = require('bcryptjs');
-const passport = require('passport');
-
 const multer = require('multer');
 var exifr = require('exifr');
+
+const authMidware = require('../middleware/authMiddle');
+
 // const exif = require('exif-js');
 
 //////////////middle wear TODO -- bring to seperate file
@@ -26,7 +26,7 @@ var exifr = require('exifr');
 
 var storage = multer.diskStorage({
    destination: function (req, file, cb) {
-      cb(null, './uploads');
+      cb(null, './public/uploads');
    },
    filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + '-' + file.originalname;
@@ -65,107 +65,7 @@ const { resolve } = require('path');
 //routes
 /////////////////
 
-//Login
-router.get('/login', (req, res) => res.render('login'));
-
-//Register
-router.get('/register', (req, res) => res.render('register'));
-
-router.post('/register', (req, res) => {
-   let errors = [];
-   const { name, email, password, password2 } = req.body;
-
-   //check required fields
-   if (!name || !email || !password || !password2) {
-      errors.push({
-         msg: 'all fields are required',
-      });
-   }
-
-   //check pw match
-   if (password != password2) {
-      errors.push({
-         msg: 'password must be atleast 9 characters',
-      });
-   }
-
-   //chack pw length
-   if (password.length < 9) {
-      errors.push({
-         msg: 'all fields are required',
-      });
-   }
-
-   if (errors.length > 0) {
-      res.render('register', {
-         errors,
-         name,
-         email,
-         password,
-         password2,
-      });
-   } else {
-      User.findOne({ email: email }).then((user) => {
-         if (user) {
-            errors.push({ msg: 'Email is already registered' });
-            //rerendering page with saved valus
-            res.render('register', {
-               errors,
-               name,
-               email,
-               password,
-               password2,
-            });
-         } else {
-            //passed validation
-            const newUser = new User({
-               name,
-               email,
-               password,
-            });
-
-            console.log(newUser);
-
-            //encrypting password
-            //
-            bcrypt.genSalt(10, (err, salt) => {
-               bcrypt.hash(newUser.password, salt, (err, hash) => {
-                  if (err) throw err; //TODO handle error
-                  newUser.password = hash;
-                  newUser
-                     .save()
-                     .then((user) => {
-                        req.flash(
-                           'success_msg',
-                           'You are now registered and can log in',
-                        );
-                        res.redirect('/users/login');
-                     })
-                     .catch((err) => console.log(err));
-               });
-            });
-         }
-      });
-   }
-});
-
-// Login
-router.post('/login', (req, res, next) => {
-   passport.authenticate('local', {
-      successRedirect: '/', //TODO -- change route
-      failureRedirect: '/users/login',
-      failureFlash: true,
-   })(req, res, next);
-});
-
-//logout
-router.get('/logout', (req, res) => {
-   req.logout();
-   req.flash('success_msg', 'you are now logged out');
-   res.redirect('/users/login');
-});
-
-router.get('/:id', (req, res) => {
+router.get('/:id/profile', (req, res) => {
    res.render('users/profile');
 });
 
@@ -188,7 +88,7 @@ router.get('/', (req, res) => {
 testFunc = () => {
    return new Promise((resolve, reject) => {
       setTimeout(() => {
-         console.log('test');
+         console.log('in test function');
 
          resolve();
       }, 1000);
@@ -199,15 +99,20 @@ testFunc = () => {
 
 //upload routes
 ///////////////
-router.get('/:id/photos/upload', (req, res) => {
-   res.render('users/upload');
-});
+router.get(
+   '/:id/photos/upload',
+   authMidware.isCurUserContentOwner,
+   (req, res) => {
+      res.render('users/upload');
+   },
+);
 
 //TODO -- extract middleware //add curent user to photoDB
 //add photos to users photos
 //save photes references to list to be edited in redirect
 router.post(
    '/:id/photos/upload',
+   authMidware.isCurUserContentOwner,
    upload.array('userImage'), //TODO remname all userimage
    //TODO -- make sure no images are saved without being added database
 
@@ -218,7 +123,7 @@ router.post(
 
       if (req.files.length === 0) {
          errors.push('no files submitted');
-         res.redirect('/:id/photos/upload');
+         res.redirect(`/${req.params.id}/photos/upload`);
       }
 
       //testFunc().then(console.log('testing then'));
@@ -227,10 +132,9 @@ router.post(
          var newPhoto = new Photo({
             author: 'developer',
             SubmittedByID: 'none',
+            fileName: img.filename,
             fileLocation: path.join(img.destination, img.filename),
          });
-
-         newPhotos.push(Photo.findById(newPhoto._id));
 
          var exifData = exifr
             .parse(path.join(img.destination, img.filename))
@@ -242,9 +146,10 @@ router.post(
                newPhoto
                   .save()
                   .then((photo) => {
-                     console.log(
-                        `submitted img with location ${newPhoto.fileLocation}`,
-                     );
+                     // console.log(
+                     //    `submitted img with location ${photo.fileLocation}`,
+                     // );
+                     newPhotos.push(photo);
                   })
                   .catch((err) => {
                      console.log(err);
@@ -256,9 +161,9 @@ router.post(
                // );
 
                exifDataForID.push(output);
-               console.log(
-                  '////////printing exifdata' + JSON.stringify(exifDataForID),
-               );
+               // console.log(
+               //    '////////printing exifdata' + JSON.stringify(exifDataForID),
+               // );
             })
 
             .catch((err) => {
@@ -293,13 +198,41 @@ router.get('/:id/photos/upload/edit', (req, res) => {
 //////////
 
 router.get('/:id/test', (req, res) => {
-   exifr
-      .parse('./uploads/userImage-1594674350552-_DSC0169.jpg')
-      .then((output) => {
-         console.log(output);
-         console.log('Camera:', output.Make, output.Model);
-      });
    res.send('test');
+});
+
+router.get('/:id/photos', (req, res) => {
+   User.findById(req.params.id, (err, profileOwner) => {
+      if (err) {
+         console.log(err);
+         res.status(404).send('page not found');
+      } else {
+         currentUser = req.user;
+
+         res.render('users/photos', { profileOwner, currentUser });
+      }
+   });
+
+   //getting Current user
+
+   // while()
+});
+
+router.put('/:id/photos', (req, res) => {
+   var ndx = 0;
+
+   const { testytest, author: authors } = req.body;
+
+   res.redirect(`/users/${req.params.id}/photos`);
+
+   // console.log('/////////in post req');
+   // console.log('author' + ndx);
+
+   // console.log(req.body);
+   // console.log(testytest);
+   // console.log(authors);
+
+   // while()
 });
 
 module.exports = router;
