@@ -1,10 +1,24 @@
 <%- include("../partials/header") %> <%- include("../partials/navbar") %> <%
 photosFound.forEach((photo, ndx) =>{%>
-<img
-   class="thumbnail galleryThumb"
-   class="editThumbnail"
-   src="\uploads\<%=photo.fileName %>"
-   alt="cannot display image"
-/>
+
+<div class="photoCard">
+   <img
+      class="thumbnail galleryThumb"
+      class="editThumbnail"
+      src="\uploads\<%=photo.fileName %>"
+      alt="cannot display image"
+   />
+   <h4 class="photoCaption">
+      <%=photo.caption %>
+   </h4>
+
+   <p class="photoLocation"></p>
+   <p class="photoDescription">
+      <em>description : </em>
+      <%=photo.description %>
+   </p>
+   <p class="date">submitted on<%=photo.dateSubmited %></p>
+   <p class="date">taken on<%=photo.exifMetaData.DateTimeOriginal %></p>
+</div>
 
 <% }) %> <%- include("../partials/footer") %>

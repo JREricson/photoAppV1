@@ -149,9 +149,6 @@ router.post(
                newPhoto
                   .save()
                   .then((photo) => {
-                     // console.log(
-                     //    `submitted img with location ${photo.fileLocation}`,
-                     // );
                      newPhotos.push(photo);
                   })
                   .catch((err) => {
@@ -168,7 +165,7 @@ router.post(
       });
 
       await testFunc();
-      ///make sure following only only comes up when async done
+      ///TODO make sure following only only comes up when async done
       if (errors.length > 0) {
          res.send(errors);
       } else {
@@ -191,7 +188,9 @@ router.get('/:id/photos/upload/edit', (req, res) => {
 //////////
 
 router.get('/:id/test', (req, res) => {
-   res.send('test');
+   res.send(
+      '{"Make":"Sony","Model":"E5823","Orientation":"Rotate 90 CW","XResolution":72,"YResolution":72,"ResolutionUnit":"inches","Software":"32.4.A.1.54_0_f500","ModifyDate":"2019-02-03T05:41:04.000Z","YCbCrPositioning":1,"ExposureTime":0.05,"FNumber":2,"ISO":800,"ExifVersion":"2.2","DateTimeOriginal":"2019-02-03T05:41:04.000Z","CreateDate":"2019-02-03T05:41:04.000Z","ComponentsConfiguration":{"0":1,"1":2,"2":3,"3":0},"ShutterSpeedValue":4.32,"ExposureCompensation":0,"MeteringMode":"Pattern","LightSource":"Unknown","Flash":"Flash did not fire, compulsory flash mode","FocalLength":4.23,"SubSecTime":"759784","SubSecTimeOriginal":"759784","SubSecTimeDigitized":"759784","FlashpixVersion":"1.0","ColorSpace":1,"ExifImageWidth":3840,"ExifImageHeight":2160,"CustomRendered":"Normal","ExposureMode":"Auto","WhiteBalance":"Auto","DigitalZoomRatio":1,"SceneCaptureType":"Standard","SubjectDistanceRange":"Unknown","GPSVersionID":"2.2.0.0","GPSLatitudeRef":"N","GPSLatitude":[17,23,42.999],"GPSLongitudeRef":"E","GPSLongitude":[104,48,17.413],"GPSAltitudeRef":{"0":0},"GPSAltitude":188,"GPSTimeStamp":"8:38:35","GPSStatus":"A","GPSMapDatum":"WGS-84","GPSDateStamp":"2019:02:02","latitude":17.3952775,"longitude":104.80483694444445}',
+   );
 });
 
 router.get(
@@ -199,35 +198,70 @@ router.get(
 
    (req, res) => {
       userMidware.renderPage(req, res, 'users/photos');
-      // User.findById(req.params.id, (err, profileOwner) => {
-      //    if (err) {
-      //       console.log(err);
-      //       res.status(404).send('page not found');
-      //    } else {
-      //       currentUser = req.user;
-      //       res.render('users/photos', { profileOwner, currentUser });
-      //    }
-      // });
-      //getting Current user
-      // while()
    },
 );
 
 router.put('/:id/photos', (req, res) => {
-   var ndx = 0;
+   //getting data from doc
+   const {
+      author: authors,
+      description: descriptions,
+      photoId: photoIds,
+   } = req.body;
 
-   const { testytest, author: authors } = req.body;
+   //adding data to photo obj
+
+   try {
+      //body parser will make a list if more than one-- checking for list first
+      photoIds.forEach((id, ndx) => {
+         console.log('??????????????desciption is: --- ' + descriptions[0]);
+         Photo.findByIdAndUpdate(
+            id,
+            { description: descriptions[0] },
+            (err, updatedPhoto) => {
+               if (err) {
+                  console.log(err);
+               } else {
+                  console.log('/////// updated Photo\n' + updatedPhoto);
+               }
+            },
+         );
+         console.log(id + '---' + descriptions);
+      });
+   } catch (err) {
+      //TODO -handling error in best way???
+      //now checking as if single var, and not a list
+      if (err instanceof TypeError) {
+         try {
+            Photo.findByIdAndUpdate(
+               photoIds,
+               { description: descriptions },
+               (err, updatedPhoto) => {
+                  if (err) {
+                     console.log(err);
+                  } else {
+                     console.log('/////// updated Photo\n' + updatedPhoto);
+                  }
+               },
+            );
+         } catch {
+            console.log(err);
+         }
+      }
+   }
+
+   console.log(photoIds);
+
+   //findOneAndUpdate
+
+   //TODO remove test
+
+   console.log(req.body);
+   //need to find indiv photo
+   //get all compeonets to that photo
+   //save to photo db
 
    res.redirect(`/users/${req.params.id}/photos`);
-
-   // console.log('/////////in post req');
-   // console.log('author' + ndx);
-
-   // console.log(req.body);
-   // console.log(testytest);
-   // console.log(authors);
-
-   // while()
 });
 
 module.exports = router;
