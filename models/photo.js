@@ -30,11 +30,24 @@ const PhotoSchema = new mongoose.Schema({
       required: true,
    },
    dateTaken: {
+      type: String, //TODO change to date
+      required: false,
+   },
+   longitude: {
       type: String,
       required: false,
    },
-   photoLocation: {
-      type: String, //Change to GPS coord?
+
+   longitude: {
+      type: String,
+      required: false,
+   },
+   latitude: {
+      type: String,
+      required: false,
+   },
+   tags: {
+      type: [],
       required: false,
    },
    exifMetaData: {

@@ -8,28 +8,51 @@
 
     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
       <li class="nav-item active">
-        <a class="nav-link" href="/">Profile <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/profile">Profile </a>
+      </li>
+      <li class="nav-item active"> 
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/photos">Portfolios </a>
       </li>
 
       <li class="nav-item active">
-        <a class="nav-link" href="/">Galleries <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/photos">Gallery </a>
       </li>
+
       <li class="nav-item active">
-        <a class="nav-link" href="/">Adventures <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="/">Photo explorer <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="/">Photo explorer </a>
       </li>
       <li class="nav-item  active">
-        <a class="nav-link seenOnlyByUser " href="/users/addPhoto">Add Photos <span class="sr-only">(current)</span></a>
+        <a class="nav-link seenOnlyByUser " href="/users/addPhoto">Add Photos </a>
       </li>
+       <!--only show if user has these-->
+    <li>  <a class="nav-item" href="https://www.instagram.com/j_r_ericson/"> 
+      <i href="#" class="fab fa-instagram"  alt="instagram"/></i></a>
+</li>
 
-      <a href="https://www.instagram.com/j_r_ericson/"><li class="nav-item"><i href="#" class="fab fa-instagram"  alt="instagram"></i></a>
+ 
+<i class="fab fa-500px nav-link" aria-hidden="true"></i></li>
+ <li>   <i class="fab fa-flickr nav-link" aria-hidden="true"></i></li>
+ <li> <i class="fab fa-facebook nav-link" aria-hidden="true"></i></li>
+  <li><i class="fab fa-github nav-link" aria-hidden="true"></i></li>
+ 
+<% if(currentUser) {%>
 
-<i class="fab fa-500px" aria-hidden="true"></i>
-    <i class="fab fa-flickr" aria-hidden="true"></i>
-  <i class="fab fa-facebook" aria-hidden="true"></i>
-  <i class="fab fa-facebook" aria-hidden="true"></i>
+  <li class="nav-item  active">
+    <a class="nav-link   " href="/logout">Logout </a>
+  </li>
+
+  <%} else{%>
+
+    <li class="nav-item  ">
+      <a class="nav-link  " href="/login">Login </a>
+    </li>
+    <li class="nav-item  ">
+      <a class="nav-link " href="/register">Register </a>
+    </li>
+    
+  <%} %>
+
+
 
 </li>
 

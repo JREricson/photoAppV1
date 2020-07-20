@@ -9,7 +9,7 @@ middlewareObj.renderPage = (req, res, pagePath, objOfValToBeSent) => {
    User.findById(req.params.id, (err, contentOwner) => {
       if (err) {
          console.log(err);
-         res.status(404).send('page not found'); //TODO render 404
+         res.status(404).render('404');
       } else {
          currentUser = req.user;
          let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };

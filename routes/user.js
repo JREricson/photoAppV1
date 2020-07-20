@@ -10,6 +10,7 @@ var exifr = require('exifr');
 //middleware
 const authMidware = require('../middleware/authMiddle');
 const userMidware = require('../middleware/userMiddle');
+const photoMidware = require('../middleware/photoMiddle');
 
 // const exif = require('exif-js');
 
@@ -67,8 +68,10 @@ const { resolve } = require('path');
 //routes
 /////////////////
 
-router.get('/:id/profile', (req, res) => {
-   userMidware.renderPage(req, res, 'users/profile');
+router.get('/:id/profile', async (req, res) => {
+   const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
+
+   userMidware.renderPage(req, res, 'users/profile', { photoList });
 });
 
 //TODO -- move to all users????
@@ -116,7 +119,9 @@ router.get(
 router.post(
    '/:id/photos/upload',
    authMidware.isCurUserContentOwner,
-   upload.array('userImage'), //TODO remname all userimage
+
+   //putting photos from into an array
+   upload.array('userImage'),
    //TODO -- make sure no images are saved without being added database
 
    (postReq = async (req, res, next) => {
@@ -162,6 +167,22 @@ router.post(
                console.log(err);
                errors.push('error saving photo to db');
             });
+
+         //adding photo to currrent users's photo collection
+         User.findByIdAndUpdate(
+            req.user._id,
+            { $push: { allPhotos: newPhoto._id } },
+            (err, addedPhoto) => {
+               if (err) {
+                  console.log('photo not added to user array');
+                  console.log(err);
+               } else {
+                  console.log('++++++++++++++++++');
+                  console.log("added photo to user's photo list");
+                  console.log(req.user);
+               }
+            },
+         );
       });
 
       await testFunc();
@@ -179,45 +200,70 @@ router.post(
 );
 
 //edit upload routes
+// TODO -- add validation incase user does not exist
 router.get('/:id/photos/upload/edit', (req, res) => {
    res.render('users/editSubmitted');
 });
 
-//temp routes
-////////////
-//////////
-
-router.get('/:id/test', (req, res) => {
+router.get('/:id/test1', (req, res) => {
    res.send(
       '{"Make":"Sony","Model":"E5823","Orientation":"Rotate 90 CW","XResolution":72,"YResolution":72,"ResolutionUnit":"inches","Software":"32.4.A.1.54_0_f500","ModifyDate":"2019-02-03T05:41:04.000Z","YCbCrPositioning":1,"ExposureTime":0.05,"FNumber":2,"ISO":800,"ExifVersion":"2.2","DateTimeOriginal":"2019-02-03T05:41:04.000Z","CreateDate":"2019-02-03T05:41:04.000Z","ComponentsConfiguration":{"0":1,"1":2,"2":3,"3":0},"ShutterSpeedValue":4.32,"ExposureCompensation":0,"MeteringMode":"Pattern","LightSource":"Unknown","Flash":"Flash did not fire, compulsory flash mode","FocalLength":4.23,"SubSecTime":"759784","SubSecTimeOriginal":"759784","SubSecTimeDigitized":"759784","FlashpixVersion":"1.0","ColorSpace":1,"ExifImageWidth":3840,"ExifImageHeight":2160,"CustomRendered":"Normal","ExposureMode":"Auto","WhiteBalance":"Auto","DigitalZoomRatio":1,"SceneCaptureType":"Standard","SubjectDistanceRange":"Unknown","GPSVersionID":"2.2.0.0","GPSLatitudeRef":"N","GPSLatitude":[17,23,42.999],"GPSLongitudeRef":"E","GPSLongitude":[104,48,17.413],"GPSAltitudeRef":{"0":0},"GPSAltitude":188,"GPSTimeStamp":"8:38:35","GPSStatus":"A","GPSMapDatum":"WGS-84","GPSDateStamp":"2019:02:02","latitude":17.3952775,"longitude":104.80483694444445}',
    );
 });
 
+router.get('/:id/test2', (req, res) => {
+   res.render('map');
+});
+
+router.get(
+   '/:id/about',
+
+   (req, res) => {
+      userMidware.renderPage(req, res, 'users/about');
+   },
+);
+
 router.get(
    '/:id/photos',
 
-   (req, res) => {
-      userMidware.renderPage(req, res, 'users/photos');
+   async (req, res) => {
+      const photoList = await photoMidware.getUsersPhotos(req, res);
+      userMidware.renderPage(req, res, 'users/photos', { photoList });
+      //TODO -- only sending ID -- pages geting img src
    },
 );
 
 router.put('/:id/photos', (req, res) => {
    //getting data from doc
    const {
-      author: authors,
-      description: descriptions,
-      photoId: photoIds,
+      photoId,
+      description,
+      caption,
+      dateTaken,
+      longitude,
+      latitude,
+      tagString,
    } = req.body;
 
    //adding data to photo obj
 
    try {
       //body parser will make a list if more than one-- checking for list first
-      photoIds.forEach((id, ndx) => {
-         console.log('??????????????desciption is: --- ' + descriptions[0]);
+      photoId.forEach((id, ndx) => {
+         //console.log('??????????????desciption is: --- ' + description[0]);
          Photo.findByIdAndUpdate(
             id,
-            { description: descriptions[0] },
+            {
+               // author: req.user.name, TODO -- fix line
+               description: description[ndx],
+               caption: caption[ndx],
+               dateTaken: dateTaken[ndx],
+               tagString: tagString[ndx],
+               longitude: longitude[ndx],
+               latitude: latitude[ndx],
+               //tags: tagString[ndx],
+               // todo -- line above needs to be spilt
+            },
             (err, updatedPhoto) => {
                if (err) {
                   console.log(err);
@@ -226,7 +272,7 @@ router.put('/:id/photos', (req, res) => {
                }
             },
          );
-         console.log(id + '---' + descriptions);
+         console.log(id + '---' + description);
       });
    } catch (err) {
       //TODO -handling error in best way???
@@ -235,7 +281,17 @@ router.put('/:id/photos', (req, res) => {
          try {
             Photo.findByIdAndUpdate(
                photoIds,
-               { description: descriptions },
+               {
+                  // author: req.user.name,
+                  description: description,
+                  caption: caption,
+                  dateTaken: dateTaken,
+                  tagString: tagString,
+                  longitude: longitude,
+                  latitude: latitude,
+                  //tags: tagString,
+                  // todo -- line above needs to be spilt
+               },
                (err, updatedPhoto) => {
                   if (err) {
                      console.log(err);
@@ -249,8 +305,6 @@ router.put('/:id/photos', (req, res) => {
          }
       }
    }
-
-   console.log(photoIds);
 
    //findOneAndUpdate
 

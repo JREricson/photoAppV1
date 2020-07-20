@@ -6,6 +6,9 @@
 <h1>user's photos</h1>
 <h1>user's photos</h1>
 
+<h1>phot obj <%= JSON.stringify(photoList.photos) %></h1>
+<% console.log(JSON.stringify(photoList))%>
+
 <h1>ID: <%= contentOwner._id %></h1>
 
 <% if(currentUser){ %>
@@ -13,4 +16,15 @@
 <% } %> <% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
 
 <a href="./photos/upload" class="btn btn-info">Add to Portfolio</a>
-<% } %> <%- include("footerUser") %>
+<% } %> <% photoList.photos.forEach((photo, ndx) =>{%>
+
+<p>photo located at <%= photo %></p>
+<img
+   class="thumbnail galleryThumb"
+   class="editThumbnail"
+   src="\uploads\<%= photo.fileName %>"
+   alt="cannot display image"
+/>
+<p>latatude <%= photo.latitude %></p>
+
+<% })%> <%- include("footerUser") %>

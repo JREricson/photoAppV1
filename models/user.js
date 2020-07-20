@@ -28,6 +28,16 @@ const UserSchema = new mongoose.Schema({
       type: Array,
       default: [],
    },
+   portfolios: {
+      //an array of photo id arrays
+      type: Array,
+      default: [],
+   },
+
+   socialMediaAcnts: {
+      type: Array,
+      default: [],
+   },
 
    bio: {
       type: String,

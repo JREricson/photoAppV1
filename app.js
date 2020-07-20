@@ -68,6 +68,7 @@ mongoose.set('useCreateIndex', true);
 app.use('/', require('./routes/index'));
 app.use('/allusers', require('./routes/allUsers'));
 app.use('/users', require('./routes/user'));
+app.use('/photos', require('./routes/photos'));
 
 app.use((req, res, next) => {
    res.status(404).render('404');

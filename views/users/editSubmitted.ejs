@@ -1,5 +1,7 @@
 <%- include("headerUser") %>
 
+<!-- TODO -- validate form and send flashmessages if not suitable -->
+
 <h1 class="photoSubmissionTitle">
    Edit Submitted photos
 </h1>
@@ -9,13 +11,12 @@
 
    <input type="hidden" value="<%= photo._id %>" name="photoId" />
 
+   <!-- TODO-- have show thumbnail instead of actual photo -->
    <img
       class="editThumbnail"
       src="\uploads\<%=photo.fileName %>"
       alt="cannot display image"
    />
-   <label for="author">Author </label>
-   <input name="author" type="text" placeholder="<%= photo.author %>" />
 
    <label for="dateTaken">Date taken (format) </label>
    <input
@@ -23,21 +24,35 @@
       type="text"
       placeholder="enter a date in (..) format"
    />
+
+   <label for="latitude">Enter a caption for your photo </label>
+   <input name="caption" type="text" />"
+
    <label for="latitude">Latitude </label>
    <input
       name="latitude"
       type="text"
       value="<%= photo.exifMetaData.latitude %>"
    />"
-
-   <label for="tags">enter tags -- no need for the ugly octothorp (#) </label>
-   <input name="tags" type="text" placeholder="ex: macro insect nature" />
-   <label for="description">Enter a description for your photo </label>
+   <label for="longitude">Longitude </label>
    <input
+      name="longitude"
+      type="text"
+      value="<%= photo.exifMetaData.longitude %>"
+   />"
+
+   <button>Find location on map</button>
+
+   <label for="tagString"
+      >enter tags -- no need for the ugly octothorp (#)
+   </label>
+   <input name="tagString" type="text" placeholder="ex: macro insect nature" />
+   <label for="description">Enter a description for your photo </label>
+   <textarea
       name="description"
-      type="textarea"
+      type="text"
       placeholder="enter a description here"
-   />
+   ></textarea>
 
    <p><%= JSON.stringify(photo.exifMetaData) %></p>
    <% }); %>
