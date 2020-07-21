@@ -1,0 +1,46 @@
+<!-- grid photo up top, map below with
+    -caption below photo
+    -description 
+    -photoagrapher
+    -camera 
+    -make
+    fstop, shutter, iso
+    flash:
+    location  -- get from api
+    tags
+    -date taken 
+    date submitted
+
+    side arrows -- prob to next photo on list
+
+
+fsfg -->
+
+<!-- if current user is owner --add button to change photo -->
+
+<div>
+   <div>
+      <img
+         src="../../uploads/<%= photo.fileName %>"
+         alt="cannnot display image"
+      />
+      <div class="photoCaption"><%=photo.caption%></div>
+      <div class="photoAuthor"><%=photo.author%></div>
+   </div>
+
+   <div>
+      <div class="photoCaption"><%=photo.description%></div>
+      <div class="photoSubmitted"></div>
+
+      <div class="photoCameraModel"><%=photo.exifMetaData.Model%></div>
+      <div class="photoCameraComapany"><%=photo.exifMetaData.Make%></div>
+      <div class="photoTaken"><%= photo.dateTaken%></div>
+
+      <div class="photoSettings">
+         <%=photo.exifMetaData.ISO%> <%=photo.exifMetaData.ExposureTime%>
+         <%=photo.exifMetaData.FNumber%>
+      </div>
+
+      <!-- add map with pin -->
+   </div>
+</div>

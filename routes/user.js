@@ -26,7 +26,7 @@ const photoMidware = require('../middleware/photoMiddle');
 // }
 
 //multer uploads
-
+//TODO move multer out of user js
 var storage = multer.diskStorage({
    destination: function (req, file, cb) {
       cb(null, './public/uploads');
@@ -138,7 +138,7 @@ router.post(
 
       req.files.forEach((img) => {
          var newPhoto = new Photo({
-            author: 'developer',
+            author: req.user.name,
             SubmittedByID: 'none',
             fileName: img.filename,
             fileLocation: path.join(img.destination, img.filename),
@@ -227,7 +227,11 @@ router.get(
    '/:id/photos',
 
    async (req, res) => {
-      const photoList = await photoMidware.getUsersPhotos(req, res);
+      const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(
+         req,
+         res,
+         null,
+      );
       userMidware.renderPage(req, res, 'users/photos', { photoList });
       //TODO -- only sending ID -- pages geting img src
    },

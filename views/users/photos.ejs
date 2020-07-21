@@ -16,7 +16,7 @@
 <% } %> <% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
 
 <a href="./photos/upload" class="btn btn-info">Add to Portfolio</a>
-<% } %> <% photoList.photos.forEach((photo, ndx) =>{%>
+<% } %> <% photoList.forEach((photo, ndx) =>{%>
 
 <p>photo located at <%= photo %></p>
 <img

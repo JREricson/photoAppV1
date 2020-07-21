@@ -44,7 +44,7 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
       console.log('checking for null id list');
       if (idList === null) {
          try {
-            console.log(' null id list');
+            console.log(' ^^^^^^^^^^^^^null id list');
             photoIds = await middlewareObj.ASYNCgetOwnerPhotoIds(req, res);
             //TODO handle errors
             console.log(' ids are : ' + photoIds);
@@ -56,7 +56,7 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
          //list was provided
          photoIds = idList;
       }
-      //console.log('cur p list' + photoIds);
+      console.log('--------------\ncur p list' + photoIds);
 
       photoIds.forEach(async (photoId) => {
          var newPhoto = await middlewareObj.ASYNCgetPhotoObjFromId(photoId);
@@ -67,7 +67,7 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
          }
       });
 
-      console.log('PhotosList is :' + photoList);
+      console.log('PhotoList is :' + photoList);
 
       resolve(photoList);
    });

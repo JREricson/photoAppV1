@@ -17,7 +17,8 @@ const PhotoSchema = new mongoose.Schema({
       type: String,
       default: '',
    },
-   dateSubmited: {
+   dateSubmitted: {
+      //TODO refacror all other code to submitted
       type: Date,
       default: Date.now,
    },
