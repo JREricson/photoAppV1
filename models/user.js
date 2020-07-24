@@ -35,11 +35,19 @@ const UserSchema = new mongoose.Schema({
    },
 
    socialMediaAcnts: {
-      type: Array,
-      default: [],
+      type: Object,
+      default: {},
+   },
+   website: {
+      type: String,
+      default: '',
    },
 
    bio: {
+      type: String,
+      required: false,
+   },
+   homeLocation: {
       type: String,
       required: false,
    },

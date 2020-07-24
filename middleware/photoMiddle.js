@@ -98,4 +98,23 @@ middlewareObj.ASYNCgetPhotoObjFromId = (id) => {
 //    });
 // };
 
+//Delete methods
+
+middlewareObj.removePhotosOnly = (photoIdList) => {
+   photoIdList.forEach((photoId) => {
+      middlewareObj.removePhotoOnly(photoId);
+   });
+};
+
+middlewareObj.removePhotoOnly = (photoId) => {
+   Photo.findByIdAndRemove(photoId, function (err) {
+      if (err) {
+         console.log('error removing photo \n' + err);
+         res.send('error -- contact admin');
+      } else {
+         res.redirect('/campgrounds');
+      }
+   });
+};
+
 module.exports = middlewareObj;

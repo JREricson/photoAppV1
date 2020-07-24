@@ -1,0 +1,86 @@
+<%- include("headerUser") %> <%- include("navbarProfile") %>
+
+<form action="/users/<%= currentUser._id %>/profile?_method=PUT" method="post">
+   <h1>About</h1>
+
+   <label for="name">Name</label>
+   <input
+      name="name"
+      type="text"
+      value="<%=
+   contentOwner.name %>"
+   />
+
+   <label for="homeLocation">Home Location</label>
+   <input
+      name="homeLocation"
+      type="text-area"
+      value="<%=
+   contentOwner.homeLocation %>"
+   />
+
+   <label for="bio">Bio</label>
+   <input 
+      name="bio"
+      type="text"
+      value="<%=
+   contentOwner.bio %>"
+   >
+   </input>
+
+   <br />
+   <h1>Social media</h1>
+   <!-- //Set default values -->
+
+   <label for="personalSite">Personal Site</label>
+   <input
+      name="personalSite"
+      type="text"
+      value="<%=
+   contentOwner.website %>"
+   />
+
+   <label for="instagram">Instagram</label>
+   <input
+      name="instagram"
+      type="text"
+      value="<%=
+   contentOwner.socialMediaAcnts.instagram %>"
+   />
+   <label for="fiveHundredpix">500px</label>
+   <input
+      name="fiveHundredpix"
+      type="text"
+      value="<%=
+   contentOwner.socialMediaAcnts.fiveHundredpix %>"
+   />
+
+   <label for="flickr">flikr</label>
+   <input
+      name="flickr"
+      type="text"
+      value="<%=
+   contentOwner.socialMediaAcnts.flickr %>"
+   />
+
+   <label for="github">Github</label>
+   <input
+      name="github"
+      type="text"
+      value="<%=
+   contentOwner.socialMediaAcnts.github %>"
+   />
+
+   <button class="btn btn-primary btn-lg" type="submit">Update</button>
+</form>
+<br />
+
+<h1>options</h1>
+
+<form action="/users/<%= currentUser._id %>?_method=DELETE" method="POST">
+   <button class="btn btn-danger btn-sm">Delete account</button>
+</form>
+
+<!-- indlude show email options  -->
+
+<%- include("footerUser") %>

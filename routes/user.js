@@ -32,7 +32,8 @@ var storage = multer.diskStorage({
       cb(null, './public/uploads');
    },
    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + file.originalname;
+      const uniqueSuffix =
+         Date.now() + Math.floor(Math.random() * 100000) + file.originalname; //IMPROVE -- use crypto generate unique string
       cb(null, file.fieldname + '-' + uniqueSuffix);
    },
 });
@@ -42,7 +43,7 @@ const fileFilter = (req, file, cb) => {
    if (
       file.mimetype === 'image/jpeg' ||
       file.mimetype === 'image/jpg' ||
-      file.mimetype === 'image/png'
+      file.mimetype === 'image/tiff' // TODO -- test tiff, jpegs,jpgs, and no exif data files
    ) {
       cb(null, true);
    } else {
@@ -53,7 +54,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
    storage: storage,
    limits: {
-      fileSize: 1024 * 1024 * 20,
+      fileSize: 1024 * 1024 * 10,
    },
    fileFilter: fileFilter,
 });
@@ -139,7 +140,7 @@ router.post(
       req.files.forEach((img) => {
          var newPhoto = new Photo({
             author: req.user.name,
-            SubmittedByID: 'none',
+            SubmittedByID: req.user._id,
             fileName: img.filename,
             fileLocation: path.join(img.destination, img.filename),
          });
@@ -320,6 +321,60 @@ router.put('/:id/photos', (req, res) => {
    //save to photo db
 
    res.redirect(`/users/${req.params.id}/photos`);
+});
+
+router.get('/:id/settings', authMidware.isCurUserContentOwner, (req, res) => {
+   userMidware.renderPage(req, res, 'users/settings');
+});
+
+//Delete user
+router.delete('/:id', authMidware.isCurUserContentOwner, (req, res) => {
+   userMidware.deleteUser(req.user);
+   res.redirect('/logins'); // TODO makesure no errors with
+});
+
+//edit user details
+
+router.put('/:id/profile', authMidware.isCurUserContentOwner, (req, res) => {
+   //getting values from doc
+   const {
+      name,
+      homeLocation,
+      bio,
+      personalSite,
+      instagram,
+      fiveHundredpix,
+      flickr,
+      github,
+   } = req.body;
+
+   //editing values for logging in user
+   var socialMediaObj = {
+      instagram: instagram,
+      fiveHundredpix: fiveHundredpix,
+      github: github,
+      flickr: flickr,
+   };
+
+   User.findByIdAndUpdate(
+      req.user._id,
+      {
+         name,
+         bio,
+         homeLocation,
+         website: personalSite,
+         socialMediaAcnts: { ...socialMediaObj },
+      },
+
+      (err, updatedUser) => {
+         if (err) {
+            console.log(err);
+         } else {
+            console.log('/////// updated Photo\n' + updatedUser);
+         }
+      },
+   ),
+      res.redirect(`/users/${req.params.id}/about`);
 });
 
 module.exports = router;

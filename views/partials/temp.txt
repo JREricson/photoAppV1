@@ -44,3 +44,8 @@ module.exports = middlewareObj;
    photoList.foreach((photo) => {
       console.log(JSON.stringify(photo, null, 2));
    });
+
+    instagram: '',
+         fiveHundredpix: '',
+         github: '',
+         flickr: '',

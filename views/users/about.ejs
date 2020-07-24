@@ -1,4 +1,39 @@
 <%- include("headerUser") %> <%- include("navbarProfile") %>
 
 <h1>about page</h1>
-<%- include("footerUser") %>
+
+<h1><%= contentOwner.name %></h1>
+<h1>users stats</h1>
+
+<h3>bio</h3>
+<p><%= contentOwner.bio %></p>
+
+<a href="/users/<%= contentOwner._id %>/settings" class="btn btn-primary btn-sm"
+   >editacount info</a
+>
+<% if (contentOwner.socialMediaAcnts["instagram"] ) {%>
+<p>
+   <i class="fab fa-instagram nav-link" aria-hidden="true"> </i> Instagram: <%=
+   contentOwner.socialMediaAcnts.instagram %>
+</p>
+<% } %> <% if (contentOwner.socialMediaAcnts.flickr&&
+contentOwner.socialMediaAcnts.flickr.length>0) {%>
+<p>
+   <i class="fab fa-flickr nav-link" aria-hidden="true"></i> Flickr: <%=
+   contentOwner.socialMediaAcnts.flickr %>
+</p>
+<% } %> <% if (contentOwner.socialMediaAcnts.github &&
+contentOwner.socialMediaAcnts.github.length>0) {%>
+<p>
+   <i class="fab fa-github nav-link" aria-hidden="true"></i> Github: <%=
+   contentOwner.socialMediaAcnts.github %>
+</p>
+<% } %> <% if (contentOwner.socialMediaAcnts.fiveHundredpix &&
+contentOwner.socialMediaAcnts.fiveHundredpix.length>0) {%>
+<p>
+   <i class="fab fa-github nav-link" aria-hidden="true"></i> Github: <%=
+   contentOwner.socialMediaAcnts.github %>
+</p>
+<% } %> <%- include("footerUser") %> s
+
+<!-- include users stats -->

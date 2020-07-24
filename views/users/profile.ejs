@@ -20,6 +20,8 @@
       width: 90vw;
       margin-left: auto;
       margin-right: auto;
+
+      position: relative; outline: none;
    }
 
    #mapThumb{
@@ -145,7 +147,7 @@
 
 <div
    id="mapid"
-   style="width: 600px; height: 400px; position: relative; outline: none;"
+
    class="leaflet-container leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag"
    tabindex="0"
 >
@@ -266,6 +268,25 @@
 <!-- gallery -->
 
 <div id="photoGallery" >
+
+
+   <% photoList.forEach((photo, ndx) =>{%>
+
+
+
+
+
+
+      <a href="#">
+         <img alt="<%= photo.caption %>" src="\uploads\<%= photo.fileName %>"/>
+     </a>
+      
+      <% })%>
+
+
+
+
+
    <a href="../../uploads/userImage-1595137025244-DSC_0004.jpg
    ">
        <img alt="Title 1" src="../../uploads/userImage-1595137025244-DSC_0004.jpg"/>
@@ -329,7 +350,7 @@
 const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
 
-   var mymap = L.map('mapid').setView([20, 0], 1, {
+   var mymap = L.map('mapid').setView([20, 0], 2, {//the last num is the zoom, the two in brackets are the coords
       zoomControl: false,
    });
    mymap.scrollWheelZoom.disable();
@@ -393,9 +414,11 @@ const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeig
 
 
 $('#photoGallery').justifiedGallery({
-    rowHeight : Math.floor(vh/3),
+    rowHeight : Math.floor(vh/3.3),
     lastRow : 'nojustify',
-    margins : 5
+    margins : 20,
+    lastRow: 'center',
+
 });
 </script>
 
