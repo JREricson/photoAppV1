@@ -56,3 +56,11 @@ middlewareObj.isLoggedIn = function (req, res, next) {
    margin-right: auto;
 
    /* margin: auto; */
+
+   <!--TODO need to get content owner  -->
+<% if(currentUser && currentUser._id.equals(photo.SubmittedByID)){ %>
+<a href="./photos/<%= photo._id %>/delete" class="btn btn-info">Edit photo</a>
+
+<form action="./photos/<%= photo._id %>/delete" method=><div class="btn btn-danger">Edit Photo</div></form>
+
+<% } %>

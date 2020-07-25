@@ -13,10 +13,14 @@
 
 <% if(currentUser){ %>
 <h1>ID of cur user: <%= currentUser._id %></h1>
-<% } %> <% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
+<% } %>
+<!-- button to add more photos -->
+<% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
 
 <a href="./photos/upload" class="btn btn-info">Add to Portfolio</a>
-<% } %> <% photoList.forEach((photo, ndx) =>{%>
+<% } %>
+<!-- adding each photos in list -->
+<% photoList.forEach((photo, ndx) =>{%>
 
 <p>photo located at <%= photo %></p>
 <img

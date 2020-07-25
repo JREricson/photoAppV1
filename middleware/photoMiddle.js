@@ -1,3 +1,5 @@
+// TODO -- insconsistancies with id vs ID -- fix
+
 const User = require('../models/user');
 const Photo = require('../models/photo');
 
@@ -110,11 +112,29 @@ middlewareObj.removePhotoOnly = (photoId) => {
    Photo.findByIdAndRemove(photoId, function (err) {
       if (err) {
          console.log('error removing photo \n' + err);
-         res.send('error -- contact admin');
-      } else {
-         res.redirect('/campgrounds');
       }
    });
+};
+
+// TODO --  need to rewrite to inclde galleries or any other list
+
+/**
+ * should oly get tho this point if there is a user defined (user has an empty all photos list by default)
+ */
+middlewareObj.removePhotoFromUsersLists = (photoID, user) => {
+   if (user.allPhotos.includes(photoID)) {
+      console.log('deleting' + photoID + 'from allPhotos');
+      user.allPhotos.remove(photoID);
+   } else {
+      console.log(photoID + ' not found in allphotos');
+   }
+};
+
+middlewareObj.removePhotoAndRefernences = (req, res) => {
+   //removing photo from user's lists (allPhotos, galleries, etc)
+   middlewareObj.removePhotoFromUsersLists(req.params.photoID, req.user);
+   //removing photo
+   middlewareObj.removePhotoOnly(req.params.photoID);
 };
 
 module.exports = middlewareObj;

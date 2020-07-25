@@ -30,4 +30,20 @@ middlewareObj.isLoggedIn = function (req, res, next) {
    }
 };
 
+middlewareObj.checkUserPhotoOwner = (req, res, next) => {
+   //TODO -- test routes with postman
+
+   //checking if cur user
+   if (req.user) {
+      //checking if user owns photo
+      if (req.user) {
+         next();
+      } else {
+         res.redirect('./logins'); //TODO -- check route
+      }
+   } else {
+      res.redirect('./logins'); //TODO -- check route
+   }
+};
+
 module.exports = middlewareObj;

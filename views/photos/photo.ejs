@@ -15,10 +15,16 @@
 
 
 fsfg -->
-
+<!-- TODO -- add links to nearby photos -->
 <!-- if current user is owner --add button to change photo -->
 
 <%- include("../partials/header") %> <%- include("../partials/navbar") %>
+<!-- adding leaflet map links -->
+<link
+   rel="stylesheet"
+   href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"
+/>
+
 <div>
    <div class="photoContainer">
       <img
@@ -27,26 +33,108 @@ fsfg -->
          alt="cannnot display image"
       />
    </div>
-
+   <!-- author and description -->
    <div class="photoDetails">
       <p class="photoCaption"><%=photo.caption%></p>
       <p class="photoAuthor">Photograper -- <%=photo.author%></p>
    </div>
 
-   <div>
-      <p class="photoCaption"><%=photo.description%></p>
-      <p class="photoSubmitted"></p>
+   <!-- photo details  -->
 
-      <p class="photoCameraModel"><%=photo.exifMetaData.Model%></p>
-      <p class="photoCameraComapany"><%=photo.exifMetaData.Make%></p>
-      <p class="photoTaken"><%= photo.dateTaken%></p>
+   <div class="container photoDetailsContainer">
+      <div class="row">
+         <div class="col-lg-6 col-sm-12 img-fluid galleryfig">
+            <h1 class="sectionTitle">Photo Details</h1>
+            <p class="photoCaption">
+               <i class="las la-pen-alt"></i>
+               <strong>Description: </strong><%=photo.description%>
+            </p>
+            <p class="photoSubmitted">
+               <i class="lar la-calendar-plus"></i
+               ><strong> Submitted on: </strong>
+               <%=photo.dateSubmitted%>
+            </p>
 
-      <div class="photoSettings">
-         <p><%=photo.exifMetaData.ISO%> <%=photo.exifMetaData.ExposureTime%></p>
-         <p><%=photo.exifMetaData.FNumber%></p>
+            <p class="photoCameraModel">
+               <i class="las la-camera-retro"></i
+               ><strong> Camera Model: </strong><%=photo.exifMetaData.Make %>
+               <%=photo.exifMetaData.Model%>
+            </p>
+
+            <p class="photoTaken">
+               <i class="lar la-calendar"></i><strong> Time Taken: </strong><%=
+               photo.dateTaken%>
+            </p>
+
+            <div class="photoSettings">
+               <p><strong> ISO: </strong><%=photo.exifMetaData.ISO%></p>
+               <p>
+                  <i class="las la-stopwatch"></i>
+                  <strong> Exposure Time: </strong>
+                  <%=photo.exifMetaData.ExposureTime%>
+               </p>
+               <!-- jam icons has an iris/aperature -->
+               <p><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
+            </div>
+         </div>
+
+         <!-- map -->
+         <div class="photoMapContainer col-lg-6 col-sm-12 img-fluid">
+            <div class="mapFillContainer" id="photoPageMap"></div>
+         </div>
       </div>
-
-      <!-- add map with pin -->
    </div>
 </div>
+
+<!-- button for user to delete photo -->
+<% if(currentUser && currentUser._id.equals(photo.SubmittedByID)){ %>
+<a href="./photos/<%= photo._id %>/edit" class="btn btn-info">Edit photo</a>
+
+<form action="../../photos/<%= photo._id %>?_method=DELETE" method="POST">
+   <button class="btn btn-danger" type="submit">Delete Photo</button>
+</form>
+
+<% } %>
+
+<!-- data to be used by leaflet script -->
+<p id="photoData" data-photo="<%= JSON.stringify(photo)%>" hidden></p>
+
 <%- include("../partials/footer") %>
+
+<!-- scripts for leaflet map -->
+<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+<script>
+   const photo = document.getElementById('photoData'); //.photos;
+   photoJSON = JSON.parse(photo.dataset.photo);
+
+   // TODO--do better job at handling empty list--right now only running script if a first element
+   console.log(photoJSON.latitude);
+
+   if (photoJSON.latitude && photoJSON.longitude) {
+      var mymap = L.map('photoPageMap').setView(
+         [photoJSON.latitude, photoJSON.longitude],
+         4,
+         {
+            //the last num is the zoom, the two in brackets are the coords
+            zoomControl: false,
+         },
+      );
+      mymap.scrollWheelZoom.disable();
+
+      L.marker([photoJSON.latitude, photoJSON.longitude])
+         .addTo(mymap)
+         .on('click', function () {
+            console.log('click!');
+         });
+      L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+         attribution:
+            '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(mymap);
+   } else {
+      console.log('cannot get lon/lat');
+   }
+
+   function displayImage() {
+      console.log('ClickyClick!');
+   }
+</script>
