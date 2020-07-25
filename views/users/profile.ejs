@@ -138,8 +138,12 @@
 <div id="photoGallery">
    <% photoList.forEach((photo, ndx) =>{%>
 
-   <a href="#">
-      <img alt="<%= photo.caption %>" src="\uploads\<%= photo.fileName %>" />
+   <a href="/photos/<%= photo._id %>/photo">
+      <img
+         class="justifiedGalImg"
+         alt="<%= photo.caption %>"
+         src="/uploads/<%= photo.fileName %>"
+      />
    </a>
 
    <% })%>
@@ -257,6 +261,23 @@
       margins: 20,
       lastRow: 'center',
    });
+   // .on('jg.complete', function () {
+   //    var justifiedGalImgs = document.getElementsByClassName(
+   //       'justifiedGalImg',
+   //    );
+
+   //    var addClickListenerToImgPage = function () {
+   //       alert('click');
+   //    };
+
+   //    for (var i = 0; i < justifiedGalImgs.length; i++) {
+   //       justifiedGalImgs[i].addEventListener(
+   //          'click',
+   //          addClickListenerToImgPage,
+   //          false,
+   //       );
+   //    }
+   // });
 </script>
 
 <%- include("footerUser") %>
