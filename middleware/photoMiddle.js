@@ -7,6 +7,9 @@ var middlewareObj = {};
 
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
+/////////////////////
+//Methods for finding information
+
 //TODO possibility that photo ID might not link to image if photo obj is deleted-- need to account for this
 middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
    return new Promise((resolve, reject) => {
@@ -52,7 +55,7 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
             console.log(' ids are : ' + photoIds);
          } catch {
             console.log('ERR-- could not get photo ids from user');
-            reject;
+            reject; // TODO maybe resolve as null
          }
       } else {
          //list was provided
@@ -100,14 +103,16 @@ middlewareObj.ASYNCgetPhotoObjFromId = (id) => {
 //    });
 // };
 
-//Delete methods
+/////////////////
+//method for removal
 
+//remove all photo obj from PhotoIDs
 middlewareObj.removePhotosOnly = (photoIdList) => {
    photoIdList.forEach((photoId) => {
       middlewareObj.removePhotoOnly(photoId);
    });
 };
-
+//remove photo obj from PhotoID
 middlewareObj.removePhotoOnly = (photoId) => {
    Photo.findByIdAndRemove(photoId, function (err) {
       if (err) {
@@ -135,6 +140,32 @@ middlewareObj.removePhotoAndRefernences = (req, res) => {
    middlewareObj.removePhotoFromUsersLists(req.params.photoID, req.user);
    //removing photo
    middlewareObj.removePhotoOnly(req.params.photoID);
+};
+
+///////////////////////////////
+//methods for rendering page
+
+middlewareObj.renderPageWithUserAndPhoto = async (
+   req,
+   res,
+   pagePath,
+   objOfValToBeSent,
+) => {
+   //getting user and photo objs
+
+   photo = await middlewareObj.ASYNCgetPhotoObjFromId(req.params.photoID);
+
+   if (photo) {
+      //photo found so rendering page with values for ejs doc
+      currentUser = req.user;
+      let vals = { ...{ photo, currentUser }, ...objOfValToBeSent };
+
+      res.render(pagePath, vals);
+   } else {
+      //send 404 if no photo with ID
+      // err && console.log(err);
+      res.status(404).render('404');
+   }
 };
 
 module.exports = middlewareObj;

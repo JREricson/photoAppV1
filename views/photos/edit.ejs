@@ -1,14 +1,10 @@
-<%- include("headerUser") %>
-
-<!-- TODO -- validate form and send flashmessages if not suitable -->
+<%- include("../partials/header") %> <%- include("../partials/navbar") %>
 
 <h1 class="photoSubmissionTitle">
-   Edit Submitted photos
+   Edit Photo
 </h1>
 
 <form action="/users/<%= currentUser._id %>/photos?_method=PUT" method="post">
-   <% newPhotos.forEach(function(photo, ndx) { %>
-
    <input type="hidden" value="<%= photo._id %>" name="photoId" />
 
    <!-- TODO-- have show thumbnail instead of actual photo -->
@@ -62,12 +58,9 @@
       placeholder="enter a description here"
    ></textarea>
 
-   <p><%= JSON.stringify(photo.exifMetaData) %></p>
-   <% }); %>
-
    <button class="btn btn-primary" type="submit">submit Changes</button>
 
    <p>transfered data<%= JSON.stringify(exifDataForID) %></p>
 </form>
 
-<%- include("footerUser") %>
+<%- include("../partials/footer") %>
