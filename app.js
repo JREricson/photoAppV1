@@ -8,9 +8,12 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const expressSanitizer = require('express-sanitizer');
 
 const passport = require('passport');
 const path = require('path');
+
+app.use(expressSanitizer());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

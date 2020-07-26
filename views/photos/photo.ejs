@@ -45,9 +45,10 @@ fsfg -->
       <div class="row">
          <div class="col-lg-6 col-sm-12 img-fluid galleryfig">
             <h1 class="sectionTitle">Photo Details</h1>
-            <p class="photoCaption">
+            <p class="photoDescription">
                <i class="las la-pen-alt"></i>
-               <strong>Description: </strong><%=photo.description%>
+               <strong>Description: </strong>
+               <%=photo.description%>
             </p>
             <p class="photoSubmitted">
                <i class="lar la-calendar-plus"></i
@@ -71,7 +72,7 @@ fsfg -->
                <p>
                   <i class="las la-stopwatch"></i>
                   <strong> Exposure Time: </strong>
-                  <%=photo.exifMetaData.ExposureTime%>
+                  <%=photo.exifMetaData.ExposureTime%> seconds
                </p>
                <!-- jam icons has an iris/aperature -->
                <p><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
