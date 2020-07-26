@@ -18,8 +18,8 @@ middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
             console.log(err);
             reject;
          } else {
-            photos = contentOwner.allPhotos;
-            console.log('🧉 ////////////\n ' + JSON.stringify(photos, null, 2));
+            photos = contentOwner.allPhotos; //TODO -- check to make sure there is a conent owner contentowner &&
+            //console.log('🧉 ////////////\n ' + JSON.stringify(photos, null, 2));
             resolve(photos); //might be why wrapped
          }
       });
@@ -33,7 +33,7 @@ middlewareObj.getPageOwnerPhotoIds = (req, res) => {
          return null;
       } else {
          photos = contentOwner.allPhotos;
-         console.log('🧉 ////////////\n ' + JSON.stringify(photos, null, 2));
+         //   console.log('🧉 ////////////\n ' + JSON.stringify(photos, null, 2));
          return photos; //might be why wrapped
       }
    });
@@ -46,7 +46,7 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
    return new Promise(async (resolve, reject) => {
       //checking current user if no photo idList provided
 
-      console.log('checking for null id list');
+      //console.log('checking for null id list');
       if (idList === null) {
          try {
             console.log(' ^^^^^^^^^^^^^null id list');
@@ -61,18 +61,18 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
          //list was provided
          photoIds = idList;
       }
-      console.log('--------------\ncur p list' + photoIds);
+      //  console.log('--------------\ncur p list' + photoIds);
 
       photoIds.forEach(async (photoId) => {
          var newPhoto = await middlewareObj.ASYNCgetPhotoObjFromId(photoId);
-         console.log('new photo is: ' + newPhoto);
+         //   console.log('new photo is: ' + newPhoto);
          //only adding photos that can be found
          if (newPhoto != null) {
             photoList.push(newPhoto);
          }
       });
 
-      console.log('PhotoList is :' + photoList);
+      //   console.log('PhotoList is :' + photoList);
 
       resolve(photoList);
    });
@@ -124,7 +124,7 @@ middlewareObj.removePhotoOnly = (photoId) => {
 // TODO --  need to rewrite to inclde galleries or any other list
 
 /**
- * should oly get tho this point if there is a user defined (user has an empty all photos list by default)
+ * should only get tho this point if there is a user defined (user has an empty all photos list by default)
  */
 middlewareObj.removePhotoFromUsersLists = (photoID, user) => {
    if (user.allPhotos.includes(photoID)) {
@@ -163,7 +163,6 @@ middlewareObj.renderPageWithUserAndPhoto = async (
       res.render(pagePath, vals);
    } else {
       //send 404 if no photo with ID
-      // err && console.log(err);
       res.status(404).render('404');
    }
 };

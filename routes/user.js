@@ -277,15 +277,19 @@ router.put('/:id/photos', (req, res) => {
                }
             },
          );
-         console.log(id + '---' + description);
+         // console.log(id + '---' + description);
       });
    } catch (err) {
       //TODO -handling error in best way???
       //now checking as if single var, and not a list
       if (err instanceof TypeError) {
          try {
+            console.log(
+               '////////////////////////\n Trying to change single photo',
+            );
+
             Photo.findByIdAndUpdate(
-               photoIds,
+               photoId,
                {
                   // author: req.user.name,
                   description: description,
@@ -298,10 +302,11 @@ router.put('/:id/photos', (req, res) => {
                   // todo -- line above needs to be spilt
                },
                (err, updatedPhoto) => {
-                  if (err) {
-                     console.log(err);
+                  if (updatedPhoto) {
+                     console.log('\n\n/////// updated Photo\n' + updatedPhoto);
                   } else {
-                     console.log('/////// updated Photo\n' + updatedPhoto);
+                     console.log('\n\n!!!!!!!could not update');
+                     console.log(err);
                   }
                },
             );
@@ -315,7 +320,7 @@ router.put('/:id/photos', (req, res) => {
 
    //TODO remove test
 
-   console.log(req.body);
+   /// console.log(req.body);
    //need to find indiv photo
    //get all compeonets to that photo
    //save to photo db

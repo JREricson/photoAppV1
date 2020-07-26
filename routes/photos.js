@@ -39,13 +39,8 @@ router.get(
    authMidware.checkUserPhotoOwner,
    async (req, res) => {
       //TODO -- maybe add a list of current photos to send, incase need to update more than one
-      var photo = await middlewareObj.ASYNCgetPhotoObjFromId(
-         req.params.photoID,
-      );
 
-      res.render();
-
-      //res.render('photos/edit');
+      photoMidware.renderPageWithUserAndPhoto(req, res, 'photos/edit');
    },
 );
 

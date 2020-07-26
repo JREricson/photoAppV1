@@ -41,11 +41,11 @@ const PhotoSchema = new mongoose.Schema({
 
    longitude: {
       type: String,
-      required: false,
+      default: '',
    },
    latitude: {
       type: String,
-      required: false,
+      default: '',
    },
    tags: {
       type: [],

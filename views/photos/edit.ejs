@@ -14,30 +14,22 @@
       alt="cannot display image"
    />
 
-   <label for="dateTaken">Date taken (format) </label>
-   <input
-      name="dateTaken"
-      type="text"
-      placeholder="enter a date in (..) format"
-      value="<%= photo.exifMetaData.DateTimeOriginal %>"
-   />
-
    <label for="latitude">Enter a caption for your photo </label>
-   <input name="caption" type="text" />"
+   <input name="caption" type="text" value="<%= photo.caption %>" />"
 
    <label for="latitude">Latitude </label>
    <input
       name="latitude"
       type="text"
-      value="<%= photo.exifMetaData.latitude %>"
-   />"
+      value="<%= (photo.latitude.length>0)? photo.latitude: photo.exifMetaData.latitude %>"
+   />
    <label for="longitude">Longitude </label>
    <input
       name="longitude"
       type="text"
       value="<%= photo.exifMetaData.longitude %>"
-   />"
-
+   />
+   <% console.log("cap "+ photo.caption ) %>
    <!-- a future version would show coord on map and have the user select from map to get coord if none present or wrong -->
 
    <a
@@ -59,8 +51,6 @@
    ></textarea>
 
    <button class="btn btn-primary" type="submit">submit Changes</button>
-
-   <p>transfered data<%= JSON.stringify(exifDataForID) %></p>
 </form>
 
 <%- include("../partials/footer") %>
