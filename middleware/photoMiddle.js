@@ -42,7 +42,7 @@ middlewareObj.getPageOwnerPhotoIds = (req, res) => {
 //set idList to null to use find from current user
 middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
    var photoList = [];
-   var photoIds;
+   var photoIDs;
    return new Promise(async (resolve, reject) => {
       //checking current user if no photo idList provided
 
@@ -50,21 +50,21 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
       if (idList === null) {
          try {
             console.log(' ^^^^^^^^^^^^^null id list');
-            photoIds = await middlewareObj.ASYNCgetOwnerPhotoIds(req, res);
+            photoIDs = await middlewareObj.ASYNCgetOwnerPhotoIds(req, res);
             //TODO handle errors
-            console.log(' ids are : ' + photoIds);
+            //  console.log(' ids are : ' + photoIds);
          } catch {
             console.log('ERR-- could not get photo ids from user');
             reject; // TODO maybe resolve as null
          }
       } else {
          //list was provided
-         photoIds = idList;
+         photoIDs = idList;
       }
       //  console.log('--------------\ncur p list' + photoIds);
 
-      photoIds.forEach(async (photoId) => {
-         var newPhoto = await middlewareObj.ASYNCgetPhotoObjFromId(photoId);
+      photoIDs.forEach(async (photoID) => {
+         var newPhoto = await middlewareObj.ASYNCgetPhotoObjFromId(photoID);
          //   console.log('new photo is: ' + newPhoto);
          //only adding photos that can be found
          if (newPhoto != null) {
@@ -103,18 +103,113 @@ middlewareObj.ASYNCgetPhotoObjFromId = (id) => {
 //    });
 // };
 
+//////////////////
+//methods for updating
+middlewareObj.updatePhotosFromEjsData = (req) => {
+   const { photoId } = req.body;
+
+   if (Array.isArray(photoId)) {
+      //body parser will make a list if more than one-- checking for list first
+      middlewareObj.updateAllPhotos(req);
+   } else {
+      //ejs should have returned a single item and not an array
+      try {
+         console.log('\n\n!!!!!!!!!!!!updating single');
+         middlewareObj.updateSinglePhoto(req);
+      } catch {
+         console.log('err uploading files');
+      }
+   }
+};
+
+middlewareObj.updateAllPhotos = (req) => {
+   const {
+      photoId,
+      description,
+      caption,
+      dateTaken,
+      longitude,
+      latitude,
+      tagString,
+   } = req.body;
+
+   photoId.forEach((id, ndx) => {
+      //console.log('??????????????desciption is: --- ' + description[0]);
+      Photo.findByIdAndUpdate(
+         id,
+         {
+            // author: req.user.name, TODO -- fix line
+            description: description[ndx],
+            caption: caption[ndx],
+            dateTaken: dateTaken[ndx],
+            tagString: tagString[ndx],
+            longitude: longitude[ndx],
+            latitude: latitude[ndx],
+            //tags: tagString[ndx],
+            // todo -- line above needs to be spilt
+         },
+         (err, updatedPhoto) => {
+            if (err) {
+               console.log(err);
+            } else {
+               //  console.log('/////// updated Photo\n' + updatedPhoto);
+            }
+         },
+      );
+      // console.log(id + '---' + description);
+   });
+};
+
+middlewareObj.updateSinglePhoto = (req) => {
+   const {
+      photoId,
+      description,
+      caption,
+      dateTaken,
+      longitude,
+      latitude,
+      tagString,
+   } = req.body;
+
+   console.log('///za cation is' + caption);
+
+   Photo.findByIdAndUpdate(
+      photoId,
+      {
+         // author: req.user.name,
+         description: description,
+         caption: caption,
+         dateTaken: dateTaken,
+         tagString: tagString,
+         longitude: longitude,
+         latitude: latitude,
+         //tags: tagString,
+         // todo -- line above needs to be spilt
+      },
+      (err, updatedPhoto) => {
+         if (updatedPhoto) {
+            console.log('\n\n/////// updated Photo\n' + updatedPhoto);
+         } else {
+            console.log('\n\n!!!!!!!could not update');
+            console.log(err);
+         }
+      },
+   );
+};
+
 /////////////////
 //method for removal
 
 //remove all photo obj from PhotoIDs
-middlewareObj.removePhotosOnly = (photoIdList) => {
-   photoIdList.forEach((photoId) => {
-      middlewareObj.removePhotoOnly(photoId);
+middlewareObj.removePhotosOnly = (photoIDList) => {
+   photoIDList.forEach((photoID) => {
+      middlewareObj.removePhotoOnly(photoID);
    });
 };
+
 //remove photo obj from PhotoID
-middlewareObj.removePhotoOnly = (photoId) => {
-   Photo.findByIdAndRemove(photoId, function (err) {
+middlewareObj.removePhotoOnly = (photoID) => {
+   Photo.findByIdAndRemove(photoID, function (err) {
       if (err) {
          console.log('error removing photo \n' + err);
       }
