@@ -77,6 +77,14 @@ fsfg -->
                <!-- jam icons has an iris/aperature -->
                <p><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
             </div>
+
+            <p class="tagList">
+               <i class="las la-tags"></i><strong> Tags </strong><%
+               (photo.tags.length>0) && photo.tags.forEach(tag =>{ %>
+               <a class="label myTag label-default" href="#"> <%= tag%> </a>
+
+               <% }) %>
+            </p>
          </div>
 
          <!-- map -->

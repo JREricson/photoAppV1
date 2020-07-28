@@ -48,7 +48,7 @@ const PhotoSchema = new mongoose.Schema({
       default: '',
    },
    tags: {
-      type: [],
+      type: Array,
       default: [],
    },
    exifMetaData: {

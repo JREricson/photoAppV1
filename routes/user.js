@@ -250,7 +250,7 @@ router.get('/:id/settings', authMidware.isCurUserContentOwner, (req, res) => {
 //Delete user
 router.delete('/:id', authMidware.isCurUserContentOwner, (req, res) => {
    userMidware.deleteUser(req.user);
-   res.redirect('/logins'); // TODO makesure no errors with
+   res.redirect('/login'); // TODO makesure no errors with
 });
 
 //edit user details

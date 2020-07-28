@@ -7,8 +7,9 @@ var middlewareObj = {};
 
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
-/////////////////////
+//////////////////////////////////
 //Methods for finding information
+//////////////////////////////////
 
 //TODO possibility that photo ID might not link to image if photo obj is deleted-- need to account for this
 middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
@@ -117,7 +118,7 @@ middlewareObj.updatePhotosFromEjsData = (req) => {
          console.log('\n\n!!!!!!!!!!!!updating single');
          middlewareObj.updateSinglePhoto(req);
       } catch {
-         console.log('err uploading files');
+         console.log('err updating files');
       }
    }
 };
@@ -142,7 +143,7 @@ middlewareObj.updateAllPhotos = (req) => {
             description: description[ndx],
             caption: caption[ndx],
             dateTaken: dateTaken[ndx],
-            tagString: tagString[ndx],
+            tags: middlewareObj.getTagsFromString(tagString[ndx]),
             longitude: longitude[ndx],
             latitude: latitude[ndx],
             //tags: tagString[ndx],
@@ -151,8 +152,6 @@ middlewareObj.updateAllPhotos = (req) => {
          (err, updatedPhoto) => {
             if (err) {
                console.log(err);
-            } else {
-               //  console.log('/////// updated Photo\n' + updatedPhoto);
             }
          },
       );
@@ -180,27 +179,45 @@ middlewareObj.updateSinglePhoto = (req) => {
          description: description,
          caption: caption,
          dateTaken: dateTaken,
-         tagString: tagString,
+         tags: middlewareObj.getTagsFromString(tagString),
          longitude: longitude,
          latitude: latitude,
-         //tags: tagString,
+
          // todo -- line above needs to be spilt
       },
       (err, updatedPhoto) => {
-         if (updatedPhoto) {
-            console.log('\n\n/////// updated Photo\n' + updatedPhoto);
-         } else {
-            console.log('\n\n!!!!!!!could not update');
+         if (!updatedPhoto) {
+            console.log('\n\n!!!!!!!could not update'); //Delete
             console.log(err);
+         } else {
+            console.log('\n\n/////// updated Photo\n' + updatedPhoto); //Delete
          }
       },
    );
 };
 
-/////////////////
-//method for removal
+////////////////////////////////
+//methods for photo components
+//////////////////////////////////
 
-//remove all photo obj from PhotoIDs
+middlewareObj.getTagsFromString = (tagString) => {
+   /*splitting string -- note - the boolean filter gets rid of empty strings */
+   let tagList = tagString.split(/[ ,;]+/).filter(Boolean);
+   /*removing gross # that users will probably add, can add other items here as well if the need arrises*/
+   return tagList;
+};
+
+////////////////////
+//method for removal
+////////////////////
+//\
+
+/**
+ * removePhotosOnly
+ *
+ * remove all photo obj from PhotoIDs
+ * @param {*} photoIDList
+ */
 middlewareObj.removePhotosOnly = (photoIDList) => {
    photoIDList.forEach((photoID) => {
       middlewareObj.removePhotoOnly(photoID);

@@ -39,10 +39,10 @@ middlewareObj.checkUserPhotoOwner = (req, res, next) => {
       if (req.user) {
          next();
       } else {
-         res.redirect('/logins'); //TODO -- check route
+         res.redirect('/login'); //TODO -- check route
       }
    } else {
-      res.redirect('/logins'); //TODO -- check route
+      res.redirect('/login'); //TODO -- check route
    }
 };
 
