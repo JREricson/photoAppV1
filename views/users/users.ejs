@@ -1,10 +1,17 @@
-<h1>All users</h1>
+<%- include("headerUser") %> <%- include("navbarProfile") %>
 
-<h2>found a user</h2>
+<h1 class="">Broswer all users</h1>
+
 <% allUsers.forEach((user) =>{ %>
 
 <p><%= user.name %></p>
+<p>
+   homeLocation: <% user.homeLocation>0? user.homeLocation: "location unknown"%>
+</p>
+<p>
+   homeLocation: <% user.homeLocation>0? user.homeLocation: "location unknown"%>
+</p>
 
 <a href="/users/<%= user._id %>/profile">Go to Profile</a>
 
-<%}); %>
+<%}); %> <%- include("footerUser") %>

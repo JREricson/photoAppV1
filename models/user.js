@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
    },
    brandName: {
       type: String,
-      required: false,
+      deafault: '',
    },
    email: {
       type: String,
@@ -45,7 +45,7 @@ const UserSchema = new mongoose.Schema({
 
    bio: {
       type: String,
-      required: false,
+      default: '',
    },
    homeLocation: {
       type: String,
