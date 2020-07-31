@@ -9,7 +9,6 @@ const userMidware = require('../middleware/userMiddle');
 //mongoDB SchemaTypes
 const User = require('../models/user');
 const Photo = require('../models/photo');
-const { isEmptyObject } = require('jquery');
 
 // router.get('/users', (req, res) => {
 //    var userJSON = { test: 'test' };
@@ -17,27 +16,70 @@ const { isEmptyObject } = require('jquery');
 //    res.json(userJSON);
 // });
 
-module.exports = router;
-
 router.get('/users', async (req, res) => {
-   query = req.query;
-   andQueries = {};
+   let nameOrder, dateSubOrder, date, sortOrder;
+   const query = req.query;
+   let andQueries = {};
+   let searchOrdering = {};
+   let usersToSend = [];
+
+   approvedKeys = [
+      'name',
+      'allPhotos',
+      'socialMediaAcnts',
+      'website',
+      'bio',
+      'homeLocation',
+      'datejoined',
+   ];
+
+   /*getting sort order -- set to accending by defualt */
+
+   // NOTE -- could sort on multiple param n a later version
 
    /* adding queries if present*/
    query.name && (andQueries = { ...{ name: query.name } });
    query.bio && (andQueries = { ...{ bio: query.bio } });
 
-   //degugging
-   console.log('qo is :' + JSON.stringify(andQueries));
-   //    if (req.query.test) {
-   //       console.log(req.query.test);
+   console.log('allQueries: ' + JSON.stringify(andQueries));
+
+   //////////
+   //sort method
+
+   /*Getting sorting conditions */
+   /* CAUTION -- turning user obj string to obj -- be careful with it*/
+   //takes in format &sort={"name":"1","datjoined":"-1"}
+   // if (query.sort) {
+   //    try {
+   //       console.log(query.sort);
+   //       var sortObj = JSON.parse(query.sort);
+   //       console.log(sortObj);
+
+   //       for (let key in sortObj) {
+   //          console.log('key ' + key + ' has value ' + sortObj[key]);
+
+   //          // //TODO check if approved
+   //          keyAndValApproved(searchOrdering, approvedKeys, key, val);
+   //          //searchOrdering[key] = sortObj[key];
+   //       }
+   //       console.log('!!!!!no probs' + JSON.stringify(searchOrdering));
+   //    } catch {
+   //       console.log('problem getting keys');
    //    }
+   // }
 
-   //    objToFind
+   //TODOs
+   //date range submitted and posted
+   //photos in radius of location
+   //all searchable text -- with quotes
+   //sort order -- date posted, date submitted, name, relevance, reverse order?
 
-   let origUsersObj = await User.find({ $and: [andQueries] });
-   console.log('users are: \n' + origUsersObj);
-   let usersToSend = {};
+   let origUsersObj = await User.find(
+      // { $text: { $search: 'j' } },
+      { $text: { $search: 'j' }, $and: [andQueries] }, // [andQueries]
+   ).sort();
+
+   // console.log('orig' + origUsersObj);
 
    /*pulling only neccesary info from user obj*/
    origUsersObj.forEach((user, ndx) => {
@@ -50,27 +92,50 @@ router.get('/users', async (req, res) => {
          homeLocation,
          datejoined,
       } = user;
-      usersToSend = {
-         ...{
-            name,
-            allPhotos,
-            socialMediaAcnts,
-            website,
-            bio,
-            homeLocation,
-            datejoined,
-         },
+
+      filteredUser = {
+         name,
+         allPhotos,
+         socialMediaAcnts,
+         website,
+         bio,
+         homeLocation,
+         datejoined,
       };
+      usersToSend.push(filteredUser);
    });
+   console.log(usersToSend);
 
-   /*adding a 'no users found' message to empty obj */
-   Object.getOwnPropertyNames(usersToSend).length == 0 &&
-      (usersToSend = { err: 'no users found' }); //would it be better to send an empty obj?
+   // /*adding a 'no users found' message to empty obj */
+   // Object.getOwnPropertyNames(usersToSend).length == 0 &&
+   //    (usersToSend = { err: 'no users found' }); //TODO--would it be better to send an empty obj?
 
-   res.json(usersToSend);
+   usersToSendJSON = JSON.parse(JSON.stringify(usersToSend)); //Question -- will work without this line -- is it needed?
+   res.json(usersToSendJSON);
 });
 
 router.get('/photos', async (req, res) => {
    let photosObj = await Photo.find();
    photosObj ? res.json(photosObj) : res.json('error occured');
 });
+
+///////////////////////
+//helper functions
+///////////////////////
+
+/**
+ * keyAndValApproved
+ * @param {*} searchOrdering
+ * @param {*} approvedKeys
+ * @param {*} key
+ * @param {*} val
+ */
+function keyAndValApproved(searchOrdering, approvedKeys, key, val) {
+   approvedSortVals = { acnd: 1, dcnd: -1 };
+
+   if (key in approvedKeys && val in Object.keys(approvedSortVals)) {
+      searchOrdering[key] = approvedSortVals[sortObj[key]];
+   }
+}
+
+module.exports = router;

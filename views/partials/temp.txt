@@ -62,3 +62,58 @@ middlewareObj.isLoggedIn = function (req, res, next) {
 { "_id" : ObjectId("5f1ddc666be51943240ae04a"), "caption" : "secret", "description" : "", "longitude" : "0", "latitude" : "40", "tags" : [ ], "author" : "j", "SubmittedByID" : "5f1db4ba9378581c7802c4b1", "fileName" : "userImage-1595792527038_DSC0184.jpg", "fileLocation" : "public\\uploads\\userImage-1595792527038_DSC0184.jpg", "dateSubmitted" : ISODate("2020-07-26T19:41:26.854Z"), "dateTaken" : null, "exifMetaData" : { "Make" : "NIKON CORPORATION", "Model" : "NIKON D90", "Orientation" : "Horizontal (normal)", "XResolution" : 240, "YResolution" : 240, "ResolutionUnit" : "inches", "Software" : "Adobe Photoshop Lightroom 6.0 (Windows)", "ModifyDate" : ISODate("2019-01-03T11:28:16Z"), "ExposureTime" : 0.003125, "FNumber" : 3.5, "ExposureProgram" : "Aperture priority", "ISO" : 250, "ExifVersion" : "2.3", "DateTimeOriginal" : ISODate("2018-12-31T07:49:02Z"), "CreateDate" : ISODate("2018-12-31T07:49:02Z"), "ShutterSpeedValue" : 8.321928, "ApertureValue" : 3.61471, "ExposureCompensation" : -0.6666666666666666, "MaxApertureValue" : 3, "MeteringMode" : "Spot", "LightSource" : "Unknown", "Flash" : "Flash did not fire", "FocalLength" : 90, "SensingMethod" : "One-chip color area sensor", "FileSource" : "Digital Camera", "SceneType" : "Directly photographed", "CFAPattern" : { "0" : 2, "1" : 0, "2" : 2, "3" : 0, "4" : 1, "5" : 2, "6" : 0, "7" : 1 }, "CustomRendered" : "Normal", "ExposureMode" : "Auto", "WhiteBalance" : "Auto", "DigitalZoomRatio" : 1, "FocalLengthIn35mmFormat" : 135, "SceneCaptureType" : "Standard", "GainControl" : "None", "Contrast" : "Normal", "Saturation" : "Normal", "Sharpness" : "Normal", "SubjectDistanceRange" : "Unknown", "SerialNumber" : "3518197", "LensInfo" : [ 90, 90, 2.8, 2.8 ], "LensModel" : "90.0 mm f/2.8" }, "__v" : 0 }
 { "_id" : ObjectId("5f1e76406cad2e29e44ae37a"), "caption" : "snakes!!!", "description" : "ahhhhhh", "longitude" : "45", "latitude" : "2", "tags" : null, "author" : "j", "SubmittedByID" : "5f1db4ba9378581c7802c4b1", "fileName" : "userImage-1595831937538_DSC0060.jpg", "fileLocation" : "public\\uploads\\userImage-1595831937538_DSC0060.jpg", "dateSubmitted" : ISODate("2020-07-27T06:37:52.741Z"), "dateTaken" : null, "exifMetaData" : { "Make" : "NIKON CORPORATION", "Model" : "NIKON D90", "Orientation" : "Horizontal (normal)", "XResolution" : 240, "YResolution" : 240, "ResolutionUnit" : "inches", "Software" : "Adobe Photoshop Lightroom 6.0 (Windows)", "ModifyDate" : ISODate("2019-01-05T07:15:18Z"), "ExposureTime" : 0.00625, "FNumber" : 3.2, "ExposureProgram" : "Manual", "ISO" : 320, "ExifVersion" : "2.3", "DateTimeOriginal" : ISODate("2018-12-26T10:03:10Z"), "CreateDate" : ISODate("2018-12-26T10:03:10Z"), "ShutterSpeedValue" : 7.321928, "ApertureValue" : 3.356144, "ExposureCompensation" : -0.6666666666666666, "MaxApertureValue" : 3.3, "MeteringMode" : "Spot", "LightSource" : "Unknown", "Flash" : "Flash did not fire", "FocalLength" : 90, "SensingMethod" : "One-chip color area sensor", "FileSource" : "Digital Camera", "SceneType" : "Directly photographed", "CFAPattern" : { "0" : 2, "1" : 0, "2" : 2, "3" : 0, "4" : 1, "5" : 2, "6" : 0, "7" : 1 }, "CustomRendered" : "Normal", "ExposureMode" : "Manual", "WhiteBalance" : "Auto", "DigitalZoomRatio" : 1, "FocalLengthIn35mmFormat" : 135, "SceneCaptureType" : "Standard", "GainControl" : "None", "Contrast" : "Normal", "Saturation" : "Normal", "Sharpness" : "Normal", "SubjectDistanceRange" : "Unknown", "SerialNumber" : "3518197", "LensInfo" : [ 90, 90, 2.8, 2.8 ], "LensModel" : "90.0 mm f/2.8" }, "__v" : 0 }
 
+router.get('/users', async (req, res) => {
+   console.log(`query is ${JSON.stringify(req.query)}`);
+
+   let nameOrder, dateSubOrder, date, sortOrder;
+   const query = req.query;
+   let andQueries = {};
+   let usersToSend = {};
+
+   /*getting sort order -- set to accending by defualt */
+
+   // NOTE -- could sort on multiple param n a later version
+   //query.sortOrder === '-1' ? (sortOrder = -1) : (sortOrder = 1);
+
+   /* adding queries if present*/
+   query.name && (andQueries = { ...{ name: query.name } });
+   query.bio && (andQueries = { ...{ bio: query.bio } });
+
+   //TODOs
+   //date range submitted and posted
+   //photos in radius of location
+   //all searchable text -- with quotes
+   //sort order -- date posted, date submitted, name, relevance, reverse order?
+
+   let origUsersObj = await User.find({ $and: [andQueries] });
+   console.log(`orig is ${JSON.stringify()}`);
+   /*pulling only neccesary info from user obj*/
+   origUsersObj.forEach((user, ndx) => {
+      let {
+         name,
+         allPhotos,
+         socialMediaAcnts,
+         website,
+         bio,
+         homeLocation,
+         datejoined,
+      } = user;
+      usersToSend = {
+         ...{
+            name,
+            allPhotos,
+            socialMediaAcnts,
+            website,
+            bio,
+            homeLocation,
+            datejoined,
+         },
+      };
+   });
+
+   /*adding a 'no users found' message to empty obj */
+   Object.getOwnPropertyNames(usersToSend).length == 0 &&
+      (usersToSend = { err: 'no users found' }); //TODO--would it be better to send an empty obj?
+
+   res.json(usersToSend);
+});
