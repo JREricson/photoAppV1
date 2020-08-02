@@ -18,6 +18,8 @@ const Photo = require('../models/photo');
 
 router.get('/users', async (req, res) => {
    let nameOrder, dateSubOrder, date, sortOrder;
+
+   let searchQuery = '';
    const query = req.query;
    let andQueries = {};
    let searchOrdering = {};
@@ -40,6 +42,7 @@ router.get('/users', async (req, res) => {
    /* adding queries if present*/
    query.name && (andQueries = { ...{ name: query.name } });
    query.bio && (andQueries = { ...{ bio: query.bio } });
+   query.search && (searchQuery = query.search);
 
    console.log('allQueries: ' + JSON.stringify(andQueries));
 
@@ -76,7 +79,10 @@ router.get('/users', async (req, res) => {
 
    let origUsersObj = await User.find(
       // { $text: { $search: 'j' } },
-      { $text: { $search: 'j' }, $and: [andQueries] }, // [andQueries]
+      {
+         $text: { $search: searchQuery },
+         //  $and: [andQueries]
+      }, // [andQueries]//searchQuery$text: { $search: 'j' }
    ).sort();
 
    // console.log('orig' + origUsersObj);
@@ -116,6 +122,7 @@ router.get('/users', async (req, res) => {
 
 router.get('/photos', async (req, res) => {
    let photosObj = await Photo.find();
+
    photosObj ? res.json(photosObj) : res.json('error occured');
 });
 
