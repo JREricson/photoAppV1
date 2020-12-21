@@ -2,21 +2,104 @@
 
 <h1 class="">Broswer all users</h1>
 
-<form action="">
-   <input type="text" />
-   <button type="=submit">Search</button>
-</form>
-
-<% allUsers.forEach((user) =>{ %>
+<!-- search bar  -->
+<input
+   id="userSearch"
+   type="text"
+   placeholder="enter name here"
+   data-page="0"
+/>
+<button id="loadMore">Load more results</button>
+<% allUsers.forEach((user) =>{ %><!-- //TODO -- find way to hide button -->
 
 <p><%= user.name %></p>
 <p>
    homeLocation: <% user.homeLocation>0? user.homeLocation: "location unknown"%>
 </p>
-<p>
-   homeLocation: <% user.homeLocation>0? user.homeLocation: "location unknown"%>
-</p>
 
 <a href="/users/<%= user._id %>/profile">Go to Profile</a>
+<div id="userInfo"></div>
+<%}); %>
 
-<%}); %> <%- include("footerUser") %>
+<!-- script for generating user elements in  -->
+<script>
+   //TODO -- have display most recent users if search bar is empty
+   search = document.getElementById('userSearch');
+
+   const searchUsers = async (searchText) => {
+      const usersRes = await fetch(`../api/users/?search=${searchText}`);
+
+      /*setting page data to zero*/
+      userSearch.dataset.page = 0;
+      userSearch = document.getElementById('userSearch');
+      console.log('page is ' + userSearch.dataset.page);
+      let page = userSearch.dataset.page;
+
+      if (usersRes.ok) {
+         let userJSON = await usersRes.json();
+         console.log(usersRes);
+         console.log(userJSON);
+         userInfo = document.getElementById('userInfo');
+
+         userInfo.innerHTML = showResultsOnPage(userJSON, page);
+
+         //tester.innerHTML = userJSON;
+      } else {
+         console.log('problem gettingJSON'); //TODO  -- better err handling
+      }
+
+      // return userJSON;
+   };
+
+   const showResultsOnPage = (users, page) => {
+      // TODO --fully test this function
+      let html;
+      if (users.length > 0) {
+         users.forEach((user, ndx) => {
+            /*limiting results to 25 users*/
+            //note -- a more advanced version would allow for pagation
+            if (ndx >= page && ndx < 25 * (page + 1)) {
+               //TODO -- test this with more data
+               html += `<div class="card card-body">
+               <h3> Name:  ${user.name}</h3>
+               <h3> photoList ${user.allPhotos}</h3>
+               <h4>${ndx}</h4>
+               <a href="/users/${user._id}/profile" class="btn btn-primary">View Profile</a>
+
+
+               </div>`;
+            }
+         });
+      } else {
+         html = '';
+      }
+
+      return html;
+   };
+
+   //  ${generatePhotoGallery(user.allPhotos)}
+   const generatePhotoGallery = async (photoList) => {
+      let html = '';
+
+      if (photoList.length > 0) {
+         photoList.forEach((id, ndx) => {
+            //get photo from photo api
+
+            //create justified gal element
+
+            //limit to first 3 photos -- have css put all photos on same line
+            console.log(id);
+         });
+      }
+   };
+
+   loadMore.addEventListener('input', () => {
+      userSearch.dataset.page++;
+      console.log('page incremented' + userSearch.dataset.page); //delete
+      showResultsOnPage(search.value, userSearch.dataset.page);
+   });
+
+   search.addEventListener('input', () => searchUsers(search.value));
+</script>
+
+<%- include("footerUser") %>

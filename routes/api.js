@@ -26,6 +26,7 @@ router.get('/users', async (req, res) => {
    let usersToSend = [];
 
    approvedKeys = [
+      '_id',
       'name',
       'allPhotos',
       'socialMediaAcnts',
@@ -90,6 +91,7 @@ router.get('/users', async (req, res) => {
    /*pulling only neccesary info from user obj*/
    origUsersObj.forEach((user, ndx) => {
       let {
+         _id,
          name,
          allPhotos,
          socialMediaAcnts,
@@ -100,6 +102,7 @@ router.get('/users', async (req, res) => {
       } = user;
 
       filteredUser = {
+         _id,
          name,
          allPhotos,
          socialMediaAcnts,
@@ -121,7 +124,16 @@ router.get('/users', async (req, res) => {
 });
 
 router.get('/photos', async (req, res) => {
-   let photosObj = await Photo.find();
+   let query = req.query;
+   query.search && (searchQuery = query.search);
+
+   let photosObj = await Photo.find(
+      // { $text: { $search: 'j' } },
+      {
+         $text: { $search: searchQuery },
+         //  $and: [andQueries]
+      }, // [andQueries]//searchQuery$text: { $search: 'j' }
+   ).sort();
 
    photosObj ? res.json(photosObj) : res.json('error occured');
 });

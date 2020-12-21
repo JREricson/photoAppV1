@@ -3,48 +3,46 @@
 
 <!-- script tage for obtainging EXIF data -->
 
-<body>
-   <!-- <img
+<!-- <img
       id="testImage"
       src="https://free-images.com/or/269b/bry.jpg"
       alt="cannot display"
    /> -->
-   <div class="container">
-      <div class="row">
-         <div class="col-md-6 m-auto">
-            <h1 class="text-center display-4 my-4">Add to your portfolio</h1>
-            <form
-               action="/users/<%= contentOwner._id%>/photos/upload"
-               method="POST"
-               enctype="multipart/form-data"
-            >
-               <div id="uploadFormText" class="custom-file mb-3">
-                  <input
-                     type="file"
-                     name="userImage"
-                     id="file"
-                     class="custom-file-input"
-                     required
-                     multiple
-                     onchange="changeInnerHtml();"
-                  />
-                  <label for="file" class="custom-file-label"
-                     ><span id="fileUploadText">Choose File</span></label
-                  >
-               </div>
+<div class="container">
+   <div class="row">
+      <div class="col-md-6 m-auto">
+         <h1 class="text-center display-4 my-4">Add to your portfolio</h1>
+         <form
+            action="/users/<%= contentOwner._id%>/photos/upload"
+            method="POST"
+            enctype="multipart/form-data"
+         >
+            <div id="uploadFormText" class="custom-file mb-3">
                <input
-                  type="submit"
-                  value="Submit"
-                  class="btn btn-primary btn-block"
+                  type="file"
+                  name="userImage"
+                  id="file"
+                  class="custom-file-input"
+                  required
+                  multiple
+                  onchange="changeInnerHtml();"
                />
-            </form>
-            <hr />
-         </div>
+               <label for="file" class="custom-file-label"
+                  ><span id="fileUploadText">Choose File</span></label
+               >
+            </div>
+            <input
+               type="submit"
+               value="Submit"
+               class="btn btn-primary btn-block"
+            />
+         </form>
+         <hr />
       </div>
    </div>
-   <!-- TODO is needed??? -->
-   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-   <!-- script for generating loaded names -->
-   <script src="../../../scripts/uploadScript.js"></script>
-   <%- include("footerUser") %>
-</body>
+</div>
+<!-- TODO is needed??? -->
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<!-- script for generating loaded names -->
+<script src="../../../scripts/uploadScript.js"></script>
+<%- include("footerUser") %>

@@ -117,3 +117,63 @@ router.get('/users', async (req, res) => {
 
    res.json(usersToSend);
 });
+
+
+<!-- adding each photos in list -->
+<% photoList.forEach((photo, ndx) =>{%>
+
+<p>photo located at <%= photo %></p>
+<img
+   class="thumbnail galleryThumb"
+   class="editThumbnail"
+   src="\uploads\<%= photo.fileName %>"
+   alt="cannot display image"
+/>
+
+
+<% photosFound.forEach((photo, ndx) =>{%>
+
+<div class="photoCard">
+   <img
+      class="thumbnail galleryThumb"
+      class="editThumbnail"
+      src="\uploads\<%=photo.fileName %>"
+      alt="cannot display image"
+   />
+   <h4 class="photoCaption">
+      <%=photo.caption %>
+   </h4>
+
+   <p class="photoLocation"></p>
+   <p class="photoDescription">
+      <em>description : </em>
+      <%=photo.description %>
+   </p>
+   <p class="date">submitted on<%=photo.dateSubmited %></p>
+   <p class="date">taken on<%=photo.exifMetaData.DateTimeOriginal %></p>
+</div>
+
+<% }) %>
+
+
+<div id="photoGallery">
+   <% photosFound.forEach((photo, ndx) =>{%>
+
+   <a href="/photos/<%= photo._id %>/photo">
+      <img
+         class="justifiedGalImg"
+         alt="<%= photo.caption %>"
+         src="/uploads/<%= photo.fileName %>"
+      />
+   </a>
+
+   <% })%>
+
+
+
+
+
+
+
+
+  

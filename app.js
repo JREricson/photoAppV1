@@ -46,6 +46,7 @@ app.use(passport.session());
 // Connect flash
 app.use(flash());
 
+//TODO --  extract below??
 //Global vars
 app.use((req, res, next) => {
    //flash
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
 });
 
 //setting up mongoDB
+////////////////////
 mongoose
    .connect('mongodb://localhost:27017/photoAppV1', {
       useNewUrlParser: true,
@@ -68,6 +70,7 @@ mongoose
 mongoose.set('useCreateIndex', true);
 
 //Routes
+//////////////////
 app.use('/', require('./routes/index'));
 app.use('/allusers', require('./routes/allUsers'));
 app.use('/users', require('./routes/user'));
@@ -92,4 +95,5 @@ var date =
    ':' +
    today.getMinutes();
 
-app.listen(PORT, console.log(`server started on port ${PORT} on ${date}`));
+app.listen(PORT , console.log(`server started on port ${PORT} on ${date}`));
+
