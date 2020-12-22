@@ -79,7 +79,7 @@
                   photo.caption +
                   '</h3>'+
                   //author with link
-                  '<a href="../../../users/'+photo.SubmittedByID+'/profile"><h4>submitted by ' +
+                  '<a href="/users/'+photo.SubmittedByID+'/profile"><h4>submitted by ' +
                   photo.author +
                   '</h4></a>'+
                   //GPS

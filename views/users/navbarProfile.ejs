@@ -8,22 +8,21 @@
 
     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
       <li class="nav-item active">
-        <a class="nav-link" href="/users/<%= contentOwner._id %>/profile">Profile </a>
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/profile"><strong>Viewing <%=contentOwner.name %>'s profile: </strong></a>
       </li>
       <li class="nav-item active"> 
-        <a class="nav-link" href="/users/<%= contentOwner._id %>/photos">Portfolios </a>
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/photos">photos </a>
       </li>
 
       <li class="nav-item active">
-        <a class="nav-link" href="/users/<%= contentOwner._id %>/photos">Gallery </a>
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/galleries">Galleries </a>
       </li>
 
+
       <li class="nav-item active">
-        <a class="nav-link" href="/">Photo explorer </a>
+        <a class="nav-link" href="/users/<%= contentOwner._id %>/contact">Contact</a>
       </li>
-      <li class="nav-item  active">
-        <a class="nav-link seenOnlyByUser " href="/users/addPhoto">Add Photos </a>
-      </li>
+
        <!--only show if user has these-->
     <li>  <a class="nav-item" href="https://www.instagram.com/j_r_ericson/"> 
       <i href="#" class="fab fa-instagram"  alt="instagram"/></i></a>

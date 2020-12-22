@@ -31,7 +31,7 @@ const PhotoSchema = new mongoose.Schema({
       required: true,
    },
    dateTaken: {
-      type: String, //TODO change to date
+      type: Date, //update all that use this -- uploads
       required: false,
    },
    longitude: {
