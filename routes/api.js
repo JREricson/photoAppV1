@@ -151,8 +151,10 @@ router.get('/photos', async (req, res) => {
    }
 
    /* F number*/
-   (query.fNumberMin || query.fNumberMax) && (searchObj = {...searchObj, ...{"exifMetaData.FNumber":createMinMaxQuery(query.fNumberMin, query.fNumberMax)}});
+   if(query.fNumberMin || query.fNumberMax) {
+      searchObj = {...searchObj, ...{"exifMetaData.FNumber":createMinMaxQuery(query.fNumberMin, query.fNumberMax)}};
   
+   }
    /*search GPS */
    //-- TODO - km radians = distance in km / 6371
             // query.lon && (searchLatitude = query.lon);
@@ -165,11 +167,15 @@ router.get('/photos', async (req, res) => {
 
    /*search exposureTime*/
    //accept num only-- TODO - autosuggest from  on frontend
-   (query.expTimeMin || query.expTimeMax) && (searchObj = {...searchObj, ...{"exifMetaData.ExposureTime":createMinMaxQuery(query.expTimeMin, query.expTimeMax)}});
+   if(query.expTimeMin || query.expTimeMax) {
+      searchObj = {...searchObj, ...{"exifMetaData.ExposureTime":createMinMaxQuery(query.expTimeMin, query.expTimeMax)}};
+   } ;
 
    /*search ISO */
    //generating query to find min and max values and adding to current seachObj
-   (query.isoMax || query.isoMin) && (searchObj = {...searchObj, ...{"exifMetaData.ISO":createMinMaxQuery(query.isoMin, query.isoMax)}});
+   if (query.isoMax || query.isoMin) {
+      (searchObj = {...searchObj, ...{"exifMetaData.ISO":createMinMaxQuery(query.isoMin, query.isoMax)}});
+   } ;
 
 
 
@@ -179,7 +185,7 @@ router.get('/photos', async (req, res) => {
    if(query.tags){
       searchtags = query.tags.split(" ");
       searchObj = {...searchObj, ...{tags:{$in: searchtags}}}
-   }
+   };
 
    // { "$in" : ["sushi"]} }
    //search date
@@ -254,6 +260,27 @@ function createMinMaxQuery(min, max){
    maxNum && (queryObj = {...queryObj,...{$lte:maxNum}});
 
    return queryObj;
+}
+
+
+function createDateQuery(yearMin, yearMax, monthMax, monthMin, dayMax, dayMin){
+
+
+   //exact 
+      //date
+
+      
+
+
+   //y-m-d
+
+   //just year
+
+
+
+
+
+
 }
 
 module.exports = router;
