@@ -138,14 +138,7 @@ router.get('/photos', async (req, res) => {
    //search content = { ...{ name: query.name } } $text: { $search: searchQuery }
    query.search && (searchObj = { ...{$text: { $search: query.search } }});
 
-   //search tags
-   query.tags && (searchtags = query.tags);
-   //search date
-      //cast to date
 
-   //accepted yyyy-mm-dd only for now
-   query.dateBefore && (searchDateBeforeAr = query.dateBefore.split('-')); //Initialize?
-   query.dateAfter && (searchDateAfterAr = query.dateAfter.split('-'));
 
    //search will fail and crash server without try catch
    try{
@@ -177,6 +170,31 @@ router.get('/photos', async (req, res) => {
    /*search ISO */
    //generating query to find min and max values and adding to current seachObj
    (query.isoMax || query.isoMin) && (searchObj = {...searchObj, ...{"exifMetaData.ISO":createMinMaxQuery(query.isoMin, query.isoMax)}});
+
+
+
+
+
+   //search tags
+   if(query.tags){
+      searchtags = query.tags.split(" ");
+      searchObj = {...searchObj, ...{tags:{$in: searchtags}}}
+   }
+
+   // { "$in" : ["sushi"]} }
+   //search date
+      //cast to date
+
+   //accepted yyyy-mm-dd only for now
+         //  query.dateBefore && (searchDateBeforeAr = query.dateBefore.split('-')); //Initialize?
+         //  query.dateAfter && (searchDateAfterAr = query.dateAfter.split('-'));
+
+
+
+
+
+
+
 
 /*
 finding all values with query
