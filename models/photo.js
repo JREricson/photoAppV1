@@ -1,8 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'),
+   Schema = mongoose.Schema,
+   ObjectId = Schema.ObjectId;
 
-const PhotoSchema = new mongoose.Schema({
+const PhotoSchema = new Schema({
    SubmittedByID: {
-      type: String,
+      type: ObjectId,
       required: true,
    },
    author: {
@@ -21,6 +23,7 @@ const PhotoSchema = new mongoose.Schema({
       //TODO refacror all other code to submitted
       type: Date,
       default: Date.now,
+      required: true,
    },
    fileLocation: {
       type: String,
@@ -31,14 +34,9 @@ const PhotoSchema = new mongoose.Schema({
       required: true,
    },
    dateTaken: {
-      type: Date, //update all that use this -- uploads
+      type: Date, //TODO change to date
       required: false,
    },
-   longitude: {
-      type: String,
-      required: false,
-   },
-
    longitude: {
       type: String,
       default: '',
@@ -48,7 +46,7 @@ const PhotoSchema = new mongoose.Schema({
       default: '',
    },
    tags: {
-      type: Array,
+      type: [String],
       default: [],
    },
    exifMetaData: {

@@ -19,7 +19,7 @@ router.get('/login', (req, res) => res.render('auth/login'));
 
 router.post('/login', (req, res, next) => {
    passport.authenticate('local', {
-      successRedirect: `/users`, //TODO -- change route
+      successRedirect: `/users/`, //TODO -- change route
       failureRedirect: '/login/',
       failureFlash: true,
    })(req, res, next);
@@ -28,7 +28,7 @@ router.post('/login', (req, res, next) => {
 //logout
 router.get('/logout', (req, res) => {
    req.logout();
-   req.flash('success_msg', 'you are now logged out');
+   req.flash('success_msg', 'You are now logged out');
    res.redirect('/login');
 });
 

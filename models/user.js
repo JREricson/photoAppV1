@@ -1,7 +1,10 @@
 /*jshint esversion: 6 */
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'),
+    Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
 
-const UserSchema = new mongoose.Schema({
+
+const UserSchema = new Schema({
    name: {
       type: String,
       index: true,
@@ -10,7 +13,7 @@ const UserSchema = new mongoose.Schema({
    brandName: {
       type: String,
       index: true,
-      deafault: '',
+      deafault: '', 
    },
    email: {
       type: String,
@@ -25,39 +28,44 @@ const UserSchema = new mongoose.Schema({
       type: Date,
       index: true,
       default: Date.now,
+      required: true,
    },
 
    allPhotos: {
-      type: Array,
+      type: [ObjectId],
       index: true,
       default: [],
+      required: true,
    },
-   portfolios: {
+   photoCollectionIds: {
       //an array of photo id arrays
-      type: Array,
+      type: [ObjectId],
       default: [],
+      required: true,
    },
 
    socialMediaAcnts: {
       type: Object,
       index: true,
       default: {},
+      required: true,
    },
    website: {
       type: String,
       index: true,
       default: '',
+     // required: true
    },
 
    bio: {
       type: String,
       index: true,
       default: '',
+      //required: true,
    },
    homeLocation: {
       type: String,
       index: true,
-      required: false,
    },
 });
 
