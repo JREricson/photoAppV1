@@ -18,10 +18,14 @@ middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
          if (err) {
             console.log(err);
             reject;
+         } else if (!contentOwner.allPhotos) {
+            //I believe below should fix error in TODO above
+            //rejecting promise in the event that the photo had been deleted during session
+            reject;
          } else {
             photos = contentOwner.allPhotos; //TODO -- check to make sure there is a conent owner contentowner &&
-            //console.log('🧉 ////////////\n ' + JSON.stringify(photos, null, 2));
-            resolve(photos); //might be why wrapped
+
+            resolve(photos);
          }
       });
    });
@@ -34,7 +38,6 @@ middlewareObj.getPageOwnerPhotoIds = (req, res) => {
          return null;
       } else {
          photos = contentOwner.allPhotos;
-         //   console.log('🧉 ////////////\n ' + JSON.stringify(photos, null, 2));
          return photos; //might be why wrapped
       }
    });

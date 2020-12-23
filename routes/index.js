@@ -72,7 +72,7 @@ router.post('/register', (req, res) => {
       User.findOne({ email: email }).then((user) => {
          if (user) {
             errors.push({ msg: 'Email is already registered' });
-            //rerendering page with saved valus
+            //rerendering page with saved values
             res.render('auth/register', {
                errors,
                name,
@@ -82,6 +82,7 @@ router.post('/register', (req, res) => {
             });
          } else {
             //passed validation
+            //creating new user
             const newUser = new User({
                name,
                email,

@@ -124,103 +124,136 @@ router.get('/users', async (req, res) => {
    res.json(usersToSendJSON);
 });
 
-
-
-
-
-
-
+//photo route
+////////////
 router.get('/photos', async (req, res) => {
-   searchObj= { };
+   searchObj = {};
 
    //extracting search terms from query
    let query = req.query;
    //search content = { ...{ name: query.name } } $text: { $search: searchQuery }
-   query.search && (searchObj = { ...{$text: { $search: query.search } }});
-
-
+   query.search && (searchObj = { ...{ $text: { $search: query.search } } });
 
    //search will fail and crash server without try catch
-   try{
-   let searchDateBefore = new Date(searchDateBeforeAr[0], searchDateBeforeAr[1]-1,searchDateBeforeAr[2] );
-   let searchDateAfter = new Date(searchDateAfterAr[0], searchDateAfterAr[1]-1,searchDateAfterAr[2] );
-
-   searchObj = {...searchObj, ...{dateTaken: { $gte:searchDateAfter, $lte: searchDateBefore }}};
-   } catch{
-      console.log('invalid date entered');
-   }
 
    /* F number*/
-   if(query.fNumberMin || query.fNumberMax) {
-      searchObj = {...searchObj, ...{"exifMetaData.FNumber":createMinMaxQuery(query.fNumberMin, query.fNumberMax)}};
-  
+   if (query.fNumberMin || query.fNumberMax) {
+      searchObj = {
+         ...searchObj,
+         ...{
+            'exifMetaData.FNumber': createMinMaxQuery(
+               query.fNumberMin,
+               query.fNumberMax,
+            ),
+         },
+      };
    }
    /*search GPS */
    //-- TODO - km radians = distance in km / 6371
-            // query.lon && (searchLatitude = query.lon);
-            // //let lowLon = 
+   // query.lon && (searchLatitude = query.lon);
+   // //let lowLon =
 
-            // query.lat && (searchLongitude = query.lat);
+   // query.lat && (searchLongitude = query.lat);
 
    /*search user*/
-   query.user && (searchObj = {...searchObj, ...{ author: query.user }} );
+   query.user && (searchObj = { ...searchObj, ...{ author: query.user } });
 
    /*search exposureTime*/
    //accept num only-- TODO - autosuggest from  on frontend
-   if(query.expTimeMin || query.expTimeMax) {
-      searchObj = {...searchObj, ...{"exifMetaData.ExposureTime":createMinMaxQuery(query.expTimeMin, query.expTimeMax)}};
-   } ;
+   if (query.expTimeMin || query.expTimeMax) {
+      searchObj = {
+         ...searchObj,
+         ...{
+            'exifMetaData.ExposureTime': createMinMaxQuery(
+               query.expTimeMin,
+               query.expTimeMax,
+            ),
+         },
+      };
+   }
 
    /*search ISO */
    //generating query to find min and max values and adding to current seachObj
    if (query.isoMax || query.isoMin) {
-      (searchObj = {...searchObj, ...{"exifMetaData.ISO":createMinMaxQuery(query.isoMin, query.isoMax)}});
-   } ;
-
-
-
-
+      searchObj = {
+         ...searchObj,
+         ...{
+            'exifMetaData.ISO': createMinMaxQuery(query.isoMin, query.isoMax),
+         },
+      };
+   }
 
    //search tags
-   if(query.tags){
-      searchtags = query.tags.split(" ");
-      searchObj = {...searchObj, ...{tags:{$in: searchtags}}}
-   };
+   if (query.tags) {
+      searchtags = query.tags.split(' ');
+      searchObj = { ...searchObj, ...{ tags: { $in: searchtags } } };
+   }
 
-   // { "$in" : ["sushi"]} }
    //search date
-      //cast to date
 
+   //
    //accepted yyyy-mm-dd only for now
-         //  query.dateBefore && (searchDateBeforeAr = query.dateBefore.split('-')); //Initialize?
-         //  query.dateAfter && (searchDateAfterAr = query.dateAfter.split('-'));
+   let dateAfter = query.dateAfter,
+      dateBefore = query.dateBefore;
+   if (dateAfter || dateBefore) {
+      try {
+         //TODO-- add regex for validation ^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$
 
+         //create seperate query for search for single date
+         let endDate;
+         let startDate;
 
+         if (dateBefore === dateAfter) {
+            //search single date
+            console.log('singledate');
+            startDate = createDateFromQuery(dateBefore);
+            console.log(startDate);
 
+            //creating end date 1 day after start date
+            endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 1);
+            console.log(startDate);
+            console.log(endDate);
+         } else {
+            //searching for range between dates
+            console.log('between dates\n');
+            dateAfter && (startDate = createDateFromQuery(dateAfter));
+            dateBefore && (endDate = createDateFromQuery(dateBefore));
+         }
+         //creating obj to hold date searches only if val is present
+         let dateSearch = {};
+         startDate && (dateSearch = { $gte: startDate });
+         endDate && (dateSearch = { ...dateSearch, ...{ $lte: endDate } });
+         //adding date search to search obj
+         searchObj = {
+            ...searchObj,
+            ...{ dateTaken: dateSearch },
+         };
+      } catch {
+         console.log('invalid date entered');
+      }
+   }
 
+   //cast to date
 
-
-
-
-/*
+   /*
 finding all values with query
 */
-  console.log('============>' + JSON.stringify(searchObj));
-  let photosObj
-  try{
-    photosObj = await Photo.find(
-      searchObj
+   console.log('============>' + JSON.stringify(searchObj));
+   let photosObj;
+   try {
+      photosObj = await Photo.find(
+         searchObj,
 
-      
-      // [andQueries]//searchQuery$text: { $search: 'j' }
-   ).sort();
-   res.json(photosObj);
-  } catch{
-     console.log("problem with query");
-     res.json('error occured');
-  }
+         // [andQueries]//searchQuery$text: { $search: 'j' }
+      ).sort();
+      res.json(photosObj);
+   } catch {
+      console.log('problem with query');
+      res.json('error occured');
+   }
 
-  // photosObj ? res.json(photosObj) : res.json('error occured');
+   // photosObj ? res.json(photosObj) : res.json('error occured');
 });
 
 ///////////////////////
@@ -246,41 +279,36 @@ function keyAndValApproved(searchOrdering, approvedKeys, key, val) {
  * function used to create obj of min max values in search query
  * @param {*} min min val of query -- inclusive
  * @param {*} max max val of query -- inclusive
- * @returns object to be used in seach query 
+ * @returns object to be used in seach query
  */
 
-function createMinMaxQuery(min, max){
-
+function createMinMaxQuery(min, max) {
    let minNum = Number.parseFloat(min);
    let maxNum = Number.parseFloat(max);
 
    let queryObj = {};
    //only adding min or max search if present
-   minNum && (queryObj = {...{$gte:minNum}});
-   maxNum && (queryObj = {...queryObj,...{$lte:maxNum}});
+   minNum && (queryObj = { ...{ $gte: minNum } });
+   maxNum && (queryObj = { ...queryObj, ...{ $lte: maxNum } });
 
    return queryObj;
 }
 
-
-function createDateQuery(yearMin, yearMax, monthMax, monthMin, dayMax, dayMin){
-
-
-   //exact 
-      //date
-
-      
-
-
+function createDateQuery(yearMin, yearMax, monthMax, monthMin, dayMax, dayMin) {
+   //exact
+   //date
    //y-m-d
-
    //just year
+}
 
-
-
-
-
-
+function createDateFromQuery(dateString) {
+   try {
+      let dateAr = dateString.split('-');
+      let date = new Date(dateAr[0], dateAr[1] - 1, dateAr[2]);
+      return date;
+   } catch {
+      return null;
+   }
 }
 
 module.exports = router;
