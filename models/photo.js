@@ -41,6 +41,16 @@ const PhotoSchema = new Schema({
       type: String,
       default: '',
    },
+
+   location_2dsphere: {
+      type: { type: String, default: 'Point' },
+      //CAUTION -- stored as [long, lat] in geoJSON
+      //work around for nt being able to index a null value
+      coordinates: {
+         type: [Number],
+         default: [-139, -30], // null value is in the Pacific Ocean
+      },
+   },
    latitude: {
       type: String,
       default: '',

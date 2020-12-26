@@ -1,0 +1,19 @@
+
+ db.photos.createIndex( { location_2dsphere: "2dsphere" } )
+
+
+
+
+
+ {
+      location_2dsphere: {
+         $near: {
+            $geometry: {
+               type: 'Point',
+               coordinates: [105, 17],
+            },
+            $maxDistance: 100000,
+            // $minDistance: <distance in meters>
+         },
+      },
+   }

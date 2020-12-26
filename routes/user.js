@@ -143,6 +143,7 @@ router.post(
             SubmittedByID: req.user._id,
             fileName: img.filename,
             fileLocation: path.join(img.destination, img.filename),
+            //TODO -- figure out best way to handle below
          });
 
          var exifData = exifr

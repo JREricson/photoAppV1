@@ -149,8 +149,6 @@ middlewareObj.updateAllPhotos = (req) => {
             tags: middlewareObj.getTagsFromString(tagString[ndx]),
             longitude: longitude[ndx],
             latitude: latitude[ndx],
-            //tags: tagString[ndx],
-            // todo -- line above needs to be spilt
          },
          (err, updatedPhoto) => {
             if (err) {
@@ -173,21 +171,52 @@ middlewareObj.updateSinglePhoto = (req) => {
       tagString,
    } = req.body;
 
-   console.log('///za cation is' + caption);
+   console.log('///za caption is' + caption);
+
+   let updateObj = {
+      // author: req.user.name,
+      description: description,
+      caption: caption,
+      dateTaken: dateTaken,
+      tags: middlewareObj.getTagsFromString(tagString),
+      longitude: longitude,
+      latitude: latitude,
+   };
+
+   //adding location_2dsphere only if long and lat are present
+   let coordLong, coordLat;
+   if (latitude && longitude) {
+      coodLong = parseFloat(longitude);
+      coordLat = parseFloat(latitude);
+   } else {
+      //woork around null value -- in pacific ocean
+      coodLong = -139;
+      coordLat = -30;
+
+      updateObj = {
+         ...updateObj,
+         ...{
+            location_2dsphere: {
+               type: 'Point',
+               //geoJSON stores as [long, lat]
+               coordinates: [coodLong, coordLat],
+            },
+         },
+      };
+   }
 
    Photo.findByIdAndUpdate(
       photoId,
-      {
-         // author: req.user.name,
-         description: description,
-         caption: caption,
-         dateTaken: dateTaken,
-         tags: middlewareObj.getTagsFromString(tagString),
-         longitude: longitude,
-         latitude: latitude,
-
-         // todo -- line above needs to be spilt
-      },
+      updateObj,
+      // {
+      //    // author: req.user.name,
+      //    description: description,
+      //    caption: caption,
+      //    dateTaken: dateTaken,
+      //    tags: middlewareObj.getTagsFromString(tagString),
+      //    longitude: longitude,
+      //    latitude: latitude,
+      // },
       (err, updatedPhoto) => {
          if (!updatedPhoto) {
             console.log('\n\n!!!!!!!could not update'); //Delete
@@ -236,7 +265,7 @@ middlewareObj.removePhotoOnly = (photoID) => {
    });
 };
 
-// TODO --  need to rewrite to inclde galleries or any other list
+// TODO --  need to rewrite to include galleries or any other list
 
 /**
  * should only get tho this point if there is a user defined (user has an empty all photos list by default)
