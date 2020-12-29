@@ -173,7 +173,7 @@ router.get('/users', async (req, res) => {
 
 
 
-
-
+{"location_2dsphere":{"$near":{"$geometry":{"type":"Point","coordinates":[5,17]},"$maxDistance":100000}}}
+{"location_2dsphere":{"$near":{"$geometry":{"type":"Point","coordinates":[12,115]},"$maxDistance":3000}}}
 
   

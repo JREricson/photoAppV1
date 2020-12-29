@@ -18,14 +18,16 @@ middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
          if (err) {
             console.log(err);
             reject;
-         } else if (!contentOwner.allPhotos) {
+         } else if (!contentOwner) {
+            res.render('404');
             //I believe below should fix error in TODO above
             //rejecting promise in the event that the photo had been deleted during session
             reject;
-         } else {
-            photos = contentOwner.allPhotos; //TODO -- check to make sure there is a conent owner contentowner &&
-
+         } else if (contentOwner) {
+            photos = contentOwner.allPhotos;
             resolve(photos);
+         } else {
+            reject;
          }
       });
    });
@@ -55,6 +57,8 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
          try {
             console.log(' ^^^^^^^^^^^^^null id list');
             photoIDs = await middlewareObj.ASYNCgetOwnerPhotoIds(req, res);
+
+            console.log('photoids: ', photoIDs);
             //TODO handle errors
             //  console.log(' ids are : ' + photoIds);
          } catch {
@@ -139,24 +143,26 @@ middlewareObj.updateAllPhotos = (req) => {
 
    photoId.forEach((id, ndx) => {
       //console.log('??????????????desciption is: --- ' + description[0]);
-      Photo.findByIdAndUpdate(
-         id,
-         {
-            // author: req.user.name, TODO -- fix line
-            description: description[ndx],
-            caption: caption[ndx],
-            dateTaken: dateTaken[ndx],
-            tags: middlewareObj.getTagsFromString(tagString[ndx]),
-            longitude: longitude[ndx],
-            latitude: latitude[ndx],
-         },
-         (err, updatedPhoto) => {
+
+      updateObj = {
+         // author: req.user.name, TODO -- fix line
+         description: description[ndx],
+         caption: caption[ndx],
+         dateTaken: dateTaken[ndx],
+         tags: middlewareObj.getTagsFromString(tagString[ndx]),
+         longitude: longitude[ndx],
+         latitude: latitude[ndx],
+      };
+
+      (updateObj = {
+         ...updateObj,
+         ...middlewareObj.makeGeoJSONObj(latitude, longitude),
+      }),
+         Photo.findByIdAndUpdate(id, updateObj, (err, updatedPhoto) => {
             if (err) {
                console.log(err);
             }
-         },
-      );
-      // console.log(id + '---' + description);
+         });
    });
 };
 
@@ -186,46 +192,31 @@ middlewareObj.updateSinglePhoto = (req) => {
    //adding location_2dsphere only if long and lat are present
    let coordLong, coordLat;
    if (latitude && longitude) {
-      coodLong = parseFloat(longitude);
+      coordLong = parseFloat(longitude);
       coordLat = parseFloat(latitude);
    } else {
-      //woork around null value -- in pacific ocean
-      coodLong = -139;
+      //work around null value -- in pacific ocean
+      coordLong = -139;
       coordLat = -30;
-
-      updateObj = {
-         ...updateObj,
-         ...{
-            location_2dsphere: {
-               type: 'Point',
-               //geoJSON stores as [long, lat]
-               coordinates: [coodLong, coordLat],
-            },
-         },
-      };
    }
 
-   Photo.findByIdAndUpdate(
-      photoId,
-      updateObj,
-      // {
-      //    // author: req.user.name,
-      //    description: description,
-      //    caption: caption,
-      //    dateTaken: dateTaken,
-      //    tags: middlewareObj.getTagsFromString(tagString),
-      //    longitude: longitude,
-      //    latitude: latitude,
-      // },
-      (err, updatedPhoto) => {
-         if (!updatedPhoto) {
-            console.log('\n\n!!!!!!!could not update'); //Delete
-            console.log(err);
-         } else {
-            console.log('\n\n/////// updated Photo\n' + updatedPhoto); //Delete
-         }
-      },
-   );
+   (updateObj = {
+      ...updateObj,
+      ...middlewareObj.makeGeoJSONObj(latitude, longitude),
+   }),
+      Photo.findByIdAndUpdate(
+         photoId,
+         updateObj,
+
+         (err, updatedPhoto) => {
+            if (!updatedPhoto) {
+               console.log('\n\n!!!!!!!could not update'); //Delete
+               console.log(err);
+            } else {
+               console.log('\n\n/////// updated Photo\n' + updatedPhoto); //Delete
+            }
+         },
+      );
 };
 
 ////////////////////////////////
@@ -237,6 +228,28 @@ middlewareObj.getTagsFromString = (tagString) => {
    let tagList = tagString.split(/[ ,;]+/).filter(Boolean);
    /*removing gross # that users will probably add, can add other items here as well if the need arrises*/
    return tagList;
+};
+
+middlewareObj.makeGeoJSONObj = (latitude, longitude) => {
+   //adding location_2dsphere only if long and lat are present
+   let coordLong, coordLat;
+   if (latitude && longitude) {
+      coordLong = parseFloat(longitude);
+      coordLat = parseFloat(latitude);
+   } else {
+      //work around null value -- in pacific ocean
+      coordLong = -139;
+      coordLat = -30;
+   }
+
+   obj = {
+      location_2dsphere: {
+         type: 'Point',
+         //geoJSON stores as [long, lat]
+         coordinates: [coordLong, coordLat],
+      },
+   };
+   return obj;
 };
 
 ////////////////////

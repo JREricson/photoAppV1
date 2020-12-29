@@ -17,3 +17,24 @@
          },
       },
    }
+
+
+
+   db.photos.createIndex(
+   {
+     author: "text",
+     caption: "text",
+     description: "text",
+     tags: "text"
+   }
+ )
+
+   db.users.createIndex(
+   {
+     name: "text",
+     brandName: "text",
+     website: "text",
+     bio: "text",
+     homeLocation: "text"
+   }
+ )

@@ -1,19 +1,20 @@
 /*jshint esversion: 6 */
 const mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-    ObjectId = Schema.ObjectId;
-
+   Schema = mongoose.Schema,
+   ObjectId = Schema.ObjectId;
 
 const UserSchema = new Schema({
    name: {
       type: String,
-      index: true,
+      // index: true,
       required: true,
+      //text: true, //creates text index
    },
    brandName: {
       type: String,
-      index: true,
-      deafault: '', 
+      // index: true,
+      deafault: '',
+      // text: true,
    },
    email: {
       type: String,
@@ -26,7 +27,7 @@ const UserSchema = new Schema({
    },
    dateJoined: {
       type: Date,
-      index: true,
+      //index: true,
       default: Date.now,
       required: true,
    },
@@ -46,26 +47,29 @@ const UserSchema = new Schema({
 
    socialMediaAcnts: {
       type: Object,
-      index: true,
+      //index: true,
       default: {},
       required: true,
+      // text: true,
    },
    website: {
       type: String,
-      index: true,
+      //index: true,
       default: '',
-     // required: true
+      // required: true
+      // text: true,
    },
 
    bio: {
       type: String,
-      index: true,
+      //index: true,
       default: '',
       //required: true,
+      // text: true,
    },
    homeLocation: {
       type: String,
-      index: true,
+      //index: true,
    },
 });
 

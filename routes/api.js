@@ -17,80 +17,108 @@ const { query } = require('express');
 //    res.json(userJSON);
 // });
 
+////////////////////////////////
+//        user route
+////////////////////////////////
+
 router.get('/users', async (req, res) => {
-   let nameOrder, dateSubOrder, date, sortOrder;
-
-   let searchQuery = '';
-
    const query = req.query;
-   let andQueries = {};
-   let searchOrdering = {};
-   let usersToSend = [];
 
-   approvedKeys = [
-      '_id',
-      'name',
-      'allPhotos',
-      'socialMediaAcnts',
-      'website',
-      'bio',
-      'homeLocation',
-      'datejoined',
+   //stores of list of all validation functions -- each returns an approval object and an error obj
+   let validationFunctions = [
+      validateSearch,
+      validateBio,
+      validateDate,
+      validateName,
+      validateHomeLocation,
+      validateWebsite,
    ];
 
-   /*getting sort order -- set to accending by defualt */
+   //checking queries to pass -- any query that is not approved will be skipped
+   //errorList list will keep track off errors encountered that are worthy of reporting to end user
+   let { approvedQueries, errorList } = validateQueriesFromFuncList(
+      query,
+      validationFunctions,
+   );
+   console.log('------ user validate error list:', errorList);
+   console.log('------ user validate aprovals:', approvedQueries);
 
-   // NOTE -- could sort on multiple param n a later version
+   //defines functions used to generate queries that will be added to search obj
+   let queryFunctions = [
+      makeSearchObj, //doubleCheck if correct
+      makeBioObj,
+      makeDateObj, //us
+      makeNameObj, //use user obj
+      makeHomeLocationObj,
+      makeWebsiteObj,
+   ];
+   //this is a list of names for keys to be be approved -- must be in same order of corresponding function in above list
+   let approvalKeys = [
+      'search',
+      'bio',
+      'date',
+      'name',
+      'homeLocation',
+      'website',
+   ];
 
-   /* adding queries if present*/
-   query.name && (andQueries = { ...{ name: query.name } });
-   query.bio && (andQueries = { ...{ bio: query.bio } });
-   query.search && (searchQuery = query.search);
+   //adding queries to search if approved
+   let curSearchObj = generateQueryObjAndErrors(
+      query,
+      queryFunctions,
+      approvedQueries,
+      approvalKeys,
+   );
+   searchObj = { ...searchObj, ...curSearchObj };
+   console.log('cur search obj is:', searchObj);
 
-   console.log('allQueries: ' + JSON.stringify(andQueries));
+   //setting pagation from queries
+   //CAUTION! -- current implementation should be changed as it does not scale well to large searches, but fine for current version of app
+   let { page, limit, errorList: pagationErrors } = validatePageAndLimit(query);
+   errorList = { ...errorList, ...pagationErrors };
+   console.log('page/lim ', page, '/', limit, pagationErrors);
+
+   let usersToSend = [];
+
+   // let approvedKeysFromUerObj = [
+   //    '_id',
+   //    'name',
+   //    'allPhotos',
+   //    'socialMediaAcnts',
+   //    'website',
+   //    'bio',
+   //    'homeLocation',
+   //    'dateJoined',
+   //    'last',
+   // ];
+
+   //these are keys that the user is allowed to sort by
+   let approvedSortKeys = {
+      name: true,
+
+      website: true,
+      homeLocation: true,
+      dateJoined: true,
+   };
 
    //////////
    //sort method
 
-   /*Getting sorting conditions */
-   /* CAUTION -- turning user obj string to obj -- be careful with it*/
-   //takes in format &sort={"name":"1","datjoined":"-1"}
-   // if (query.sort) {
-   //    try {
-   //       console.log(query.sort);
-   //       var sortObj = JSON.parse(query.sort);
-   //       console.log(sortObj);
+   let { sortObj, sortErrors } = makeSortObj(query, approvedSortKeys); //this method also runs a validation on user input
+   console.log('---------sort obj is: ', sortObj);
+   console.log('---------sorterrors are: ', sortErrors);
+   errorList = { ...errorList, ...sortErrors };
 
-   //       for (let key in sortObj) {
-   //          console.log('key ' + key + ' has value ' + sortObj[key]);
-
-   //          // //TODO check if approved
-   //          keyAndValApproved(searchOrdering, approvedKeys, key, val);
-   //          //searchOrdering[key] = sortObj[key];
-   //       }
-   //       console.log('!!!!!no probs' + JSON.stringify(searchOrdering));
-   //    } catch {
-   //       console.log('problem getting keys');
-   //    }
-   // }
-
-   //TODOs
-   //date range submitted and posted
-   //photos in radius of location
-   //all searchable text -- with quotes
-   //sort order -- date posted, date submitted, name, relevance, reverse order?
-
-   let origUsersObj = await User.find(
-      // { $text: { $search: 'j' } },
-      {
-         $text: { $search: searchQuery },
-         //  $and: [andQueries]
-      }, // [andQueries]//searchQuery$text: { $search: 'j' }
-   ).sort();
+   let origUsersObj = await User.find(searchObj)
+      .skip(page * limit) //will ignore skip when both are null
+      .limit(limit) // ignores limit if it is null
+      .sort(sortObj);
 
    // console.log('orig' + origUsersObj);
 
-   /*pulling only neccesary info from user obj*/
+   /*pulling only neccesary info from user obj
+   purpose to hide hidden info such as passwords or other private info
+   */
    origUsersObj.forEach((user, ndx) => {
       let {
          _id,
@@ -100,7 +128,7 @@ router.get('/users', async (req, res) => {
          website,
          bio,
          homeLocation,
-         datejoined,
+         dateJoined,
       } = user;
 
       filteredUser = {
@@ -111,8 +139,9 @@ router.get('/users', async (req, res) => {
          website,
          bio,
          homeLocation,
-         datejoined,
+         dateJoined,
       };
+      console.log('filtered user is :', filteredUser);
       usersToSend.push(filteredUser);
    });
    console.log(usersToSend);
@@ -120,186 +149,160 @@ router.get('/users', async (req, res) => {
    // /*adding a 'no users found' message to empty obj */
    // Object.getOwnPropertyNames(usersToSend).length == 0 &&
    //    (usersToSend = { err: 'no users found' }); //TODO--would it be better to send an empty obj?
+   let returnJSON = { users: usersToSend, errors: errorList };
 
-   usersToSendJSON = JSON.parse(JSON.stringify(usersToSend)); //Question -- will work without this line -- is it needed?
-   res.json(usersToSendJSON);
+   //usersToSendJSON = JSON.parse(JSON.stringify(usersToSend)); //Question -- will work without this line -- is it needed?
+   res.json(returnJSON);
 });
 
 ///////////////////////////////////////////////
-//photo route
+//               photo route
 ///////////////////////////////////////////////
+/**
+ *
+ */
 router.get('/photos', async (req, res) => {
    //creating an object that will hold all search queries to database
    //if there are queries present, they wll be added to the search object if there ar no errors
    searchObj = {};
 
+   //extracting query
    let query = req.query;
 
-   //checking queries to pass
+   //stores of list of all validation functions -- each returns an approval object and an error obj
+   let validationFunctions = [
+      ValidateFNumber,
+      ValidateISO,
+      validateSearch,
+      validateExposure,
+      validateUser,
+      validateGPS,
+      validateDate,
+      validateTags,
+   ];
+
+   //checking queries to pass -- any query that is not approved will be skipped
    //errorList list will keep track off errors encountered that are worthy of reporting to end user
-   let { approvedQueries, errorList } = validatePhotoQueries(query);
+   let { approvedQueries, errorList } = validateQueriesFromFuncList(
+      query,
+      validationFunctions,
+   );
 
    /*extracting search terms from query*/
    //search content = { ...{ name: query.name } } $text: { $search: searchQuery }
 
+   //defines functions used to generate queries that will be added to search obj
    let queryFunctions = [
       makeSearchObj,
       makeFNumberObj,
       makeISOObj,
       makeExposureObj,
       makeUserObj,
+      makeGPSObj,
+      makeDateObj,
+      makeTagsObj,
    ];
+   //this is a list of names for keys to be be approved -- must be in same order of corresponding function in above list
    let approvalKeys = [
       'search',
       'fStop',
       'iso',
       'exposure',
-      'user' /* 'gps', 'date', 'tags'*/,
-      ,
+      'user',
+      'gps',
+      'date',
+      'tags',
    ];
-   let curSearchObj = {};
-   queryFunctions.forEach((func, ndx) => {
-      if (approvedQueries[approvalKeys[ndx]]) {
-         console.log('----------->key found:', approvalKeys[ndx]);
-         curSearchObj = func(query);
-         //adding query if aproved
-         searchObj = { ...searchObj, ...curSearchObj };
-      }
-   });
 
-   //query.search && (searchObj = { ...{ $text: { $search: query.search } } });
+   //adding queries to search if approved
+   let curSearchObj = generateQueryObjAndErrors(
+      query,
+      queryFunctions,
+      approvedQueries,
+      approvalKeys,
+   );
+   searchObj = { ...searchObj, ...curSearchObj };
 
-   //search will fail and crash server without try catch
+   //setting pagation from queries
+   //CAUTION! -- current implementation should be changed as it does not scale well to large searches, but fine for current version of app
+   let { page, limit, errorList: pagationErrors } = validatePageAndLimit(query);
+   errorList = { ...errorList, ...pagationErrors };
+   console.log('page/lim ', page, '/', limit, pagationErrors);
 
-   /*search GPS */
-   //need to create 2d sphere index in mongo for function to work
-   if (query.lat && query.lon && query.dist) {
-      let lat = parseFloat(query.lat),
-         lon = parseFloat(query.lon);
-      //turning km to m -- mongo searches my meters
-      dist = parseFloat(query.dist) * 1000;
+   //these are keys that the user is allowed to sort by
+   let approvedSortKeys = {
+      author: true,
 
-      gpsSearch = {
-         location_2dsphere: {
-            $near: {
-               $geometry: {
-                  type: 'Point',
-                  //geoJSON uses long, lat format
-                  coordinates: [lon, lat],
-               },
-               //searches by meter within coord
-               $maxDistance: dist,
-               // $minDistance: <distance in meters>
-            },
-         },
-      };
+      dateSubmitted: true,
+      dateTaken: true,
+   };
 
-      searchObj = {
-         ...searchObj,
-         ...gpsSearch,
-      };
-   }
+   //////////
+   //sort method
 
-   // {
-   //    <location field>: {
-   //      $near: {
-   //        $geometry: {
-   //           type: "Point" ,
-   //           coordinates: [ <longitude> , <latitude> ]
-   //        },
-   //        $maxDistance: <distance in meters>,
-   //        $minDistance: <distance in meters>
-   //      }
-   //    }
-   // }
+   let { sortObj, sortErrors } = makeSortObj(query, approvedSortKeys); //this method also runs a validation on user input
+   console.log('---------sort obj is: ', sortObj);
+   console.log('---------sorterrors are: ', sortErrors);
+   errorList = { ...errorList, ...sortErrors };
 
-   //search tags
-
-   if (query.tags) {
-      searchtags = query.tags.split(' ');
-      searchObj = { ...searchObj, ...{ tags: { $in: searchtags } } };
-   }
-
-   //search date
-
-   //
-   //accepted yyyy-mm-dd only for now
-   let dateAfter = query.dateAfter,
-      dateBefore = query.dateBefore;
-   if (dateAfter || dateBefore) {
-      try {
-         //create seperate query for search for single date
-         let endDate;
-         let startDate;
-
-         if (dateBefore === dateAfter) {
-            //search single date
-            console.log('singledate');
-            startDate = createDateFromQuery(dateBefore);
-            console.log(startDate);
-
-            //creating end date 1 day after start date
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 1);
-            console.log(startDate);
-            console.log(endDate);
-         } else {
-            //searching for range between dates
-            console.log('between dates\n');
-            dateAfter && (startDate = createDateFromQuery(dateAfter));
-            dateBefore && (endDate = createDateFromQuery(dateBefore));
-         }
-         //creating obj to hold date searches only if val is present
-         let dateSearch = {};
-         startDate && (dateSearch = { $gte: startDate });
-         endDate && (dateSearch = { ...dateSearch, ...{ $lte: endDate } });
-         //adding date search to search obj
-         searchObj = {
-            ...searchObj,
-            ...{ dateTaken: dateSearch },
-         };
-      } catch {
-         console.log('invalid date entered');
-      }
-   }
-
-   //cast to date
-
-   /*
-finding all values with query
-*/
+   /*searching database with query and sending JSON back to user*/
    console.log('looking for============>' + JSON.stringify(searchObj));
    let photosObj;
    try {
-      photosObj = await Photo.find(
-         searchObj,
-
-         // [andQueries]//searchQuery$text: { $search: 'j' }
-      ).sort();
+      photosObj = await Photo.find(searchObj)
+         .sort(sortObj)
+         .skip(page * limit) //will ignore skip when both are null
+         .limit(limit); // ignores limit if it is null
       res.json({ photos: photosObj, errors: errorList });
    } catch {
       console.log('problem with query');
-      res.json('error occured');
+      res.json({
+         photos: {},
+         errors:
+            'unknow error(s), possible that query was not in excepted format',
+      }); //change response to be more compatable with ui????
    }
 
    // photosObj ? res.json(photosObj) : res.json('error occured');
 });
 
-///////////////////////
-//helper functions
-///////////////////////
+////////////////////////////////
+//        helper functions
+////////////////////////////////
+
+generateQueryObjAndErrors = (
+   query,
+   queryFunctions,
+   approvedQueries,
+   approvalKeys,
+) => {
+   curSearchObj = {};
+   searchObj = {};
+
+   queryFunctions.forEach((func, ndx) => {
+      if (approvedQueries[approvalKeys[ndx]]) {
+         console.log('----------->key found:', approvalKeys[ndx]);
+         curSearchObj = func(query);
+         //adding query if aproved
+         console.log('cur searchobj is', curSearchObj);
+         searchObj = { ...searchObj, ...curSearchObj };
+      }
+   });
+
+   return searchObj;
+};
 
 /**
  * keyAndValApproved
  * @param {*} searchOrdering
- * @param {*} approvedKeys
+ * @param {*} approvedKeysFromUserObj
  * @param {*} key
  * @param {*} val
  */
-function keyAndValApproved(searchOrdering, approvedKeys, key, val) {
+function keyAndValApproved(searchOrdering, approvedKeysFromUserObj, key, val) {
    approvedSortVals = { acnd: 1, dcnd: -1 };
 
-   if (key in approvedKeys && val in Object.keys(approvedSortVals)) {
+   if (key in approvedKeysFromUserObj && val in Object.keys(approvedSortVals)) {
       searchOrdering[key] = approvedSortVals[sortObj[key]];
    }
 }
@@ -323,13 +326,6 @@ function createMinMaxQuery(min, max) {
    return queryObj;
 }
 
-function createDateQuery(yearMin, yearMax, monthMax, monthMin, dayMax, dayMin) {
-   //exact
-   //date
-   //y-m-d
-   //just year
-}
-
 function createDateFromQuery(dateString) {
    try {
       let dateAr = dateString.split('-');
@@ -340,20 +336,9 @@ function createDateFromQuery(dateString) {
    }
 }
 
-validatePhotoQueries = (query) => {
+validateQueriesFromFuncList = (query, validationFunctions) => {
    let approvedQueries = {};
    let errorList = {};
-   //stores of list of all validation functions
-   let validationFunctions = [
-      ValidateFNumber,
-      ValidateISO,
-      validateSearch,
-      validateExposure,
-      validateUser,
-      validateGPS,
-      validateDate,
-      validateTags,
-   ];
 
    //
    validationFunctions.forEach((func) => {
@@ -481,41 +466,12 @@ validateExposure = (query) => {
 };
 
 validateSearch = (query) => {
-   errorList = {};
-   approvedQuery = {};
-   if (query.search) {
-      //checking search is too long
-      maxChar = 300;
-      if (query.search && query.search.length > maxChar) {
-         errorList = {
-            searchErrors: [
-               `search string needs to be less than ${maxChar} char`,
-            ],
-         };
-      } else {
-         approvedQuery = { search: true };
-      }
-   }
-   return { approvedQuery, errorList };
+   //currently only validates length
+   return validateLength(query.search, 'search', 300);
 };
 
 validateUser = (query) => {
-   errorList = {};
-   approvedQuery = {};
-
-   //checking user string is too long
-   if (query.user) {
-      maxChar = 60;
-      if (query.user && query.user.length > maxChar) {
-         errorList = {
-            searchErrors: [`user string needs to be less than ${maxChar} char`],
-         };
-      } else {
-         approvedQuery = { user: true };
-      }
-   }
-
-   return { approvedQuery, errorList };
+   return validateLength(query.user, 'user', 60);
 };
 
 validateGPS = (query) => {
@@ -531,8 +487,8 @@ validateGPS = (query) => {
       lonErrorList = errorListFromMaxMin(query, -180, 180, 'lon', null);
 
       //dist in range
-      //todo make sure working properly -- 6400 should give all photos on earth
-      distErrorList = errorListFromMaxMin(query, 0, 6400, 'dist', null); //diameter of earth is 6378km
+      //todo make sure working properly -- s 40,007.863 km at eq is diameter of earth, 20,010
+      distErrorList = errorListFromMaxMin(query, 0, 20100, 'dist', null);
 
       //adding all errors to single errorlist
 
@@ -566,6 +522,43 @@ validateTags = (query) => {
    }
 
    return { approvedQuery, errorList };
+};
+
+// validateSort = (query) => {
+//    //TODO -- this is a stub
+//    errorList = {};
+//    approvedQuery = {};
+//    if (query.tags) {
+//       approvedQuery = { sort: true };
+//    }
+
+//    return { approvedQuery, sortOrder };
+// };
+
+/**
+ * main reason for validation id to limit large queries
+ */
+validatePageAndLimit = (query) => {
+   console.log('in pagation function');
+   let page = null;
+   let limit = null;
+   errorList = {};
+   pageInt = parseInt(query.page);
+   limitInt = parseInt(query.limit);
+   if (pageInt <= 10000 && limitInt <= 500) {
+      console.log('creating pagation');
+      page = pageInt;
+      limit = limitInt;
+   } else {
+      if (query.page || query.limit) {
+         errorList = {
+            pageLimits: [
+               'need page and limit in interger format for pagation. limit must be <=500 and page mst be <=10000',
+            ],
+         };
+      }
+   }
+   return { page, limit, errorList };
 };
 
 validateDate = (query) => {
@@ -617,18 +610,153 @@ validateDate = (query) => {
 
    return { approvedQuery, errorList };
 };
+
+//general validation methods
+validateLength = (queryParam, queryName, maxChar) => {
+   errorList = {};
+   approvedQuery = {};
+   if (queryParam) {
+      //checking search is too long
+      if (queryParam && queryParam.length >= maxChar) {
+         errorList[
+            `${queryName}Errors`
+         ] = `${queryName} string needs to be less than ${maxChar} char`;
+      } else {
+         approvedQuery[queryName] = true;
+      }
+   }
+   return { approvedQuery, errorList };
+};
+
+///////////////////////////////////////////
+//           user validation routes
+///////////////////////////////////////////
+
+validateBio = (query) => {
+   return validateLength(query.bio, 'bio', 100);
+};
+
+validateName = (query) => {
+   return validateLength(query.name, 'name', 60);
+};
+validateHomeLocation = (query) => {
+   return validateLength(query.homeLocation, 'homeLocation', 60);
+};
+validateWebsite = (query) => {
+   return validateLength(query.website, 'website', 40);
+};
+
 /////////////////////////////////////
-//query functions
+//query functions (make<___>Obj functions)
 //
-//Note! -- all of these functions assume validation for query has passed
+//CAUTION! -- all of these functions assume validation for query has passed
 /////////////////////////////////////
 
 /**
  * need to make $text index in database for function to work
  */
 makeSearchObj = (query) => {
-   curSearchObj = { $text: { $search: query.search } };
+   (curSearchObj = { $text: { $search: query.search } }),
+      { score: { $meta: 'textScore' } }; //used for sorting
    return curSearchObj;
+};
+
+/**
+ * 
+ * 
+ * db.stores.find( { $text: { $search: "java shop -coffee" } } )
+ * 
+makeSearchObj = (query) => {
+   curSearchObj = {
+      $text: {
+         $search: query.search,
+      },
+      // $options: 'i', // i - ignore case
+   }; //
+   return curSearchObj;
+};
+
+/**
+ *       author: {
+         $regex: `${query.user}`,
+         $options: 'i', // i - ignore case
+      },
+
+
+
+db.stores.find(
+   { $text: { $search: "java coffee shop" } },
+   { score: { $meta: "textScore" } }
+).sort( { score: { $meta: "textScore" } } )
+
+ */
+
+makeSortObj = (query, approvedList) => {
+   //sort method
+   let sortObj = {};
+
+   let sortErrors = {};
+   let errorList = [];
+   //let approvalErrors = [];
+
+   /*Getting sorting conditions */
+   /* CAUTION -- turning user obj string to obj -- be careful with it*/
+   //takes in format &sort={"name":"a","dateJoined":"d"}
+   if (query.sort) {
+      try {
+         console.log('-------', query.sort);
+         var userSortObj = JSON.parse(query.sort);
+         console.log('user.sort=====>', userSortObj);
+
+         // //TODO check if approved
+
+         let { sortObj: approvedSortObj, errors } = validateSearchObj(
+            userSortObj,
+            approvedList,
+         );
+         sortObj = approvedSortObj;
+         errorList = errors;
+         //searchOrdering[key] = sortObj[key];
+
+         // console.log('!!!!!no probs' + JSON.stringify(searchOrdering));
+      } catch {
+         console.log('problem getting keys');
+         errorList.push('cannot process sort');
+      }
+   }
+   if (errorList.length > 0) {
+      sortErrors['sort errors'] = errorList;
+   }
+
+   console.log('sort errors in makesortobj', sortErrors);
+   return { sortObj, sortErrors };
+};
+
+validateSearchObj = (userSortObj, approvedList) => {
+   sortObj = {};
+   errors = [];
+
+   console.log('=========approved keys:', approvedList);
+   for (let key in userSortObj) {
+      if (approvedList[key]) {
+         console.log(`${key} found in approve list`);
+         if (userSortObj[key] === 1 || userSortObj[key] === -1) {
+            sortObj[key] = userSortObj[key];
+            console.log('key approved');
+         } else {
+            errors.push(`improper order(${userSortObj[key]}) for key = ${key}`);
+            console.log(`improper order for key = ${key}`);
+         }
+      } else {
+         errors.push(`${key} is not approved`);
+         console.log(`${key} is not approved`);
+      }
+      console.log('key ' + key + ' has value ' + userSortObj[key]);
+   }
+
+   console.log('errors in search validate are: ', errors);
+
+   return { sortObj, errors };
 };
 
 makeFNumberObj = (query) => {
@@ -663,8 +791,104 @@ makeExposureObj = (query) => {
 
 makeUserObj = (query) => {
    /*search user*/
-   curSearchObj = { author: { $regex: `${query.user}` } };
+   curSearchObj = {
+      author: {
+         $regex: `${query.user}`,
+         $options: 'i', // i - ignore case
+      },
+   };
    return curSearchObj;
+};
+
+makeNameObj = (query) => {
+   /*search user*/
+   curSearchObj = {
+      name: {
+         $regex: `${query.name}`,
+         $options: 'i', // i - ignore case
+      },
+   };
+   return curSearchObj;
+};
+
+makeGPSObj = (query) => {
+   let lat = parseFloat(query.lat),
+      lon = parseFloat(query.lon);
+   //turning m to km -- mongo searches my meters
+   dist = parseFloat(query.dist) * 1000;
+
+   curSearchObj = {
+      location_2dsphere: {
+         $near: {
+            $geometry: {
+               type: 'Point',
+               //geoJSON uses long, lat format
+               coordinates: [lon, lat],
+            },
+            //searches by meter within coord
+            $maxDistance: dist,
+
+            // $minDistance: <distance in meters>
+         },
+      },
+   };
+
+   return curSearchObj;
+};
+
+makeDateObj = (query) => {
+   //might entering 2020-11-32 might create a valid date obj --does not handle all improper dates
+   //accepted yyyy-mm-dd only for now
+   let dateAfter = query.dateAfter,
+      dateBefore = query.dateBefore;
+
+   try {
+      //create seperate query for search for single date
+      let endDate;
+      let startDate;
+
+      if (dateBefore === dateAfter) {
+         //search single date
+         console.log('singledate');
+         startDate = createDateFromQuery(dateBefore);
+
+         //creating enddate 1 day after start date
+         endDate = new Date(startDate);
+         endDate.setDate(endDate.getDate() + 1);
+      } else {
+         //searching for range between dates
+
+         dateAfter && (startDate = createDateFromQuery(dateAfter));
+         dateBefore && (endDate = createDateFromQuery(dateBefore));
+      }
+      //creating obj to hold date searches only if val is present
+      let dateSearch = {};
+      startDate && (dateSearch = { $gte: startDate });
+      endDate && (dateSearch = { ...dateSearch, ...{ $lte: endDate } });
+      //adding date search to search obj
+      curSearchObj = { dateTaken: dateSearch };
+   } catch {
+      console.log('invalid date entered'); //TODO -send error to user
+      curSearchObj = {};
+   }
+};
+
+makeTagsObj = (query) => {
+   searchtags = query.tags.split(' ');
+   console.log(searchtags);
+   curSearchObj = { tags: { $all: searchtags } };
+   return curSearchObj;
+};
+
+makeBioObj = (query) => {
+   return { bio: query.bio };
+};
+
+makeHomeLocationObj = (query) => {
+   return { homeLocation: query.homeLocation };
+};
+makeWebsiteObj = (query) => {
+   return { website: query.website };
 };
 
 /////////////////////////////
