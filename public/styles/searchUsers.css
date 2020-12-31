@@ -1,0 +1,12 @@
+.searchUserPhoto {
+   border: 1px solid #ddd;
+   border-radius: 4px;
+   padding: 5px;
+   height: 150px;
+   height: 30vh;
+}
+
+.photoHolder {
+   margin-left: auto;
+   margin-right: auto;
+}

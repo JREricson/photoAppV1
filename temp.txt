@@ -177,3 +177,183 @@ router.get('/users', async (req, res) => {
 {"location_2dsphere":{"$near":{"$geometry":{"type":"Point","coordinates":[12,115]},"$maxDistance":3000}}}
 
   
+
+  //performs a search when user enters input -- might be a better idea to have on a delay in a future version to limit
+//calss to server
+
+//holds limit for number of results to be returned
+
+let loadMoreButton = document.getElementById('loadMore');
+let userSearch = document.getElementById('userSearch');
+let profileSearch = document.getElementById('profileSearch');
+let userInfo = document.getElementById('userInfo');
+let data = document.getElementById('variables');
+
+// let page = data.dataset.page;
+// let limit = data.dataset.limit;
+loadMoreButton.style.display = 'none';
+
+data.dataset.limit = 1; //TODO-set back to 25
+
+userSearch.addEventListener('input', () => {
+   data.dataset.searchType = 'name'; //searchs usernames only
+   data.dataset.page = 0;
+   //page = 0;
+   userInfo.innerHTML = '';
+
+   searchUsers();
+});
+
+profileSearch.addEventListener('input', () => {
+   data.dataset.searchType = 'search'; //searches all searchable feilds
+   data.dataset.page = 0;
+   //page = 0;
+   userInfo.innerHTML = '';
+
+   searchUsers();
+});
+//calls users api to genterate list of users and add it to screen
+const searchUsers = async () => {
+   let searchText = '';
+   if (data.dataset.searchType === 'name') {
+      searchText = userSearch.value;
+   } else if (data.dataset.searchType === 'search') {
+      searchText = profileSearch.value;
+   }
+
+   /*setting page data to zero*/
+   //this holds the current page of the results-- resets on new search
+
+   console.log('page is ' + data.dataset.page);
+
+   const usersRes = await fetch(
+      `../api/users/?${data.dataset.searchType}=${searchText}&page=${data.dataset.page}&limit=${data.dataset.limit}`,
+   );
+   //    console.log(
+   //       `../api/users/?name=${searchText}&page=${data.dataset.page}&limit=${data.dataset.limit}`,
+   //    );
+
+   if (usersRes.ok) {
+      let userJSON = await usersRes.json(); //await needed?
+      //console.log(usersRes.users);
+      console.log('users: ', userJSON);
+      showResultsOnPage(userJSON.users);
+
+      //userInfo.innerHTML = await showResultsOnPage(userJSON.users);
+
+      //tester.innerHTML = userJSON;
+   } else {
+      console.log('problem gettingJSON'); //TODO  -- better err handling
+   }
+
+   // return userJSON;
+};
+
+const showResultsOnPage = (users) => {
+   // TODO --fully test this function
+   let html = userInfo.innerHTML;
+   if (users.length > 0) {
+      users.forEach((user, ndx) => {
+         /*limiting results to 25 users*/
+         //note -- a more advanced version would allow for pagation
+
+         //TODO -- test this with more data
+         html += `<div class="card card-body">
+         <h3> Name:  ${user.name}</h3>
+         <h3> photoList ${user.allPhotos}</h3> <span class"photoHolder"> `;
+         console.log('making html');
+
+         if (user.allPhotos && user.allPhotos.length > 0) {
+            for (i = 0; i < user.allPhotos.length && i < 3; i++) {}
+         }
+
+         html += ` </span> <h4>${ndx}</h4>
+               <a href="/users/${user._id}/profile" class="btn btn-primary">View Profile</a>
+
+
+
+               </div>`;
+      });
+   }
+
+   ///////////////////////
+
+   //    let photoRes = await fetch(
+   //       `../api/photos/?id=}=${user.allPhotos[i]}`,
+   //    );
+
+   //html += await generatePhotoImage(user.allPhotos[i]);
+   //console.log('html:', html);
+
+   //    if (photoRes.ok) {
+   //       console.log('photo res ok');
+   //       console.log(user.allPhotos[i]);
+   //       html += ` <h1>hi-${user.allPhotos[i]}<h1> `;
+   //       //html += ` <img class="searchUserPhoto" src="https://pocket-syndicated-images.s3.amazonaws.com/5f480254484fa.jpg" </img> `;
+   //    }
+   //////////////////////////////////
+
+   //    } else if (page == 0) {
+   //       //only resets when no results to display
+   //       html = '';
+   //    }
+
+   //generates button there are results
+   if (users.length > 0) {
+      loadMoreButton.style.display = 'block'; // = 'visible';
+      //   loadMoreButtonHolder.innerHTML =
+      //      '<button id="loadMore">Load more results</button>';
+   } else {
+      loadMoreButton.style.display = 'none'; //visibility = 'hidden';
+      if (html.length > 0 && html[html.length - 2] === 'v') {
+         //lazy way to account for async call
+         html += ' <h2 class = "noResults" >No more results to display</h2>';
+      } else {
+         html = ' <h2 class = "noResults" >no results found matching <h2>';
+      }
+      //  loadMoreButton.innerHTML = '<h1>No more results to display</h1>';
+      //removes button there are no results
+   }
+
+   return html;
+};
+
+//  ${generatePhotoGallery(user.allPhotos)}
+
+const generatePhotoGallery = async (photoList) => {
+   let html = '';
+
+   if (photoList.length > 0) {
+      photoList.forEach((id, ndx) => {
+         //get photo from photo api
+
+         //create justified gal element
+
+         //limit to first 3 photos -- have css put all photos on same line
+         console.log(id);
+      });
+   }
+};
+
+loadMoreButton.addEventListener('click', async () => {
+   data.dataset.page++;
+   console.log('page incremented' + data.dataset.page); //delete
+   await searchUsers();
+});
+
+const generatePhotoImage = async (photoId) => {
+   let photoRes = await fetch(`../api/photos/?id=}=${photoId}`);
+   let imgElement = '';
+
+   if (photoRes.ok) {
+      photoJSON = await photoRes.json();
+      console.log('photo res ok');
+      console.log(photoJSON);
+      imgElement += ` <h1>hi-${photoId}<h1> `;
+      //html += ` <img class="searchUserPhoto" src="https://pocket-syndicated-images.s3.amazonaws.com/5f480254484fa.jpg" </img> `;
+   } else {
+      ('<h2>No photos added</h2>');
+   }
+
+   return imgElement;
+};

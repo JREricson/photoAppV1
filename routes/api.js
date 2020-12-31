@@ -26,6 +26,7 @@ router.get('/users', async (req, res) => {
 
    //stores of list of all validation functions -- each returns an approval object and an error obj
    let validationFunctions = [
+      validateID,
       validateSearch,
       validateBio,
       validateDate,
@@ -110,9 +111,9 @@ router.get('/users', async (req, res) => {
    errorList = { ...errorList, ...sortErrors };
 
    let origUsersObj = await User.find(searchObj)
+      .sort(sortObj)
       .skip(page * limit) //will ignore skip when both are null
-      .limit(limit) // ignores limit if it is null
-      .sort(sortObj);
+      .limit(limit); // ignores limit if it is null
 
    // console.log('orig' + origUsersObj);
 
@@ -171,6 +172,7 @@ router.get('/photos', async (req, res) => {
 
    //stores of list of all validation functions -- each returns an approval object and an error obj
    let validationFunctions = [
+      validateID,
       ValidateFNumber,
       ValidateISO,
       validateSearch,
@@ -193,6 +195,7 @@ router.get('/photos', async (req, res) => {
 
    //defines functions used to generate queries that will be added to search obj
    let queryFunctions = [
+      makeIdSEarchObj,
       makeSearchObj,
       makeFNumberObj,
       makeISOObj,
@@ -204,6 +207,7 @@ router.get('/photos', async (req, res) => {
    ];
    //this is a list of names for keys to be be approved -- must be in same order of corresponding function in above list
    let approvalKeys = [
+      'id',
       'search',
       'fStop',
       'iso',
@@ -367,7 +371,7 @@ validateQueriesFromFuncList = (query, validationFunctions) => {
  * @param {*} minName -- name of min val for error string
  * @param {*} maxName -- name of max val for error string
  */
-errorListFromMaxMin = (query, minVal, maxVal, minName, maxName) => {
+const errorListFromMaxMin = (query, minVal, maxVal, minName, maxName) => {
    //pulling query vaues from query if present
    let min = eval(`query.${minName}`),
       max = eval(`query.${maxName}`);
@@ -400,8 +404,12 @@ errorListFromMaxMin = (query, minVal, maxVal, minName, maxName) => {
    console.log('errors: ', errors);
    return errors;
 };
+/**
+ *
+ * @param {*} query
+ */
 
-ValidateFNumber = (query) => {
+const ValidateFNumber = (query) => {
    let approvedQuery = {};
    let errorList = {};
 
@@ -468,6 +476,10 @@ validateExposure = (query) => {
 validateSearch = (query) => {
    //currently only validates length
    return validateLength(query.search, 'search', 300);
+};
+
+const validateID = (query) => {
+   return validateLength(query.id, 'id', 30); //ids are about 24 char
 };
 
 validateUser = (query) => {
@@ -878,6 +890,10 @@ makeTagsObj = (query) => {
    console.log(searchtags);
    curSearchObj = { tags: { $all: searchtags } };
    return curSearchObj;
+};
+
+makeIdSEarchObj = (query) => {
+   return { _id: query.id };
 };
 
 makeBioObj = (query) => {
