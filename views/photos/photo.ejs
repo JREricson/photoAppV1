@@ -75,13 +75,13 @@ fsfg -->
                   <%=photo.exifMetaData.ExposureTime%> seconds
                </p>
                <!-- jam icons has an iris/aperature -->
-               <p><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
+               <p><span class="your-custom-class" data-jam="aperture" data-fill="#222"></span><span class="jam jam-backpack"></span><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
             </div>
 
             <p class="tagList">
                <i class="las la-tags"></i><strong> Tags </strong><%
                (photo.tags.length>0) && photo.tags.forEach(tag =>{ %>
-               <a class="label myTag label-default" href="#"> <%= tag%> </a>
+               <a class="label myTag label-default" href="/photos?tags=<%= tag%>"> <%= tag%> </a>
 
                <% }) %>
             </p>

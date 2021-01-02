@@ -304,7 +304,7 @@ const showResultsOnPage = (users) => {
       //   loadMoreButtonHolder.innerHTML =
       //      '<button id="loadMore">Load more results</button>';
    } else {
-      loadMoreButton.style.display = 'none'; //visibility = 'hidden';
+      Button.style.display = 'none'; //visibility = 'hidden';
       if (html.length > 0 && html[html.length - 2] === 'v') {
          //lazy way to account for async call
          html += ' <h2 class = "noResults" >No more results to display</h2>';

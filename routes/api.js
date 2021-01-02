@@ -173,29 +173,30 @@ router.get('/photos', async (req, res) => {
    //stores of list of all validation functions -- each returns an approval object and an error obj
    let validationFunctions = [
       validateID,
-      ValidateFNumber,
-      ValidateISO,
+      validateFNumber,
+      validateISO,
       validateSearch,
       validateExposure,
       validateUser,
       validateGPS,
       validateDate,
       validateTags,
+      validateCaption,
    ];
 
    //checking queries to pass -- any query that is not approved will be skipped
    //errorList list will keep track off errors encountered that are worthy of reporting to end user
+   //approvedQueries will be added to generateQueryObjAndErrors function as param
+
    let { approvedQueries, errorList } = validateQueriesFromFuncList(
       query,
       validationFunctions,
    );
 
-   /*extracting search terms from query*/
-   //search content = { ...{ name: query.name } } $text: { $search: searchQuery }
-
-   //defines functions used to generate queries that will be added to search obj
+   //lists functions used to generate queries that will be added to search obj
+   //will be added to generateQueryObjAndErrors function as param
    let queryFunctions = [
-      makeIdSEarchObj,
+      makeIdSearchObj,
       makeSearchObj,
       makeFNumberObj,
       makeISOObj,
@@ -204,8 +205,11 @@ router.get('/photos', async (req, res) => {
       makeGPSObj,
       makeDateObj,
       makeTagsObj,
+      makeCaptionObj,
    ];
    //this is a list of names for keys to be be approved -- must be in same order of corresponding function in above list
+   //will be added to generateQueryObjAndErrors function as param
+
    let approvalKeys = [
       'id',
       'search',
@@ -216,6 +220,7 @@ router.get('/photos', async (req, res) => {
       'gps',
       'date',
       'tags',
+      'caption',
    ];
 
    //adding queries to search if approved
@@ -356,8 +361,6 @@ validateQueriesFromFuncList = (query, validationFunctions) => {
    console.log('final errorlist: ', errorList);
    console.log('approved queries: ', approvedQueries);
 
-   /*validating tags*/
-
    return { approvedQueries, errorList };
 };
 
@@ -409,7 +412,7 @@ const errorListFromMaxMin = (query, minVal, maxVal, minName, maxName) => {
  * @param {*} query
  */
 
-const ValidateFNumber = (query) => {
+const validateFNumber = (query) => {
    let approvedQuery = {};
    let errorList = {};
 
@@ -434,7 +437,7 @@ const ValidateFNumber = (query) => {
    return { approvedQuery, errorList };
 };
 
-ValidateISO = (query) => {
+validateISO = (query) => {
    let approvedQuery = {};
    let errorList = {};
    if (query.isoMax || query.isoMin) {
@@ -480,6 +483,11 @@ validateSearch = (query) => {
 
 const validateID = (query) => {
    return validateLength(query.id, 'id', 30); //ids are about 24 char
+};
+
+const validateCaption = (query) => {
+   console.log('---=-==--=-=-caption validation');
+   return validateLength(query.caption, 'caption', 100);
 };
 
 validateUser = (query) => {
@@ -582,7 +590,6 @@ validateDate = (query) => {
 
    let { dateAfter, dateBefore } = query;
    if (dateAfter || dateBefore) {
-      //TODO-- add regex for validation ^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$
       let validDate = new RegExp(
          '^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$',
       );
@@ -672,36 +679,6 @@ makeSearchObj = (query) => {
       { score: { $meta: 'textScore' } }; //used for sorting
    return curSearchObj;
 };
-
-/**
- * 
- * 
- * db.stores.find( { $text: { $search: "java shop -coffee" } } )
- * 
-makeSearchObj = (query) => {
-   curSearchObj = {
-      $text: {
-         $search: query.search,
-      },
-      // $options: 'i', // i - ignore case
-   }; //
-   return curSearchObj;
-};
-
-/**
- *       author: {
-         $regex: `${query.user}`,
-         $options: 'i', // i - ignore case
-      },
-
-
-
-db.stores.find(
-   { $text: { $search: "java coffee shop" } },
-   { score: { $meta: "textScore" } }
-).sort( { score: { $meta: "textScore" } } )
-
- */
 
 makeSortObj = (query, approvedList) => {
    //sort method
@@ -839,10 +816,12 @@ makeGPSObj = (query) => {
             },
             //searches by meter within coord
             $maxDistance: dist,
-
-            // $minDistance: <distance in meters>
          },
       },
+   };
+   //below is the "null value" used as a work around--a better work around miht be a GPS set flag
+   curSearchObj['location_2dsphere.coordinates'] = {
+      $not: { $eq: [-139, -30] },
    };
 
    return curSearchObj;
@@ -864,12 +843,11 @@ makeDateObj = (query) => {
          console.log('singledate');
          startDate = createDateFromQuery(dateBefore);
 
-         //creating enddate 1 day after start date
+         //creating end date 1 day after start date (gets 24 hr interval in searxh)
          endDate = new Date(startDate);
          endDate.setDate(endDate.getDate() + 1);
       } else {
          //searching for range between dates
-
          dateAfter && (startDate = createDateFromQuery(dateAfter));
          dateBefore && (endDate = createDateFromQuery(dateBefore));
       }
@@ -892,19 +870,34 @@ makeTagsObj = (query) => {
    return curSearchObj;
 };
 
-makeIdSEarchObj = (query) => {
+makeIdSearchObj = (query) => {
    return { _id: query.id };
 };
 
+const makeCaptionObj = (query) => {
+   console.log('---=-==--=-=-caption obj being made');
+   return makeRegexSearchObj(query.caption, 'caption');
+};
+
 makeBioObj = (query) => {
-   return { bio: query.bio };
+   return makeRegexSearchObj(query.bio, 'bio');
 };
 
 makeHomeLocationObj = (query) => {
-   return { homeLocation: query.homeLocation };
+   return makeRegexSearchObj(query.homeLocation, 'HomeLocation');
 };
 makeWebsiteObj = (query) => {
-   return { website: query.website };
+   return makeRegexSearchObj(query.website, 'website');
+};
+
+const makeRegexSearchObj = (queryParam, queryName) => {
+   curSearchObj = {};
+   curSearchObj[queryName] = {
+      $regex: `${queryParam}`,
+      $options: 'i', // i - ignore case
+   };
+
+   return curSearchObj;
 };
 
 /////////////////////////////

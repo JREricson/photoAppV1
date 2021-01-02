@@ -100,7 +100,7 @@ const showResultsOnPage = async (users) => {
 
    //Toggling show more button based on user list size
    if (users.length > 0) {
-      loadMoreButton.style.display = 'block'; // = 'visible';
+      loadMoreButton.style.display = ''; // = 'visible';
       //   loadMoreButtonHolder.innerHTML =
       //      '<button id="loadMore">Load more results</button>';
    } else {
@@ -119,28 +119,6 @@ const showResultsOnPage = async (users) => {
       //  loadMoreButton.innerHTML = '<h1>No more results to display</h1>';
       //removes button there are no results
    }
-
-   ///////////////////////
-
-   //    let photoRes = await fetch(
-   //       `../api/photos/?id=}=${user.allPhotos[i]}`,
-   //    );
-
-   //html += await generatePhotoImage(user.allPhotos[i]);
-   //console.log('html:', html);
-
-   //    if (photoRes.ok) {
-   //       console.log('photo res ok');
-   //       console.log(user.allPhotos[i]);
-   //       html += ` <h1>hi-${user.allPhotos[i]}<h1> `;
-   //       //html += ` <img class="searchUserPhoto" src="https://pocket-syndicated-images.s3.amazonaws.com/5f480254484fa.jpg" </img> `;
-   //    }
-   //////////////////////////////////
-
-   //    } else if (page == 0) {
-   //       //only resets when no results to display
-   //       html = '';
-   //    }
 };
 
 //  ${generatePhotoGallery(user.allPhotos)}
