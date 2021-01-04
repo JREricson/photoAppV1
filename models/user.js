@@ -38,10 +38,10 @@ const UserSchema = new Schema({
       default: [],
       required: true,
    },
-   photoCollectionIds: {
-      //an array of photo id arrays
-      type: [ObjectId],
-      default: [],
+   albumIds: {
+      //stored this way to access as hashmap
+      type: { objectID: Boolean },
+      default: {},
       required: true,
    },
 

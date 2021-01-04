@@ -11,7 +11,7 @@
 
    <input type="hidden" value="<%= photo._id %>" name="photoId" />
 
-   <!-- TODO-- have show thumbnail instead of actual photo -->
+
    <img
       class="editThumbnail"
       src="\uploads\<%=photo.fileName %>"
@@ -62,12 +62,12 @@
       placeholder="enter a description here"
    ></textarea>
 
-   <p><%= JSON.stringify(photo.exifMetaData) %></p>
+
    <% }); %>
 
    <button class="btn btn-primary" type="submit">submit Changes</button>
 
-   <p>transfered data<%= JSON.stringify(exifDataForID) %></p>
+
 </form>
 
 <%- include("footerUser") %>

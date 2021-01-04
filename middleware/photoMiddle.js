@@ -25,6 +25,7 @@ middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
             reject;
          } else if (contentOwner) {
             photos = contentOwner.allPhotos;
+            console.log('photos from midware -->', photos.length);
             resolve(photos);
          } else {
             reject;
@@ -46,46 +47,38 @@ middlewareObj.getPageOwnerPhotoIds = (req, res) => {
 };
 
 //set idList to null to use find from current user
-middlewareObj.ASYNCgetOwnerPhotoObjs = (req, res, idList) => {
+
+middlewareObj.ASYNCgetOwnerPhotoObjs = async (req, res, idList) => {
    var photoList = [];
-   var photoIDs;
-   return new Promise(async (resolve, reject) => {
-      //checking current user if no photo idList provided
-
-      //console.log('checking for null id list');
-      if (idList === null) {
-         try {
-            console.log(' ^^^^^^^^^^^^^null id list');
-            photoIDs = await middlewareObj.ASYNCgetOwnerPhotoIds(req, res);
-
-            console.log('photoids: ', photoIDs);
-            //TODO handle errors
-            //  console.log(' ids are : ' + photoIds);
-         } catch {
-            console.log('ERR-- could not get photo ids from user');
-            reject; // TODO maybe resolve as null
-         }
-      } else {
-         //list was provided
-         photoIDs = idList;
+   var photoIds;
+   //checking current user if no photo idList provided
+   if (idList === null) {
+      try {
+         photoIds = await middlewareObj.ASYNCgetOwnerPhotoIds(req, res);
+      } catch {
+         console.log('ERR-- could not get photo ids from user');
+         return null; // TODO maybe resolve as null
       }
-      //  console.log('--------------\ncur p list' + photoIds);
+   } else {
+      //list was provided
+      photoIds = idList;
+   }
 
-      photoIDs.forEach(async (photoID) => {
-         var newPhoto = await middlewareObj.ASYNCgetPhotoObjFromId(photoID);
-         //   console.log('new photo is: ' + newPhoto);
-         //only adding photos that can be found
-         if (newPhoto != null) {
-            photoList.push(newPhoto);
-         }
-      });
+   photoList = await middlewareObj.getPhotoListFromPhotoIds(photoIds);
 
-      //   console.log('PhotoList is :' + photoList);
+   console.log(
+      'PhotoList is(from ASYNCgetOwnerPhotoObjs ) :' + photoList.length,
+   );
 
-      resolve(photoList);
-   });
+   return photoList;
 };
 
+middlewareObj.getPhotoListFromPhotoIds = async (photoIds) => {
+   photoList = await Photo.find({ _id: { $in: photoIds } });
+
+   return photoList;
+};
+//replace with v2
 middlewareObj.ASYNCgetPhotoObjFromId = (id) => {
    return new Promise((resolve, reject) => {
       Photo.findById(id, (err, foundPhoto) => {
@@ -97,6 +90,17 @@ middlewareObj.ASYNCgetPhotoObjFromId = (id) => {
             resolve(foundPhoto);
          }
       });
+   });
+};
+
+middlewareObj.ASYNCgetPhotoObjFromId2 = async (id) => {
+   await Photo.findById(id, (err, foundPhoto) => {
+      if (err) {
+         console.log('ERR---could not find photo-- \n' + err);
+         return null;
+      } else {
+         return foundPhoto;
+      }
    });
 };
 // middlewareObj.getUserPhotos = (req, res) => {
@@ -285,8 +289,18 @@ middlewareObj.removePhotoOnly = (photoID) => {
  */
 middlewareObj.removePhotoFromUsersLists = (photoID, user) => {
    if (user.allPhotos.includes(photoID)) {
+      /*
+ * db.mycollection.update(
+    {'_id': ObjectId("5150a1199fac0e6910000002")}, 
+    { $pull: { "items" : { id: 23 } } },
+false,
+true 
+);
+ */
+
       console.log('deleting' + photoID + 'from allPhotos');
-      user.allPhotos.remove(photoID);
+      user.allPhotos.remove(photoID); //TODO - correct this -- it is wrong!
+      //TODO-remove photo from file
    } else {
       console.log(photoID + ' not found in allphotos');
    }

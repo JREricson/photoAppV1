@@ -2,6 +2,7 @@
 
 
 public/uploads/*
+seedFiles/seedPhotos/*
 public/images/*
 uploads/*
 todoList.txt

@@ -27,17 +27,7 @@
 
 <!-- <div id="loadMoreButtonHolder"></div> -->
 <button id="loadMore" >Load more results</button>
-<% allUsers.forEach((user) =>{ %><!-- //TODO -- find way to hide button -->
 
-<p><%= user.name %></p>
-<p>
-   homeLocation: <% user.homeLocation>0? user.homeLocation: "location unknown"%>
-</p>
-
-<a href="/users/<%= user._id %>/profile">Go to Profile</a>
-
-
-<%}); %>
 
 
 <!-- script for generating user elements in  page after search input is entered-->

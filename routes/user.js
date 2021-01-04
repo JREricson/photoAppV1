@@ -5,7 +5,7 @@ const router = express.Router();
 const path = require('path');
 
 const multer = require('multer');
-var exifr = require('exifr');
+//var exifr = require('exifr');
 
 //middleware
 const authMidware = require('../middleware/authMiddle');
@@ -69,40 +69,27 @@ const { resolve } = require('path');
 //routes
 /////////////////
 
-router.get('/:id/profile', async (req, res) => {
-   const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
+router.get('/:id/profile', userMidware.ASYNCgetProfile);
 
-   userMidware.renderPage(req, res, 'users/profile', { photoList });
-});
-
-//TODO -- move to all users????
 router.get('/', (req, res) => {
-   User.find({}, (err, allUsers) => {
-      if (err) {
-         console.log(error);
-      } else {
-         res.render('users/users', {
-            allUsers,
-         });
-      }
-   });
+   res.render('users/users');
 });
 
 ////////////////////////
 //User photo Routes
 /////////////////////////
 
-testFunc = () => {
-   return new Promise((resolve, reject) => {
-      setTimeout(() => {
-         console.log('in test function');
+// testFunc = () => {
+//    return new Promise((resolve, reject) => {
+//       setTimeout(() => {
+//          console.log('in test function');
 
-         resolve();
-      }, 1000);
-   });
+//          resolve();
+//       }, 1000);
+//    });
 
-   resolve();
-};
+//    resolve();
+// };
 
 //upload routes
 ///////////////
@@ -120,85 +107,10 @@ router.get(
 router.post(
    '/:id/photos/upload',
    authMidware.isCurUserContentOwner,
-
    //putting photos from into an array
    upload.array('userImage'),
    //TODO -- make sure no images are saved without being added database
-
-   (postReq = async (req, res, next) => {
-      var errors = [];
-      var newPhotos = [];
-      var exifDataForID = [];
-
-      if (req.files.length === 0) {
-         errors.push('no files submitted');
-         res.redirect(`/${req.params.id}/photos/upload`);
-      }
-
-      //testFunc().then(console.log('testing then'));
-
-      req.files.forEach((img) => {
-         var newPhoto = new Photo({
-            author: req.user.name,
-            SubmittedByID: req.user._id,
-            fileName: img.filename,
-            fileLocation: path.join(img.destination, img.filename),
-            //TODO -- figure out best way to handle below
-         });
-
-         var exifData = exifr
-            .parse(path.join(img.destination, img.filename))
-            .then((output) => {
-               //TODO -- add other options not upto user
-               newPhoto.dateTaken = output.DateTimeOriginal;
-               newPhoto.exifMetaData = output;
-
-               newPhoto
-                  .save()
-                  .then((photo) => {
-                     newPhotos.push(photo);
-                  })
-                  .catch((err) => {
-                     console.log(err);
-                     errors.push('error saving photo to db');
-                  });
-               exifDataForID.push(output);
-            })
-
-            .catch((err) => {
-               console.log(err);
-               errors.push('error saving photo to db');
-            });
-
-         //adding photo to currrent users's photo collection
-         User.findByIdAndUpdate(
-            req.user._id,
-            { $push: { allPhotos: newPhoto._id } },
-            (err, addedPhoto) => {
-               if (err) {
-                  console.log('photo not added to user array');
-                  console.log(err);
-               } else {
-                  console.log('++++++++++++++++++');
-                  console.log("added photo to user's photo list");
-                  console.log(req.user);
-               }
-            },
-         );
-      });
-
-      await testFunc();
-      ///TODO make sure following only only comes up when async done
-      if (errors.length > 0) {
-         res.send(errors);
-      } else {
-         userMidware.renderPage(req, res, 'users/editSubmitted', {
-            newPhotos,
-            exifDataForID,
-         });
-         //res.render('users/editSubmitted', { newPhotos, exifDataForID }); //better way to do this??
-      }
-   }),
+   userMidware.savephotosToDBandRenderEditPhotoPage,
 );
 
 //edit upload routes
@@ -207,15 +119,15 @@ router.get('/:id/photos/upload/edit', (req, res) => {
    res.render('users/editSubmitted');
 });
 
-router.get('/:id/test1', (req, res) => {
-   res.send(
-      '{"Make":"Sony","Model":"E5823","Orientation":"Rotate 90 CW","XResolution":72,"YResolution":72,"ResolutionUnit":"inches","Software":"32.4.A.1.54_0_f500","ModifyDate":"2019-02-03T05:41:04.000Z","YCbCrPositioning":1,"ExposureTime":0.05,"FNumber":2,"ISO":800,"ExifVersion":"2.2","DateTimeOriginal":"2019-02-03T05:41:04.000Z","CreateDate":"2019-02-03T05:41:04.000Z","ComponentsConfiguration":{"0":1,"1":2,"2":3,"3":0},"ShutterSpeedValue":4.32,"ExposureCompensation":0,"MeteringMode":"Pattern","LightSource":"Unknown","Flash":"Flash did not fire, compulsory flash mode","FocalLength":4.23,"SubSecTime":"759784","SubSecTimeOriginal":"759784","SubSecTimeDigitized":"759784","FlashpixVersion":"1.0","ColorSpace":1,"ExifImageWidth":3840,"ExifImageHeight":2160,"CustomRendered":"Normal","ExposureMode":"Auto","WhiteBalance":"Auto","DigitalZoomRatio":1,"SceneCaptureType":"Standard","SubjectDistanceRange":"Unknown","GPSVersionID":"2.2.0.0","GPSLatitudeRef":"N","GPSLatitude":[17,23,42.999],"GPSLongitudeRef":"E","GPSLongitude":[104,48,17.413],"GPSAltitudeRef":{"0":0},"GPSAltitude":188,"GPSTimeStamp":"8:38:35","GPSStatus":"A","GPSMapDatum":"WGS-84","GPSDateStamp":"2019:02:02","latitude":17.3952775,"longitude":104.80483694444445}',
-   );
-});
+// router.get('/:id/test1', (req, res) => {
+//    res.send(
+//       '{"Make":"Sony","Model":"E5823","Orientation":"Rotate 90 CW","XResolution":72,"YResolution":72,"ResolutionUnit":"inches","Software":"32.4.A.1.54_0_f500","ModifyDate":"2019-02-03T05:41:04.000Z","YCbCrPositioning":1,"ExposureTime":0.05,"FNumber":2,"ISO":800,"ExifVersion":"2.2","DateTimeOriginal":"2019-02-03T05:41:04.000Z","CreateDate":"2019-02-03T05:41:04.000Z","ComponentsConfiguration":{"0":1,"1":2,"2":3,"3":0},"ShutterSpeedValue":4.32,"ExposureCompensation":0,"MeteringMode":"Pattern","LightSource":"Unknown","Flash":"Flash did not fire, compulsory flash mode","FocalLength":4.23,"SubSecTime":"759784","SubSecTimeOriginal":"759784","SubSecTimeDigitized":"759784","FlashpixVersion":"1.0","ColorSpace":1,"ExifImageWidth":3840,"ExifImageHeight":2160,"CustomRendered":"Normal","ExposureMode":"Auto","WhiteBalance":"Auto","DigitalZoomRatio":1,"SceneCaptureType":"Standard","SubjectDistanceRange":"Unknown","GPSVersionID":"2.2.0.0","GPSLatitudeRef":"N","GPSLatitude":[17,23,42.999],"GPSLongitudeRef":"E","GPSLongitude":[104,48,17.413],"GPSAltitudeRef":{"0":0},"GPSAltitude":188,"GPSTimeStamp":"8:38:35","GPSStatus":"A","GPSMapDatum":"WGS-84","GPSDateStamp":"2019:02:02","latitude":17.3952775,"longitude":104.80483694444445}',
+//    );
+// });
 
-router.get('/:id/test2', (req, res) => {
-   res.render('map');
-});
+// router.get('/:id/test2', (req, res) => {
+//    res.render('map');
+// });
 
 router.get(
    '/:id/about',
@@ -223,6 +135,21 @@ router.get(
    (req, res) => {
       userMidware.renderPage(req, res, 'users/about');
    },
+);
+
+// TODO
+router.get(
+   '/:id/albums',
+   // async (req, res) => {
+   //    const albumList = albumMidware.ASYNCgetOwnerAlbumList(
+   //       req,
+   //       res,
+   //       null,
+   //    ),
+   //    userMidware.renderPage(req, res, 'users/photos', { albumList });
+   // }
+
+   // get list of all albums by user
 );
 
 router.get(
@@ -239,7 +166,7 @@ router.get(
    },
 );
 
-router.put('/:id/photos', (req, res) => {
+router.put('/:id/photos', authMidware.isCurUserContentOwner, (req, res) => {
    photoMidware.updatePhotosFromEjsData(req); //TODO -- make Asyc???
    res.redirect(`/users/${req.params.id}/photos`);
 });
@@ -256,46 +183,10 @@ router.delete('/:id', authMidware.isCurUserContentOwner, (req, res) => {
 
 //edit user details
 
-router.put('/:id/profile', authMidware.isCurUserContentOwner, (req, res) => {
-   //getting values from doc
-   const {
-      name,
-      homeLocation,
-      bio,
-      personalSite,
-      instagram,
-      fiveHundredpix,
-      flickr,
-      github,
-   } = req.body;
-
-   //editing values for logging in user
-   var socialMediaObj = {
-      instagram: instagram,
-      fiveHundredpix: fiveHundredpix,
-      github: github,
-      flickr: flickr,
-   };
-
-   User.findByIdAndUpdate(
-      req.user._id,
-      {
-         name,
-         bio,
-         homeLocation,
-         website: personalSite,
-         socialMediaAcnts: { ...socialMediaObj },
-      },
-
-      (err, updatedUser) => {
-         if (err) {
-            console.log(err);
-         } else {
-            console.log('/////// updated Photo\n' + updatedUser);
-         }
-      },
-   ),
-      res.redirect(`/users/${req.params.id}/about`);
-});
+router.put(
+   '/:id/profile',
+   authMidware.isCurUserContentOwner,
+   userMidware.renderProfile,
+);
 
 module.exports = router;
