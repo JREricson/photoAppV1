@@ -10,8 +10,9 @@ var exifr = require('exifr');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 
-//other middleware
+//other middleware/packages
 const photoMidware = require('./photoMiddle');
+const userMethods = require('../databaseFunctions/userMethods');
 
 var userMidware = {};
 
@@ -42,50 +43,6 @@ userMidware.renderPage = (req, res, pagePath, objOfValToBeSent) => {
 
    //removing users
 };
-userMidware.deleteUserOnly = (userID) => {
-   User.findByIdAndRemove(userID, function (err) {
-      if (err) {
-         console.log('error removing user \n' + err);
-         // res.send('error -- contact admin');
-      }
-   });
-};
-
-userMidware.deleteUser = (user) => {
-   //TODO include error checking
-   //get photolist
-   var photoList = user.allPhotos;
-
-   //remove photos in list
-   photoMidware.removePhotosOnly(photoList);
-
-   //remove user
-   userMidware.deleteUserOnly(user._id);
-};
-
-userMidware.addPhotoToUserList = async (req, newPhoto) => {
-   await User.findByIdAndUpdate(
-      req.user._id,
-      { $push: { allPhotos: newPhoto._id } },
-      (err, addedPhoto) => {
-         if (err) {
-            console.log('photo not added to user array');
-            console.log(err);
-         } else {
-            console.log('++++++++++++++++++');
-            console.log("added photo to user's photo list");
-            console.log(req.user);
-         }
-      },
-   );
-};
-
-///////////////////////
-//actual middle
-//////////////////
-
-//multer uploads
-//TODO move multer out of user js
 
 userMidware.ASYNCgetProfile = async (req, res) => {
    const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
@@ -94,7 +51,7 @@ userMidware.ASYNCgetProfile = async (req, res) => {
    userMidware.renderPage(req, res, 'users/profile', { photoList });
 };
 
-userMidware.savephotosToDBandRenderEditPhotoPage = async (req, res, next) => {
+userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
    var errors = [];
    var newPhotos = [];
    var exifDataForID = [];
@@ -115,7 +72,11 @@ userMidware.savephotosToDBandRenderEditPhotoPage = async (req, res, next) => {
             //TODO -- figure out best way to handle below
          });
 
-         //TODO -- seperate out into steps incase no exif data present
+         //adding photo to currrent users's photo collection
+         //await userMethods.addPhotoToUserList(req, newPhoto._id);
+         req.user.allPhotos.push(newPhoto._id);
+
+         //adding exif data if present
          var exifData = await exifr
             .parse(path.join(img.destination, img.filename))
             .then((output) => {
@@ -123,15 +84,8 @@ userMidware.savephotosToDBandRenderEditPhotoPage = async (req, res, next) => {
                newPhoto.dateTaken = output.DateTimeOriginal;
                newPhoto.exifMetaData = output;
 
-               newPhoto
-                  .save()
-                  .then((photo) => {
-                     newPhotos.push(photo);
-                  })
-                  .catch((err) => {
-                     console.log(err);
-                     errors.push('error saving photo to db');
-                  });
+               newPhoto.save();
+
                exifDataForID.push(output);
             })
             .catch((err) => {
@@ -139,10 +93,11 @@ userMidware.savephotosToDBandRenderEditPhotoPage = async (req, res, next) => {
                errors.push('error saving photo to db');
             });
 
-         //adding photo to currrent users's photo collection
-         await userMidware.addPhotoToUserList(req, newPhoto);
+         //adding photo to list to return to user
+         newPhotos.push(newPhoto);
       }),
    );
+   req.user.save();
 
    if (errors.length > 0) {
       res.send(errors);
@@ -194,6 +149,11 @@ userMidware.renderProfile = (req, res, next) => {
       },
    ),
       res.redirect(`/users/${req.params.id}/about`);
+};
+
+userMidware.renderPhotoPage = async (req, res, next) => {
+   const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
+   userMidware.renderPage(req, res, 'users/photos', { photoList });
 };
 
 module.exports = userMidware;

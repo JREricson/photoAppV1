@@ -68,6 +68,8 @@ mongoose
    .then(() => console.log('MongoDB connected'))
    .catch((err) => console.log(err));
 mongoose.set('useCreateIndex', true);
+//handle a depreciation warning on useFindAndModify
+mongoose.set('useFindAndModify', false);
 
 //Routes
 //////////////////
@@ -95,5 +97,4 @@ var date =
    ':' +
    today.getMinutes();
 
-app.listen(PORT , console.log(`server started on port ${PORT} on ${date}`));
-
+app.listen(PORT, console.log(`server started on port ${PORT} on ${date}`));

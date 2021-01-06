@@ -5,6 +5,12 @@ const Photo = require('../models/photo');
 
 var middlewareObj = {};
 
+const fetch = require('node-fetch');
+const querystring = require('querystring');
+const { findById } = require('../models/user');
+
+const photoMethods = require('../databaseFunctions/photoMethods');
+
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
 //////////////////////////////////
@@ -64,7 +70,7 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = async (req, res, idList) => {
       photoIds = idList;
    }
 
-   photoList = await middlewareObj.getPhotoListFromPhotoIds(photoIds);
+   photoList = await photoMethods.getPhotoListFromPhotoIds(photoIds);
 
    console.log(
       'PhotoList is(from ASYNCgetOwnerPhotoObjs ) :' + photoList.length,
@@ -72,48 +78,6 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = async (req, res, idList) => {
 
    return photoList;
 };
-
-middlewareObj.getPhotoListFromPhotoIds = async (photoIds) => {
-   photoList = await Photo.find({ _id: { $in: photoIds } });
-
-   return photoList;
-};
-//replace with v2
-middlewareObj.ASYNCgetPhotoObjFromId = (id) => {
-   return new Promise((resolve, reject) => {
-      Photo.findById(id, (err, foundPhoto) => {
-         if (err) {
-            console.log('ERR---could not find photo-- \n' + err);
-            resolve(null);
-         } else {
-            //console.log('photoFound' + foundPhoto);
-            resolve(foundPhoto);
-         }
-      });
-   });
-};
-
-middlewareObj.ASYNCgetPhotoObjFromId2 = async (id) => {
-   await Photo.findById(id, (err, foundPhoto) => {
-      if (err) {
-         console.log('ERR---could not find photo-- \n' + err);
-         return null;
-      } else {
-         return foundPhoto;
-      }
-   });
-};
-// middlewareObj.getUserPhotos = (req, res) => {
-//    return new Promise((resolve, reject) => {
-//       $.getJSON({
-//          url: getLocationURL(user.location.split(',')),
-//          success(weather) {
-//             resolve({ user, weather: weather.query.results });
-//          },
-//          error: reject,
-//       });
-//    });
-// };
 
 //////////////////
 //methods for updating
@@ -146,8 +110,6 @@ middlewareObj.updateAllPhotos = (req) => {
    } = req.body;
 
    photoId.forEach((id, ndx) => {
-      //console.log('??????????????desciption is: --- ' + description[0]);
-
       updateObj = {
          // author: req.user.name, TODO -- fix line
          description: description[ndx],
@@ -160,7 +122,7 @@ middlewareObj.updateAllPhotos = (req) => {
 
       (updateObj = {
          ...updateObj,
-         ...middlewareObj.makeGeoJSONObj(latitude, longitude),
+         ...photoMethods.makeGeoJSONObj(latitude, longitude),
       }),
          Photo.findByIdAndUpdate(id, updateObj, (err, updatedPhoto) => {
             if (err) {
@@ -206,7 +168,7 @@ middlewareObj.updateSinglePhoto = (req) => {
 
    (updateObj = {
       ...updateObj,
-      ...middlewareObj.makeGeoJSONObj(latitude, longitude),
+      ...photoMethods.makeGeoJSONObj(latitude, longitude),
    }),
       Photo.findByIdAndUpdate(
          photoId,
@@ -234,84 +196,7 @@ middlewareObj.getTagsFromString = (tagString) => {
    return tagList;
 };
 
-middlewareObj.makeGeoJSONObj = (latitude, longitude) => {
-   //adding location_2dsphere only if long and lat are present
-   let coordLong, coordLat;
-   if (latitude && longitude) {
-      coordLong = parseFloat(longitude);
-      coordLat = parseFloat(latitude);
-   } else {
-      //work around null value -- in pacific ocean
-      coordLong = -139;
-      coordLat = -30;
-   }
-
-   obj = {
-      location_2dsphere: {
-         type: 'Point',
-         //geoJSON stores as [long, lat]
-         coordinates: [coordLong, coordLat],
-      },
-   };
-   return obj;
-};
-
-////////////////////
-//method for removal
-////////////////////
-//\
-
-/**
- * removePhotosOnly
- *
- * remove all photo obj from PhotoIDs
- * @param {*} photoIDList
- */
-middlewareObj.removePhotosOnly = (photoIDList) => {
-   photoIDList.forEach((photoID) => {
-      middlewareObj.removePhotoOnly(photoID);
-   });
-};
-
-//remove photo obj from PhotoID
-middlewareObj.removePhotoOnly = (photoID) => {
-   Photo.findByIdAndRemove(photoID, function (err) {
-      if (err) {
-         console.log('error removing photo \n' + err);
-      }
-   });
-};
-
 // TODO --  need to rewrite to include galleries or any other list
-
-/**
- * should only get tho this point if there is a user defined (user has an empty all photos list by default)
- */
-middlewareObj.removePhotoFromUsersLists = (photoID, user) => {
-   if (user.allPhotos.includes(photoID)) {
-      /*
- * db.mycollection.update(
-    {'_id': ObjectId("5150a1199fac0e6910000002")}, 
-    { $pull: { "items" : { id: 23 } } },
-false,
-true 
-);
- */
-
-      console.log('deleting' + photoID + 'from allPhotos');
-      user.allPhotos.remove(photoID); //TODO - correct this -- it is wrong!
-      //TODO-remove photo from file
-   } else {
-      console.log(photoID + ' not found in allphotos');
-   }
-};
-
-middlewareObj.removePhotoAndRefernences = (req, res) => {
-   //removing photo from user's lists (allPhotos, galleries, etc)
-   middlewareObj.removePhotoFromUsersLists(req.params.photoID, req.user);
-   //removing photo
-   middlewareObj.removePhotoOnly(req.params.photoID);
-};
 
 ///////////////////////////////
 //methods for rendering page
@@ -323,8 +208,9 @@ middlewareObj.renderPageWithUserAndPhoto = async (
    objOfValToBeSent,
 ) => {
    //getting user and photo objs
-
-   photo = await middlewareObj.ASYNCgetPhotoObjFromId(req.params.photoID);
+   console.log('photo id is ', req.params.photoID);
+   let photo = await photoMethods.ASYNCgetPhotoObjFromId(req.params.photoID);
+   console.log('photo is: ', photo);
 
    if (photo) {
       //photo found so rendering page with values for ejs doc
@@ -338,4 +224,58 @@ middlewareObj.renderPageWithUserAndPhoto = async (
    }
 };
 
+middlewareObj.loadAllPhotosPage = async (req, res) => {
+   var query = req.query;
+
+   searchObj = {};
+
+   console.log('query is:', querystring.stringify(req.query));
+
+   //TODO-- make env variable
+   let server = 'http://localhost:3001';
+
+   //getting photo obj from api
+   let photoRes = await fetch(
+      `${server}/api/photos/?${querystring.stringify(req.query)}`,
+   );
+   //will be photo objs sent to user-- empty by default
+   let photosFound = {};
+   //if ok, generating JSON
+   if (photoRes.ok) {
+      photoJSON = await photoRes.json();
+      //  console.log('photoJSON %%%%%%%%%%%%%%%%%%%%%%%=>', photoJSON);
+      //only sending photos if there are no errors -- API skips over queries that generate errors when returning results
+      if (photoJSON.photos && Object.keys(photoJSON.errors).length === 0) {
+         photosFound = photoJSON.photos;
+         console.log('---------->>>photosFound', photosFound);
+      }
+   } else {
+      photosFound = {}; //await Photo.find(searchObj);
+      console.log('problem getting photos');
+      // imgElement += '<h2>No photos added</h2>';
+   }
+
+   //////////////////////
+
+   /*search criteria will be added to searchObj if found in query*/
+   // query.search && (searchObj['$text'] = { $search: query.search }); ////
+   // query.search && (searchObj['$tags'] = { $search: query.tags }); ////
+
+   //console.log('searchObj is now ' + searchObj);
+
+   // let photosList = await Photo.find(searchObj);
+   res.render('photos/allPhotos', { photosFound });
+};
+
+middlewareObj.removePhotoAndRefernences = (req, res, next) => {
+   //removing photo from user's lists (allPhotos, galleries, etc)
+   photoMethods.removePhotoFromUsersLists(req.params.photoID, req.user);
+
+   console.log('req.user is', req.user);
+   //removing photo
+   photoMethods.removeSinglePhotoFromDBAndFS(req.params.photoID);
+   next();
+};
+
+////////////////////////////////
 module.exports = middlewareObj;
