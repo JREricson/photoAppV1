@@ -38,12 +38,6 @@ const UserSchema = new Schema({
       default: [],
       required: true,
    },
-   albumIds: {
-      //stored this way to access as hashmap
-      type: { objectID: Boolean },
-      default: {},
-      required: true,
-   },
 
    socialMediaAcnts: {
       type: Object,

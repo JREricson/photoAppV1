@@ -7,15 +7,16 @@
 <form action="/users/<%= currentUser._id %>/photos?_method=PUT" method="post">
    <input type="hidden" value="<%= photo._id %>" name="photoId" />
 
-   <!-- TODO-- have show thumbnail instead of actual photo -->
    <img
       class="editThumbnail"
       src="\uploads\<%=photo.fileName %>"
       alt="cannot display image"
    />
-
+   <br>
+<!-- TODO -- have boot starp box for pic on right and other stuff on left -->
    <label for="latitude">Enter a caption for your photo </label>
-   <input name="caption" type="text" value="<%= photo.caption %>" />"
+   <input name="caption" type="text" value="<%= photo.caption %>" />
+   <br>
 
    <label for="latitude">Latitude </label>
    <input
@@ -23,6 +24,7 @@
       type="text"
       value="<%= (photo.latitude.length>0)? photo.latitude: photo.exifMetaData.latitude %>"
    />
+   
    <label for="longitude">Longitude </label>
    <input
       name="longitude"
@@ -31,25 +33,28 @@
    />
    <% console.log("cap "+ photo.caption ) %>
    <!-- a future version would show coord on map and have the user select from map to get coord if none present or wrong -->
-
+   <br>
    <a
       class="btn btn-primary"
       onclick="window.open('https://www.gps-coordinates.net/', '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');"
    >
       Find location on map
    </a>
-
+   <br>
    <label for="tagString"
       >enter tags -- no need for the ugly octothorp (#)
    </label>
    <input name="tagString" type="text" placeholder="ex: macro insect nature" />
+   
+   <br>
    <label for="description">Enter a description for your photo </label>
+   <br>
    <textarea
       name="description"
       type="text"
       placeholder="enter a description here"
    ></textarea>
-
+   <br>
    <button class="btn btn-primary" type="submit">submit Changes</button>
 </form>
 

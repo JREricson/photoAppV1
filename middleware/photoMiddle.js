@@ -201,6 +201,38 @@ middlewareObj.getTagsFromString = (tagString) => {
 ///////////////////////////////
 //methods for rendering page
 
+middlewareObj.renderMapPage = async (req, res) => {
+   //esentialy same code as all photos page -- TODO refactor!!!!
+   searchObj = {};
+
+   console.log('query is:', querystring.stringify(req.query));
+
+   //TODO-- make env variable
+   let server = 'http://localhost:3001';
+
+   //getting photo obj from api
+   let photoRes = await fetch(
+      `${server}/api/photos/?${querystring.stringify(req.query)}`,
+   );
+   //will be photo objs sent to user-- empty by default
+   let photosFound = {};
+   //if ok, generating JSON
+   if (photoRes.ok) {
+      photoJSON = await photoRes.json();
+
+      //only sending photos if there are no errors -- API skips over queries that generate errors when returning results
+      if (photoJSON.photos && Object.keys(photoJSON.errors).length === 0) {
+         photosFound = photoJSON.photos;
+         console.log('---------->>>photosFound', photosFound);
+      }
+   } else {
+      photosFound = {}; //await Photo.find(searchObj);
+      console.log('problem getting photos');
+   }
+
+   res.render('photos/map', { photosFound });
+};
+
 middlewareObj.renderPageWithUserAndPhoto = async (
    req,
    res,

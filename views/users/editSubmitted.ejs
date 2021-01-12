@@ -17,8 +17,10 @@
       src="\uploads\<%=photo.fileName %>"
       alt="cannot display image"
    />
+   <br>
 
    <label for="dateTaken">Date taken (format) </label>
+ 
    <input
       name="dateTaken"
       type="text"
@@ -26,22 +28,24 @@
       value="<%= photo.exifMetaData.DateTimeOriginal %>"
    />
 
+   <br>
    <label for="latitude">Enter a caption for your photo </label>
-   <input name="caption" type="text" />"
-
+   <input name="caption" type="text" />
+   <br>
    <label for="latitude">Latitude </label>
    <input
       name="latitude"
       type="text"
       value="<%= photo.exifMetaData.latitude %>"
-   />"
+   />
+
    <label for="longitude">Longitude </label>
    <input
       name="longitude"
       type="text"
       value="<%= photo.exifMetaData.longitude %>"
-   />"
-
+   />
+   <br>
    <!-- a future version would show coord on map and have the user select from map to get coord if none present or wrong -->
 
    <a
@@ -50,17 +54,20 @@
    >
       Find location on map
    </a>
-
+   <br>
    <label for="tagString"
       >enter tags -- no need for the ugly octothorp (#)
    </label>
    <input name="tagString" type="text" placeholder="ex: macro insect nature" />
+   <br>
    <label for="description">Enter a description for your photo </label>
+   <br>
    <textarea
       name="description"
       type="text"
       placeholder="enter a description here"
    ></textarea>
+   <br>
 
 
    <% }); %>

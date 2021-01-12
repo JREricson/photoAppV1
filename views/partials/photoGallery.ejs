@@ -1,0 +1,14 @@
+
+<div id="photoGallery">
+  <% photoList.forEach((photo, ndx) =>{%>
+
+  <a href="/photos/<%= photo._id %>/photo">
+     <img
+        class="justifiedGalImg"
+        alt="<%= photo.caption %>"
+        src="/uploads/<%= photo.fileName %>"
+     />
+  </a>
+
+  <% })%>
+</div>

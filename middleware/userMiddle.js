@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Photo = require('../models/photo');
+const Album = require('../models/album');
 
 const path = require('path');
 
@@ -13,12 +14,13 @@ const passport = require('passport');
 //other middleware/packages
 const photoMidware = require('./photoMiddle');
 const userMethods = require('../databaseFunctions/userMethods');
+const albumMethods = require('../databaseFunctions/albumMethods');
 
 var userMidware = {};
 
-////////////
-// create
-////////////
+//////////////////////////
+// page rendering methods
+/////////////////////////////
 
 userMidware.renderPage = (req, res, pagePath, objOfValToBeSent) => {
    //add other params to render with page
@@ -37,11 +39,17 @@ userMidware.renderPage = (req, res, pagePath, objOfValToBeSent) => {
    });
 
    //Deleting routes
-   //firste getting all of user's photos
+   //first getting all of user's photos
 
    //removing photos
 
    //removing users
+};
+
+userMidware.renderUploadPage = async (req, res) => {
+   //getting all ablbums by user
+   let albumIds = await albumMethods.ASYNCfindAllAlbumsByUserId(req.user._id);
+   userMidware.renderPage(req, res, 'users/upload', { albumIds: albumIds });
 };
 
 userMidware.ASYNCgetProfile = async (req, res) => {
@@ -51,63 +59,62 @@ userMidware.ASYNCgetProfile = async (req, res) => {
    userMidware.renderPage(req, res, 'users/profile', { photoList });
 };
 
+//TODO - rename this function
 userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
    var errors = [];
    var newPhotos = [];
-   var exifDataForID = [];
+   //var albums = [];
+   console.log('existing alb', req.body.existingAblums);
 
-   //submitting errors if no files found
-   if (req.files.length === 0) {
-      errors.push('no files submitted');
-      res.redirect(`/${req.params.id}/photos/upload`);
-   }
+   const user = req.user;
+   let albums = await userMidware.validatedAlbumsfromSubmittedAlbumIds(
+      req.body.existingAblums,
+      user,
+   );
+   console.log(albums);
+
+   userMidware.redrirectToUploadPageIfNoUploads(req.files.length, res);
+   newAlbum = userMidware.createNewAlbumIfNeeded(req);
+   newAlbum && albums.push(newAlbum);
+   console.log(albums);
+
+   // console.log('existing albums', existingAblums);
+   // console.log('new album name ', newAlbumTitle);
+   // console.log('new album desc ', newAlbumDescription);
 
    await Promise.all(
       req.files.map(async (img) => {
          var newPhoto = new Photo({
-            author: req.user.name,
-            SubmittedByID: req.user._id,
+            author: user.name,
+            SubmittedByID: user._id,
             fileName: img.filename,
             fileLocation: path.join(img.destination, img.filename),
-            //TODO -- figure out best way to handle below
          });
 
          //adding photo to currrent users's photo collection
-         //await userMethods.addPhotoToUserList(req, newPhoto._id);
-         req.user.allPhotos.push(newPhoto._id);
+         user.allPhotos.push(newPhoto._id);
 
-         //adding exif data if present
-         var exifData = await exifr
-            .parse(path.join(img.destination, img.filename))
-            .then((output) => {
-               //TODO -- add other options not upto user
-               newPhoto.dateTaken = output.DateTimeOriginal;
-               newPhoto.exifMetaData = output;
-
-               newPhoto.save();
-
-               exifDataForID.push(output);
-            })
-            .catch((err) => {
-               console.log(err);
-               errors.push('error saving photo to db');
-            });
+         await userMidware.ASYNCaddPhotoIdToAblums(albums, newPhoto._id);
+         await userMidware.extractExifDataAndSaveToPhoto(img, newPhoto);
 
          //adding photo to list to return to user
          newPhotos.push(newPhoto);
       }),
    );
-   req.user.save();
 
-   if (errors.length > 0) {
-      res.send(errors);
-   } else {
-      userMidware.renderPage(req, res, 'users/editSubmitted', {
-         newPhotos,
-         exifDataForID,
-      });
-   }
+   console.log('album list is ', albums);
+
+   await user.save();
+
+   userMidware.redirectToEditPhotosPage(req, res, newPhotos);
 };
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 
 userMidware.renderProfile = (req, res, next) => {
    //getting values from doc
@@ -154,6 +161,110 @@ userMidware.renderProfile = (req, res, next) => {
 userMidware.renderPhotoPage = async (req, res, next) => {
    const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
    userMidware.renderPage(req, res, 'users/photos', { photoList });
+};
+
+userMidware.renderUserAlbumsPage = async (req, res) => {
+   //method to get albums
+   albumMethods.getUserAlbums(user.albumList);
+   //contains id, pic location,
+
+   userMidware.renderPage(req, res, 'users/userAlbums', { albumList });
+};
+
+userMidware.addPhotoToAlbums = (user, newAlbumName, albumList) => {
+   //crates a new album if needed
+   if (newAlbumName) {
+      albumMethods.createNewAlbum = (user, newAlbumName);
+      albumMethods.updateAlbum();
+   }
+
+   albumList.forEach((album) => {
+      //add photos to album
+   });
+};
+
+/**
+ *
+ * @param {*} albumIds
+ * @param {*} user - the user that is logged in
+ */
+userMidware.validatedAlbumsfromSubmittedAlbumIds = async (albumIds, user) => {
+   approvedAlbums = await Album.find({
+      _id: { $in: albumIds },
+      //ensuring ownership
+      alb_AuthorId: user._id,
+   });
+   return approvedAlbums;
+};
+
+userMidware.ASYNCaddPhotoIdToAblums = async (albums, photoId) => {
+   albums.forEach(async (album) => {
+      album.alb_PhotoList[photoId] = true;
+      album.alb_LastUpdate = Date.now();
+      await album.save(); //TODO - make usre this is fine when working with several albums and additions
+   });
+};
+
+//TODO - edit to account for other eros such as wrong file type - maybe as middle ware
+userMidware.redrirectToUploadPageIfNoUploads = (numOfFiles, res) => {
+   if (numOfFiles === 0) {
+      res.redirect(`/${req.params.id}/photos/upload`);
+   }
+};
+
+userMidware.createNewAlbumIfNeeded = (req) => {
+   const user = req.user;
+   const { newAlbumTitle, newAlbumDescription } = req.body;
+
+   //TODO -- only do if check box cecked
+
+   if (req.body.checkForNewAlbum /* box checked and other cond met */) {
+      console.log(req.body.checkForNewAlbum);
+
+      let curDate = Date.now();
+      let newAlbum = new Album({
+         alb_AuthorName: user.name,
+         alb_AuthorId: user._id,
+         alb_Name: newAlbumTitle,
+         alb_description: newAlbumDescription,
+         alb_DateCreated: curDate,
+         alb_LastUpdate: curDate,
+      });
+      return newAlbum;
+   } else return null; //TODO - check that this works
+};
+
+userMidware.extractExifDataAndSaveToPhoto = async (img, newPhoto) => {
+   await exifr
+      .parse(path.join(img.destination, img.filename))
+      .then((output) => {
+         newPhoto.dateTaken = output.DateTimeOriginal;
+         newPhoto.exifMetaData = output;
+         newPhoto.save();
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+};
+/**
+ *
+ * @param {*} newAlbum
+ * @return - { newAlbum: newAlbum._id -- or null if no new album}
+ */
+userMidware.createNewAlbumAndIdObj = (newAlbum) => {
+   if (newAlbum) {
+      return { newAlbum: newAlbum._id };
+   } else {
+      return { newAlbum: null };
+   }
+};
+
+userMidware.redirectToEditPhotosPage = (req, res, newPhotos) => {
+   let albumIdObj = userMidware.createNewAlbumAndIdObj(newAlbum);
+   userMidware.renderPage(req, res, 'users/editSubmitted', {
+      newPhotos,
+      albumIdObj,
+   });
 };
 
 module.exports = userMidware;

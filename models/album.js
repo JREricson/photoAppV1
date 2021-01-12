@@ -5,9 +5,12 @@ const mongoose = require('mongoose'),
    ObjectId = Schema.ObjectId;
 
 const AlbumSchema = new mongoose.Schema({
-   alb_Author: {
-      authorName: { type: String },
-      authorId: { type: [ObjectID] },
+   alb_AuthorName: {
+      type: String,
+      required: true,
+   },
+   alb_AuthorId: {
+      type: [ObjectId],
       required: true,
    },
    alb_Name: {
@@ -26,7 +29,7 @@ const AlbumSchema = new mongoose.Schema({
    alb_PhotoList: {
       //stored this way to be used as a hashmap
       type: { objectID: Boolean },
-      required: false,
+      default: {},
    },
 
    alb_LastUpdate: {
@@ -39,7 +42,7 @@ const AlbumSchema = new mongoose.Schema({
    },
 
    alb_coverPhoto: {
-      coverID: { type: ObjectID },
+      coverID: { type: ObjectId },
       coverFileName: { type: String },
       required: false,
    },

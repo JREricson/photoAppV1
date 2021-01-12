@@ -4,12 +4,8 @@
 var middlewareObj = {};
 
 middlewareObj.isCurUserContentOwner = function (req, res, next) {
-   console.log('checking if suers is logged in');
-
    if (req.isAuthenticated()) {
-      console.log(req.user._id + '\t' + req.params.id);
       if (req.user._id.equals(req.params.id)) {
-         console.log('pased validation');
          next();
       } else {
          req.flash('you need to be logged in as the owner to go there');

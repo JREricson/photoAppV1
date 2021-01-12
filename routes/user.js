@@ -15,19 +15,6 @@ const photoMidware = require('../middleware/photoMiddle');
 //
 const userMethods = require('../databaseFunctions/userMethods');
 
-// const exif = require('exif-js');
-
-//////////////middle wear TODO -- bring to seperate file
-
-//  async function extractExif(fileLocation) {
-//   exifr
-//   .parse('./uploads/userImage-1594674350552-_DSC0169.jpg')
-//   .then((output) => {
-//     return output;
-//   })
-
-// }
-
 //multer uploads
 //TODO move multer out of user js
 var storage = multer.diskStorage({
@@ -87,9 +74,7 @@ router.get('/', (req, res) => {
 router.get(
    '/:id/photos/upload',
    authMidware.isCurUserContentOwner,
-   (req, res) => {
-      userMidware.renderPage(req, res, 'users/upload');
-   },
+   userMidware.renderUploadPage,
 );
 
 router.post(
@@ -116,7 +101,11 @@ router.get(
 );
 
 // TODO--this
-router.get('/:id/albums');
+router.get(
+   '/:id/albums',
+   authMidware.isCurUserContentOwner,
+   userMidware.renderUserAlbumsPage,
+);
 
 router.get('/:id/photos', userMidware.renderPhotoPage);
 

@@ -13,10 +13,6 @@ const photoMidware = require('../middleware/photoMiddle');
 const User = require('../models/user');
 const Photo = require('../models/photo');
 
-//TODO -- will need middlea=ware varify photo ownership
-
-//TODO -- move all photos to this route
-
 // router.get('/', (req,res)=>{
 //     res.render()
 
@@ -45,6 +41,9 @@ router.get(
       photoMidware.renderPageWithUserAndPhoto(req, res, 'photos/edit');
    },
 );
+
+//show map page
+router.get('/map', photoMidware.renderMapPage);
 
 //view all photos
 

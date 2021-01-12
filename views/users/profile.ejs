@@ -55,6 +55,12 @@
    <a href="#" class="btn btn-primary">Contact</a>
 </div>
 
+<!-- edit and delete button for user to delete photo -->
+<% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
+   <a href="" class="btn btn-info">Edit cover photos</a>
+   <%  } %>
+
+
 <!-- container for top user galleries -->
 <!-- TODO -- have carousel for mobile size -->
 <div class="container galleryContainer">
@@ -134,20 +140,8 @@
 <div id="mapid"></div>
 
 <!-- iamge gallery -->
+<%- include("../partials/photoGallery") %>
 
-<div id="photoGallery">
-   <% photoList.forEach((photo, ndx) =>{%>
-
-   <a href="/photos/<%= photo._id %>/photo">
-      <img
-         class="justifiedGalImg"
-         alt="<%= photo.caption %>"
-         src="/uploads/<%= photo.fileName %>"
-      />
-   </a>
-
-   <% })%>
-</div>
 
 <!--gettting data to use in script --- might need to find better way to do this-- data esposed ad looks ugly-->
 <p id="photoData" data-photos="<%= JSON.stringify(photoList)%>" hidden></p>
