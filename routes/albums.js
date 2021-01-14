@@ -9,11 +9,12 @@ const { Mongoose, SchemaTypes } = require('mongoose');
 const authMidware = require('../middleware/authMiddle');
 const userMidware = require('../middleware/userMiddle');
 const photoMidware = require('../middleware/photoMiddle');
+const albumMidware = require('../middleware/albumMiddle');
 
 //mongoDB SchemaTypes
 const User = require('../models/user');
 const Photo = require('../models/photo');
-const Album = require('../models/photoColelction');
+const Album = require('../models/album');
 
 //TODO -- will need middlea=ware varify photo ownership
 
@@ -25,11 +26,11 @@ const Album = require('../models/photoColelction');
 // })
 
 //show album
-router.get('/:albumID/', (req, res) => {
-   //get album by id
-   ///render a page of the user
-   //if current user, they will have options
-});
+router.get('/:albumID/', albumMidware.ASYNCrenderAlbumPage);
+
+//edit album
+router.get('/:albumID/edit', albumMidware.ASYNCrenderEditAlbumPage);
+//router.put('/:albumID/edit', albumMidware.ASYNCsubmitFormDataFromEditPage);
 
 //Delete album
 router.delete(

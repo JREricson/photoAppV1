@@ -13,7 +13,7 @@ let data = document.getElementById('variables');
 // let limit = data.dataset.limit;
 loadMoreButton.style.display = 'none';
 
-data.dataset.limit = 1; //TODO-set back to 25
+data.dataset.limit = 20;
 
 userSearch.addEventListener('input', () => {
    data.dataset.searchType = 'name'; //searchs usernames only

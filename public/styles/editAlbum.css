@@ -1,0 +1,7 @@
+.thumbnail {
+   object-fit: cover;
+   /* max-height: 25vh; */
+   /* max-width: 95%; */
+   max-width: 80%;
+   margin: auto;
+}

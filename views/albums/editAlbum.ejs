@@ -1,0 +1,77 @@
+
+<!-- make form -- fill in with cur vals -->
+
+<%- include("../users/headerUser") %> <%- include("../users/navbarProfile") %>
+<link rel="stylesheet" href="../../styles/editAlbum.css" />
+
+<h1>Edit Album</h1>
+<!-- create class to center dice -->
+<div class=""> 
+<form action="/albums/<%= album._id %>/edit?_method=PUT" method="post">
+ 
+
+    <label for="albumName">Album name</label>
+    <input
+       name="albumName "
+       type="text"
+       value="<%=
+    album.alb_Name %>"
+    />
+    <br>
+
+   <label for="albumDescription">Album desscription</label>
+   <input
+      name="albumDescription "
+      type="text"
+      value="<%=
+   album.alb_description %>"
+   />
+   <br>
+
+   <button class="btn btn-primary btn-sm" type="submit">Update</button>
+
+   <% photosFound && photosFound.forEach((photo, ndx)=>{%>
+      <div class="card">
+      <img
+      class="thumbnail"
+      alt="<%= photo.caption %>"
+      src="/uploads/<%= photo.fileName %>"
+   />
+      <label for="d<%= ndx%>"> delete photo</label>
+      <input type="checkBox" id="p<%= ndx%>" value="<%=photo._id%>" name="deletePhotos">
+      <br>
+      <label for="a<%= ndx%>"> Make album cover </label>
+      <input type="radio" value="<%photo._id%>" name="makeAlbumCover">
+      <br>
+   </div>
+      <%})%>
+
+
+    
+
+
+
+
+</form>
+</div>
+<br />
+
+
+
+
+
+<!-- delete button -->
+<form action="/albums/<%= album._id %>?_method=DELETE" method="POST">
+   <button class="btn btn-danger btn-sm">Delete Album</button>
+</form>
+
+<!-- edit photos -->
+<!-- for photo -->
+ <!--show photo, dlete check, album cover radio -->
+
+
+<%- include("../users/footerUser") %>
+
+
+
+

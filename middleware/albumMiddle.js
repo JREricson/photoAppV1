@@ -2,7 +2,87 @@ const User = require('../models/user');
 const Photo = require('../models/photo');
 const Album = require('../models/album');
 
+const userMidware = require('../middleware/userMiddle');
+const photoMethods = require('../databaseFunctions/photoMethods');
+
 var middlewareObj = {};
+
+middlewareObj.ASYNCrenderAlbumPage = async (req, res) => {
+   Album.findById(req.params.albumID, async (err, album) => {
+      if (err) {
+         console.log(err);
+         res.render('404');
+      } else {
+         console.log('alb is :', album);
+         photosFound = await photoMethods.getPhotoListFromPhotoIds(
+            Object.keys(album.alb_PhotoList),
+         );
+         middlewareObj.renderPageWithCurrentUserAndContentOwner(
+            req,
+            res,
+            album.alb_AuthorId,
+            'albums/album',
+            { album, photosFound },
+         );
+      }
+   });
+};
+
+middlewareObj.ASYNCrenderEditAlbumPage = async (req, res) => {
+   //TODO - code here is almost same as in display  album page -- extract
+   Album.findById(req.params.albumID, async (err, album) => {
+      if (err) {
+         console.log(err);
+         res.render('404');
+      } else {
+         console.log('alb is :', album);
+         photosFound = await photoMethods.getPhotoListFromPhotoIds(
+            Object.keys(album.alb_PhotoList),
+         );
+
+         middlewareObj.renderPageWithCurrentUserAndContentOwner(
+            req,
+            res,
+            album.alb_AuthorId,
+            'albums/EditAlbum',
+            { album, photosFound },
+         );
+      }
+   });
+};
+middlewareObj.ASYNCsubmitFormDataFromEditPage = async (req, res) => {
+   //update album
+
+   //get albumid fr=rom page
+   //get objOfItemsToUpdate from page
+   albumMethods.updateAlbum(req.user._id, albumId, objOfItemsToUpdate);
+
+   //add photos seperatly
+
+   //redirect to album page
+   res.redirect('albums/EditAlbum');
+};
+
+middlewareObj.renderPageWithCurrentUserAndContentOwner = (
+   req,
+   res,
+   albumOwnerId,
+   pagePath,
+   objOfValToBeSent,
+) => {
+   User.findById(albumOwnerId, (err, contentOwner) => {
+      if (err) {
+         console.log(err);
+         //res.status(404).render('404');
+      } else {
+         currentUser = req.user;
+         let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
+         res.render(pagePath, vals); //add other params
+      }
+   });
+};
+
+//TODO - move below to album methods
 
 /////////////
 //Read methods

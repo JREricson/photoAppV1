@@ -13,11 +13,6 @@ const photoMidware = require('../middleware/photoMiddle');
 const User = require('../models/user');
 const Photo = require('../models/photo');
 
-// router.get('/', (req,res)=>{
-//     res.render()
-
-// })
-
 //show photo
 router.get('/:photoID/photo', (req, res) => {
    photoMidware.renderPageWithUserAndPhoto(req, res, 'photos/photo');

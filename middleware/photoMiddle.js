@@ -179,7 +179,7 @@ middlewareObj.updateSinglePhoto = (req) => {
                console.log('\n\n!!!!!!!could not update'); //Delete
                console.log(err);
             } else {
-               console.log('\n\n/////// updated Photo\n' + updatedPhoto); //Delete
+               //console.log('\n\n/////// updated Photo\n' + updatedPhoto); //Delete
             }
          },
       );

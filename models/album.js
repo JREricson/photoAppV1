@@ -19,10 +19,12 @@ const AlbumSchema = new mongoose.Schema({
       required: true,
    },
    alb_shortDescription: {
+      //TODO refractor to be constistant wth cap
       type: String,
       default: '',
    },
    alb_description: {
+      //TODO refractor to be constistant wth cap
       type: String,
       default: '',
    },
@@ -42,6 +44,7 @@ const AlbumSchema = new mongoose.Schema({
    },
 
    alb_coverPhoto: {
+      //TODO refractor to be constistant wth cap
       coverID: { type: ObjectId },
       coverFileName: { type: String },
       required: false,

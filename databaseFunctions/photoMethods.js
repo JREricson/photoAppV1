@@ -21,7 +21,7 @@ photoMethods.ASYNCgetPhotoObjFromId = async (photoId) => {
 };
 
 photoMethods.makeGeoJSONObj = (latitude, longitude) => {
-   // TODO fix nana issue with this
+   // TODO fix nan issue with this
    //adding location_2dsphere only if long and lat are present
    let coordLong, coordLat;
    if (latitude && longitude) {

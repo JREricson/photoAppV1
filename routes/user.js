@@ -101,11 +101,7 @@ router.get(
 );
 
 // TODO--this
-router.get(
-   '/:id/albums',
-   authMidware.isCurUserContentOwner,
-   userMidware.renderUserAlbumsPage,
-);
+router.get('/:id/albums', userMidware.renderUserAlbumsPage);
 
 router.get('/:id/photos', userMidware.renderPhotoPage);
 

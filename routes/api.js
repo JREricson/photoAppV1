@@ -142,10 +142,10 @@ router.get('/users', async (req, res) => {
          homeLocation,
          dateJoined,
       };
-      console.log('filtered user is :', filteredUser);
+      //  console.log('filtered user is :', filteredUser);
       usersToSend.push(filteredUser);
    });
-   console.log(usersToSend);
+   // console.log(usersToSend);
 
    // /*adding a 'no users found' message to empty obj */
    // Object.getOwnPropertyNames(usersToSend).length == 0 &&

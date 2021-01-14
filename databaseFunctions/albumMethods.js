@@ -2,6 +2,7 @@
 const User = require('../models/user');
 
 const Album = require('../models/album');
+const Photo = require('../models/photo');
 
 ///
 const photoMethods = require('./photoMethods');
@@ -49,63 +50,87 @@ albumMethods.ASYNCfindAllAlbumsByUserId = async (userId) => {
 //update methods
 //////////////
 
+albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
+   console.log('in adding cover func');
+   albumList.forEach(async (album) => {
+      if (!album.alb_coverPhoto.coverFileName) {
+         console.log('no cover file name');
+         if (Object.keys(album.alb_PhotoList).length > 0) {
+            console.log(
+               'first photoID is ',
+               Object.keys(album.alb_PhotoList)[0],
+            );
+            let firstPhotoId = Object.keys(album.alb_PhotoList)[0];
+            let photo = await Photo.findById(firstPhotoId);
+            console.log('photo is', photo);
+            if (photo) {
+               console.log('updating album with photo');
+               let upAlb = await Album.findByIdAndUpdate(album._id, {
+                  alb_coverPhoto: {
+                     coverID: photo._id,
+                     coverFileName: photo.fileName,
+                  },
+               });
+               console.log('updated alm is ', upAlb);
+            }
+         }
+      }
+   });
+};
+
 /** updateAlbum
  *
  * updates album based on params that correspond to fields in album schema
- *!!CAUTION!! --  make sure user is owner of photos if getting info from front end
+ *TODO -- add validation in fucntion
  * @param {*} userId -id of content owner
  * @param {*} albumID
- * @param {*} albumName
- * @param {*} albumShortDesc
- * @param {*} albumDesc
- * @param {*} photoList
- * @param {*} coverPhotoId
- * @param {*} coverPhotoFilename
- *
- * @return returns updated obj
- */
-albumMethods.updateAlbum = async (
-   userId,
-   albumID,
-   albumName,
-   albumShortDesc,
-   albumDesc,
-   photoList,
-   coverPhotoId,
-   coverPhotoFilename,
-) => {
-   //finding album from ID if not included
-   !albumObj && (albumObj = await albumObjmiddlewareObj.findAlbumById(albumID));
-   //updateObj holds all info to be updated--written this way so it canbe extracted as a function if there are more complicated updates
-   let updateObj = {
-      alb_Author: { authorName: albumName, authorId: userId },
-      alb_Name: albumName,
+ * @param {*} objOfItemsToUpdate - obj in form sent to mongo  update methods - can include {alb_Name: albumName,
       alb_shortDescription: albumShortDesc,
       alb_description: albumDesc,
       alb_PhotoList: photoList,
-      alb_LastUpdate: Date.now(),
-      alb_coverPhoto: {
-         coverID: coverPhotoId,
-         coverFileName: coverPhotoFilename,
-      },
-   };
-   //finding album and updating all info
-   Album.findByIdAndUpdate(albumID, updateObj, (err, updatedAlbum) => {
-      if (!updatedAlbum) {
-         console.log('\n\n!!!!!!!could not update album'); //Delete
-         console.log(err);
-      } else {
-         console.log('\n\n/////// updated album\n' + updatedAlbum); //Delete
-         return updatedAlbum;
+      alb_coverPhoto:}
+ *
+ * @return returns updated obj
+ */
+albumMethods.updateAlbum = async (userId, albumId, objOfItemsToUpdate) => {
+   //TODO -- write method to validate ownership
+   let validatedAlbumBool = await ASYNCisUserOwnerOfAlbum(userId, albumId);
+
+   if (validatedAlbumBool) {
+      //finding album and updating all info
+      Album.findByIdAndUpdate(
+         albumId,
+         objOfItemsToUpdate,
+         (err, updatedAlbum) => {
+            //TODO -- Change to update many
+            if (!updatedAlbum) {
+               console.log('\n\n!!!!!!!could not update album'); //Delete
+               console.log(err);
+            } else {
+               console.log('\n\n/////// updated album\n' + updatedAlbum); //Delete
+               return updatedAlbum;
+            }
+         },
+      );
+   } else {
+      return null;
+   }
+};
+
+albumMethods.ASYNCisUserOwnerOfAlbum = async (userId, albumId) => {
+   await Album.findById(albumId, (err, album) => {
+      if (album.alb_AuthorId === userId) {
+         console.log('passed validation');
+         return true;
       }
+      console.log('did not pass validation');
+      return false;
    });
-   //will return null if no album made
-   return null;
 };
 
 //...................
-albumMethods.getUserAlbums = async (albumIdList) => {
-   let albumList = await Album.find({ $in: albumIdList });
+albumMethods.getAlbumsFromUserId = async (userId) => {
+   let albumList = await Album.find({ alb_AuthorId: userId });
    return albumList;
 };
 

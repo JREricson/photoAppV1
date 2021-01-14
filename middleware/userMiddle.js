@@ -30,7 +30,7 @@ userMidware.renderPage = (req, res, pagePath, objOfValToBeSent) => {
    User.findById(req.params.id, (err, contentOwner) => {
       if (err) {
          console.log(err);
-         res.status(404).render('404');
+         // res.status(404).render('404');
       } else {
          currentUser = req.user;
          let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
@@ -61,9 +61,7 @@ userMidware.ASYNCgetProfile = async (req, res) => {
 
 //TODO - rename this function
 userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
-   var errors = [];
    var newPhotos = [];
-   //var albums = [];
    console.log('existing alb', req.body.existingAblums);
 
    const user = req.user;
@@ -71,16 +69,12 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
       req.body.existingAblums,
       user,
    );
-   console.log(albums);
 
-   userMidware.redrirectToUploadPageIfNoUploads(req.files.length, res);
-   newAlbum = userMidware.createNewAlbumIfNeeded(req);
+   console.log('cur alb list is', albums);
+
+   userMidware.redrirectToUploadPageIfNoUploads(req.files.length, res, req);
+   newAlbum = await userMidware.createNewAlbumIfNeeded(req);
    newAlbum && albums.push(newAlbum);
-   console.log(albums);
-
-   // console.log('existing albums', existingAblums);
-   // console.log('new album name ', newAlbumTitle);
-   // console.log('new album desc ', newAlbumDescription);
 
    await Promise.all(
       req.files.map(async (img) => {
@@ -94,7 +88,7 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
          //adding photo to currrent users's photo collection
          user.allPhotos.push(newPhoto._id);
 
-         await userMidware.ASYNCaddPhotoIdToAblums(albums, newPhoto._id);
+         await userMidware.ASYNCaddPhotoIdToAblumsv2(albums, newPhoto._id); //TODO - rename this
          await userMidware.extractExifDataAndSaveToPhoto(img, newPhoto);
 
          //adding photo to list to return to user
@@ -102,6 +96,10 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
       }),
    );
 
+   await albumMethods.addFirstPhotoAsCoverImageIfNonePresent(albums);
+
+   //save all albums
+   // await userMidware.ASYNCsaveAllAlbums(albums);
    console.log('album list is ', albums);
 
    await user.save();
@@ -138,6 +136,7 @@ userMidware.renderProfile = (req, res, next) => {
    };
 
    User.findByIdAndUpdate(
+      //TODO change to updatee many
       req.user._id,
       {
          name,
@@ -151,7 +150,7 @@ userMidware.renderProfile = (req, res, next) => {
          if (err) {
             console.log(err);
          } else {
-            console.log('/////// updated Photo\n' + updatedUser);
+            // console.log('/////// updated updatedUser\n' + updatedUser);
          }
       },
    ),
@@ -164,11 +163,15 @@ userMidware.renderPhotoPage = async (req, res, next) => {
 };
 
 userMidware.renderUserAlbumsPage = async (req, res) => {
-   //method to get albums
-   albumMethods.getUserAlbums(user.albumList);
-   //contains id, pic location,
+   try {
+      let albumList = await albumMethods.getAlbumsFromUserId(req.params.id);
 
-   userMidware.renderPage(req, res, 'users/userAlbums', { albumList });
+      userMidware.renderPage(req, res, 'users/userAlbums', {
+         albumList,
+      });
+   } catch {
+      res.render('404');
+   }
 };
 
 userMidware.addPhotoToAlbums = (user, newAlbumName, albumList) => {
@@ -199,22 +202,46 @@ userMidware.validatedAlbumsfromSubmittedAlbumIds = async (albumIds, user) => {
 
 userMidware.ASYNCaddPhotoIdToAblums = async (albums, photoId) => {
    albums.forEach(async (album) => {
+      //db.foo.update({"_id" :ObjectId("...") },{$set : {"Monday.z":8}})
       album.alb_PhotoList[photoId] = true;
       album.alb_LastUpdate = Date.now();
-      await album.save(); //TODO - make usre this is fine when working with several albums and additions
+      // await album.save(); //TODO - make usre this is fine when working with several albums and additions
+   });
+};
+
+//todo make sure will not crah --validate alb ids
+userMidware.ASYNCaddPhotoIdToAblumsv2 = async (albums, photoId) => {
+   albums.forEach(async (album) => {
+      let photoIdObj = {};
+      let dateObj = { alb_LastUpdate: Date.now() };
+      photoIdObj[`alb_PhotoList.${photoId}`] = true;
+      await Album.updateOne(
+         { _id: album._id },
+         { $set: photoIdObj },
+         { $set: dateObj },
+      );
+
+      // await album.save(); //TODO - make usre this is fine when working with several albums and additions
+   });
+};
+
+userMidware.ASYNCsaveAllAlbums = async (albums) => {
+   albums.forEach(async (album) => {
+      await album.save();
    });
 };
 
 //TODO - edit to account for other eros such as wrong file type - maybe as middle ware
-userMidware.redrirectToUploadPageIfNoUploads = (numOfFiles, res) => {
+userMidware.redrirectToUploadPageIfNoUploads = (numOfFiles, res, req) => {
    if (numOfFiles === 0) {
       res.redirect(`/${req.params.id}/photos/upload`);
    }
 };
 
-userMidware.createNewAlbumIfNeeded = (req) => {
+userMidware.createNewAlbumIfNeeded = async (req) => {
    const user = req.user;
    const { newAlbumTitle, newAlbumDescription } = req.body;
+   console.log('user is ', user);
 
    //TODO -- only do if check box cecked
 
@@ -230,6 +257,7 @@ userMidware.createNewAlbumIfNeeded = (req) => {
          alb_DateCreated: curDate,
          alb_LastUpdate: curDate,
       });
+      newAlbum && (await newAlbum.save());
       return newAlbum;
    } else return null; //TODO - check that this works
 };
