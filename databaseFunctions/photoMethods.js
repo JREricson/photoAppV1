@@ -12,7 +12,7 @@ photoMethods.getPhotoListFromPhotoIds = async (photoIds) => {
 photoMethods.ASYNCgetPhotoObjFromId = async (photoId) => {
    let foundPhoto = await Photo.findById(photoId);
    if (!foundPhoto) {
-      console.log('ERR---could not find photo-- \n' + err);
+      console.log('ERR---could not find photo-- \n');
       return null;
    } else {
       console.log('photos is', foundPhoto);
@@ -61,8 +61,6 @@ photoMethods.makeGeoJSONObj = (latitude, longitude) => {
  * @param {*} photoIDList
  */
 photoMethods.removeMultiplePhotosFromDBAndFS = async (photoIDList) => {
-   //finding file path of photos
-   //let photoList = [];
    let pathList = [];
    let photoList = await Photo.find(
       {
@@ -140,6 +138,29 @@ photoMethods.removePhotoFromUsersLists = async (photoID, user) => {
    } else {
       console.log(photoID + ' not found in allphotos');
    }
+};
+
+photoMethods.ASYNCverififyPhotoOwnership = async (userId, photoIdList) => {
+   let returnBool = true;
+
+   //TODO --   account for IDs that may cause app to crash with improper casting
+   //console.log('list of photos to delete', photoIdList);
+   let photos = await Photo.find({ _id: { $in: photoIdList } });
+
+   if (!userId) {
+      console.log('no user ID');
+      returnBool = false;
+   } else {
+      photos.forEach((photo) => {
+         console.log('id=========================================', photo);
+         if (photo.SubmittedByID.toString() !== userId.toString()) {
+            console.log('id not the same');
+            returnBool = false;
+         }
+      });
+   }
+
+   return returnBool;
 };
 
 ////////////////////////////////

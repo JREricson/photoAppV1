@@ -12,7 +12,7 @@
 
     <label for="albumName">Album name</label>
     <input
-       name="albumName "
+       name="albumName"
        type="text"
        value="<%=
     album.alb_Name %>"
@@ -21,7 +21,7 @@
 
    <label for="albumDescription">Album desscription</label>
    <input
-      name="albumDescription "
+      name="albumDescription"
       type="text"
       value="<%=
    album.alb_description %>"
@@ -37,11 +37,15 @@
       alt="<%= photo.caption %>"
       src="/uploads/<%= photo.fileName %>"
    />
-      <label for="d<%= ndx%>"> delete photo</label>
-      <input type="checkBox" id="p<%= ndx%>" value="<%=photo._id%>" name="deletePhotos">
+   <label for="a<%= ndx%>"> Make album cover </label>
+   <input type="radio" id="a<%= ndx%>" value="<%=photo._id%>" name="photoIdForAlbumCover">
+   <br>
+      <label for="d<%= ndx%>"> delete photo and remove from album</label>
+      <input type="checkBox" id="d<%= ndx%>" value="<%=photo._id%>" name="photoIdsToDelete">
       <br>
-      <label for="a<%= ndx%>"> Make album cover </label>
-      <input type="radio" value="<%photo._id%>" name="makeAlbumCover">
+
+      <label for="r<%= ndx%>"> remove photo from album (does not remove from photos)</label>
+      <input type="checkBox" id="r<%= ndx%>" value="<%=photo._id%>" name="photoIdsToRemoveFromAlbum">
       <br>
    </div>
       <%})%>

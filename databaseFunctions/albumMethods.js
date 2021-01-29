@@ -1,6 +1,10 @@
 //Schemas
 const User = require('../models/user');
 
+const mongoose = require('mongoose'),
+   Schema = mongoose.Schema,
+   ObjectId = Schema.ObjectId;
+
 const Album = require('../models/album');
 const Photo = require('../models/photo');
 
@@ -24,6 +28,7 @@ var albumMethods = {};
  */
 albumMethods.createNewAlbum = (user, albumName) => {
    let curDate = Date.now();
+   !albumName && (albumName = 'Untitled_' + curDate);
    let newAlbum = new Album({
       alb_Author: { authorName: user.name, authorId: user._id },
       alb_Name: albumName,
@@ -50,6 +55,7 @@ albumMethods.ASYNCfindAllAlbumsByUserId = async (userId) => {
 //update methods
 //////////////
 
+//TODO see if can clean up with less findbyId methods
 albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
    console.log('in adding cover func');
    albumList.forEach(async (album) => {
@@ -65,13 +71,13 @@ albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
             console.log('photo is', photo);
             if (photo) {
                console.log('updating album with photo');
-               let upAlb = await Album.findByIdAndUpdate(album._id, {
+               let updatedAlb = await Album.findByIdAndUpdate(album._id, {
                   alb_coverPhoto: {
                      coverID: photo._id,
                      coverFileName: photo.fileName,
                   },
                });
-               console.log('updated alm is ', upAlb);
+               console.log('updated alm is ', updatedAlb);
             }
          }
       }
@@ -94,44 +100,100 @@ albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
  */
 albumMethods.updateAlbum = async (userId, albumId, objOfItemsToUpdate) => {
    //TODO -- write method to validate ownership
-   let validatedAlbumBool = await ASYNCisUserOwnerOfAlbum(userId, albumId);
+   // let validatedAlbumBool = await albumMethods.ASYNCisUserOwnerOfAlbum(userId, albumId);
 
-   if (validatedAlbumBool) {
-      //finding album and updating all info
-      Album.findByIdAndUpdate(
-         albumId,
-         objOfItemsToUpdate,
-         (err, updatedAlbum) => {
-            //TODO -- Change to update many
-            if (!updatedAlbum) {
-               console.log('\n\n!!!!!!!could not update album'); //Delete
-               console.log(err);
-            } else {
-               console.log('\n\n/////// updated album\n' + updatedAlbum); //Delete
-               return updatedAlbum;
-            }
-         },
-      );
-   } else {
-      return null;
-   }
+   //finding album and updating all info
+   Album.findByIdAndUpdate(albumId, objOfItemsToUpdate, (err, updatedAlbum) => {
+      //TODO -- Change to update many
+      if (!updatedAlbum) {
+         console.log('\n\n!!!!!!!could not update album'); //Delete
+         console.log(err);
+      } else {
+         console.log('\n\n/////// updated album\n' + updatedAlbum); //Delete
+         return updatedAlbum;
+      }
+   });
 };
 
 albumMethods.ASYNCisUserOwnerOfAlbum = async (userId, albumId) => {
+   let returnBool = false;
    await Album.findById(albumId, (err, album) => {
-      if (album.alb_AuthorId === userId) {
-         console.log('passed validation');
-         return true;
+      console.log(
+         'alb auth ID/usId, ',
+         album.alb_AuthorId.toString(),
+         ' ',
+         userId.toString(),
+      );
+      if (album.alb_AuthorId.toString() === userId.toString()) {
+         console.log('album passed ownership validation');
+         returnBool = true;
+      } else {
+         console.log('album did not pass ownership validation');
       }
-      console.log('did not pass validation');
-      return false;
    });
+   return returnBool;
 };
 
 //...................
 albumMethods.getAlbumsFromUserId = async (userId) => {
    let albumList = await Album.find({ alb_AuthorId: userId });
    return albumList;
+};
+
+albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs = async (
+   albumIdList,
+   photoIdList,
+) => {
+   console.log('attempting to delete photos  from album ');
+   let unsetObj = {};
+
+   photoIdList.forEach((id) => {
+      //let photoIdRemovalStr = `alb_PhotoList[${id}]`;
+      let photoIdRemovalStr = `alb_PhotoList.${id}`;
+      unsetObj[photoIdRemovalStr] = '';
+   });
+   console.log('unsetObj', unsetObj);
+   console.log('alb Id List', albumIdList);
+
+   try {
+      await Album.updateMany(
+         { _id: { $in: albumIdList } },
+         {
+            $unset: unsetObj,
+         },
+      );
+   } catch {
+      console.log('cannot delete');
+   }
+};
+
+albumMethods.deletePhotosFromAlbumsAndPhotosAndFs = async (photoIdList) => {
+   console.log('attempt to delete all photos from fs');
+
+   let albumIdList = await albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList(
+      photoIdList,
+   );
+
+   /*    //TODO -this only removes from one!
+   await albumMethods.deletePhotosFromMulAlbumsNotFromPhotosOrFs(
+      albumIdList,
+      photoIdList,
+   );
+   await photoMethods.removeMultiplePhotosFromDBAndFS(photoIdList);
+ */
+   //need to delete from user photo list
+   //remove all album referneces
+};
+
+albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList = async (
+   photoIdList,
+) => {
+   console.log('creating alb list');
+   let albums = await Album.find({
+      _id: '601207cd6309c70a4ca43d5e',
+   });
+   console.log('albums with Id:', albums);
+   return albums;
 };
 
 //////////////

@@ -4,6 +4,8 @@ const Album = require('../models/album');
 
 const userMidware = require('../middleware/userMiddle');
 const photoMethods = require('../databaseFunctions/photoMethods');
+const albumMethods = require('../databaseFunctions/albumMethods');
+const { all } = require('../routes/user');
 
 var middlewareObj = {};
 
@@ -50,17 +52,27 @@ middlewareObj.ASYNCrenderEditAlbumPage = async (req, res) => {
       }
    });
 };
-middlewareObj.ASYNCsubmitFormDataFromEditPage = async (req, res) => {
-   //update album
+middlewareObj.ASYNCpostFormDataFromEditAlbumPage = async (req, res) => {
+   let albumOwnershipVerified = !(await middlewareObj.ASYNCnoUserOrWrongUser(
+      req,
+      res,
+   ));
+   console.log('albumOwnershipVerified: ', albumOwnershipVerified);
 
-   //get albumid fr=rom page
-   //get objOfItemsToUpdate from page
-   albumMethods.updateAlbum(req.user._id, albumId, objOfItemsToUpdate);
+   !albumOwnershipVerified && console.log('albumOwnership not Verified');
 
-   //add photos seperatly
+   if (albumOwnershipVerified) {
+      console.log('albumOwnership  Verified');
+      let idsVerifiedBool = await middlewareObj.ASYNCCheckIfIdsAreValid(req); //TODO - still need to write method
+      if (idsVerifiedBool) {
+         console.log('ids are varified');
+         await middlewareObj.ASYNCupdateAllFromFormData(req);
+      }
 
-   //redirect to album page
-   res.redirect('albums/EditAlbum');
+      !idsVerifiedBool && console.log('ids not valid');
+   }
+
+   res.redirect('edit');
 };
 
 middlewareObj.renderPageWithCurrentUserAndContentOwner = (
@@ -153,8 +165,190 @@ middlewareObj.removeAlbumAndPhotosInList = (photoList, albumId) => {
    middlewareObj.removeAlbumOnly(albumId);
 };
 
+/**
+ *re
+ * @param {*} req
+ * @param {*} res TODO delte res
+ * @return - returns true if no user or user logged in is not owner
+ */
+middlewareObj.ASYNCnoUserOrWrongUser = async (req, res) => {
+   let returnBool = false;
+   if (req.user) {
+      let userIsOwner = await albumMethods.ASYNCisUserOwnerOfAlbum(
+         req.user._id,
+         req.params.albumID,
+      );
+      console.log('userIsOwner: ', userIsOwner);
+      !userIsOwner && (returnBool = true);
+      !userIsOwner && console.log('user is not content owner');
+      userIsOwner && console.log('user is content owner');
+      console.log('the user is', req.user);
+   } else {
+      console.log('no user');
+      returnBool = true;
+   }
+   return returnBool;
+};
+
+middlewareObj.convertStringToArrayIfNotArray = (obj) => {
+   if (typeof obj === 'string') {
+      return [obj];
+   } else if (Array.isArray(obj)) {
+      console.log('already n array');
+      return obj;
+   } else {
+      console.log('neither str or arr');
+      return null;
+   }
+};
+middlewareObj.ASYNCverifyPhotosInListThenDelete = async (req) => {
+   let photoIdsToDelete = req.body.photoIdsToDelete;
+   if (photoIdsToDelete) {
+      console.log('attempting to delete files');
+      let photoIdArrayToDelete = middlewareObj.convertStringToArrayIfNotArray(
+         photoIdsToDelete,
+      );
+
+      let photoOwnershipVerified = await photoMethods.ASYNCverififyPhotoOwnership(
+         req.user._id,
+         photoIdArrayToDelete,
+      );
+      !photoOwnershipVerified && console.log('NOT approved to delete files');
+      //deleteing albums in list
+      photoOwnershipVerified &&
+         /*  console.log('approved to delete files') && */
+         albumMethods.deletePhotosFromAlbumsAndPhotosAndFs(
+            photoIdArrayToDelete,
+         );
+
+      //Todo - actually delete them
+   }
+};
+/**
+ * NOTE: should only get to this point if user is verified
+ * @param {*} req
+ */
+middlewareObj.ASYNCchangeAlbumCoverToUsersSelectionOrFirstPhotoInListIfEmpty = async (
+   req,
+) => {
+   let { photoIdForAlbumCover } = req.body;
+   let albumId = req.params.albumID;
+   console.log('editing cover photo');
+   if (photoIdForAlbumCover) {
+      console.log('looking for photo with id:', photoIdForAlbumCover);
+      let photo = await Photo.findById(photoIdForAlbumCover);
+      if (photo) {
+         //Todo extract to seperate method
+         console.log('PHOTO was found, attempiting to update cover');
+         await Album.findByIdAndUpdate(albumId, {
+            alb_coverPhoto: {
+               coverID: photo._id,
+               coverFileName: photo.fileName,
+            },
+         });
+      } else {
+         //Todo extract to seperate method
+         console.log(
+            'could not find photo, attempting to et photo to first in album list',
+         );
+         let album = Album.findById(albumId);
+         console.log('cannot find  photo in collection');
+         albumMethods.addFirstPhotoAsCoverImageIfNonePresent([album]);
+         console.log('alb_coverPhoto is ', album.alb_coverPhoto);
+      }
+   }
+   console.log('aLB iD IS ', albumId);
+};
+
+//TODO extract below to Album methods
+middlewareObj.ASYNCupdateNameAndDescription = async (req) => {
+   let { albumName, albumDescription } = req.body;
+   let albumId = req.params.albumID;
+   console.log('body', req.body);
+
+   console.log('in update album name and desc method');
+   console.log('updating album : ', albumId);
+   let updateObj = {};
+   console.log('user desc and name: ', albumDescription, ' ', albumName);
+
+   albumName && (updateObj['alb_Name'] = albumName);
+   albumDescription && (updateObj['alb_description'] = albumDescription);
+   console.log('update obj is', updateObj);
+   if (albumName || albumDescription) {
+      console.log('attempting to update alb');
+      await Album.findByIdAndUpdate(albumId, updateObj);
+   }
+};
+/**
+ * used to check if Ids are valid  -- important if improper casting of Ids can crash app
+ * @param {*} req
+ */
+middlewareObj.ASYNCCheckIfIdsAreValid = async (req) => {
+   //This is a STUB
+   return true;
+};
+middlewareObj.ASYNCupdateAllFromFormData = async (req) => {
+   await middlewareObj.ASYNCverifyPhotosInListThenDelete(req);
+   await middlewareObj.ASYNCverifyPhotosInListThenRemoveFromAlbum(req);
+   await middlewareObj.ASYNCchangeAlbumCoverToUsersSelectionOrFirstPhotoInListIfEmpty(
+      req,
+   );
+   await middlewareObj.ASYNCupdateNameAndDescription(req);
+};
+
+middlewareObj.ASYNCverifyPhotosInListThenRemoveFromAlbum = async (req) => {
+   let { photoIdsToDelete, photoIdsToRemoveFromAlbum } = req.body;
+   if (photoIdsToRemoveFromAlbum) {
+      console.log('attempting to dlete photos from album');
+      photoIdsToRemoveFromAlbum = middlewareObj.convertStringToArrayIfNotArray(
+         photoIdsToRemoveFromAlbum,
+      );
+
+      photoIdsToRemoveFromAlbum = middlewareObj.removeDuplicatesInDeleteList(
+         photoIdsToDelete,
+         photoIdsToRemoveFromAlbum,
+      );
+
+      console.log(
+         'list of photos to remove from list',
+         photoIdsToRemoveFromAlbum,
+      );
+
+      let photoOwnershipVerified = await photoMethods.ASYNCverififyPhotoOwnership(
+         req.user._id,
+         photoIdsToRemoveFromAlbum,
+      );
+      //removing albums in list
+      if (photoOwnershipVerified) {
+         console.log('approved to remove files');
+         await albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs(
+            [req.params.albumID],
+            photoIdsToRemoveFromAlbum,
+         );
+      }
+   }
+
+   // const C =A.filter(n => !B.includes(n))  //https://stackoverflow.com/a/53092728/7173655
+   //removing duplicate folists
+};
+middlewareObj.removeDuplicatesInDeleteList = (
+   photoIdsToDelete,
+   photoIdsToRemoveFromAlbum,
+) => {
+   if (photoIdsToDelete) {
+      console.log('old list', photoIdsToRemoveFromAlbum);
+      console.log('removing these from list', photoIdsToDelete);
+      photoIdsToDelete = middlewareObj.convertStringToArrayIfNotArray(
+         photoIdsToDelete,
+      );
+      photoIdsToRemoveFromAlbum = photoIdsToRemoveFromAlbum.filter(
+         (n) => !photoIdsToDelete.includes(n), //taken from https://stackoverflow.com/a/53092728/7173655
+      );
+   }
+   return photoIdsToRemoveFromAlbum;
+};
+module.exports = middlewareObj;
+
 ///////////////////
 // helper functions
 ///////////////////
-
-module.exports = middlewareObj;

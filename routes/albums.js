@@ -16,21 +16,12 @@ const User = require('../models/user');
 const Photo = require('../models/photo');
 const Album = require('../models/album');
 
-//TODO -- will need middlea=ware varify photo ownership
-
-//TODO -- move all photos to this route
-
-// router.get('/', (req,res)=>{
-//     res.render()
-
-// })
-
 //show album
 router.get('/:albumID/', albumMidware.ASYNCrenderAlbumPage);
 
 //edit album
-router.get('/:albumID/edit', albumMidware.ASYNCrenderEditAlbumPage);
-//router.put('/:albumID/edit', albumMidware.ASYNCsubmitFormDataFromEditPage);
+router.get('/:albumID/edit', albumMidware.ASYNCrenderEditAlbumPage); //TODO add authettication
+router.put('/:albumID/edit', albumMidware.ASYNCpostFormDataFromEditAlbumPage);
 
 //Delete album
 router.delete(

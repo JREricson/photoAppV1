@@ -240,7 +240,7 @@ userMidware.redrirectToUploadPageIfNoUploads = (numOfFiles, res, req) => {
 
 userMidware.createNewAlbumIfNeeded = async (req) => {
    const user = req.user;
-   const { newAlbumTitle, newAlbumDescription } = req.body;
+   let { newAlbumTitle, newAlbumDescription } = req.body;
    console.log('user is ', user);
 
    //TODO -- only do if check box cecked
@@ -249,6 +249,8 @@ userMidware.createNewAlbumIfNeeded = async (req) => {
       console.log(req.body.checkForNewAlbum);
 
       let curDate = Date.now();
+      !newAlbumTitle && (newAlbumTitle = 'Untitled_' + curDate);
+
       let newAlbum = new Album({
          alb_AuthorName: user.name,
          alb_AuthorId: user._id,
