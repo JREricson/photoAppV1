@@ -26,9 +26,8 @@ router.put('/:albumID/edit', albumMidware.ASYNCpostFormDataFromEditAlbumPage);
 //Delete album
 router.delete(
    '/:albumID',
-   /* authMidware.checkUserPhotoOwner */ (req, res) => {
-      //find album and delete
-   },
+   /* authMidware.checkUserPhotoOwner, */
+   albumMidware.ASYNCpostDeleteRequest,
 );
 
 //edit single album

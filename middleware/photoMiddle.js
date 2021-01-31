@@ -72,10 +72,6 @@ middlewareObj.ASYNCgetOwnerPhotoObjs = async (req, res, idList) => {
 
    photoList = await photoMethods.getPhotoListFromPhotoIds(photoIds);
 
-   console.log(
-      'PhotoList is(from ASYNCgetOwnerPhotoObjs ) :' + photoList.length,
-   );
-
    return photoList;
 };
 
@@ -299,13 +295,13 @@ middlewareObj.loadAllPhotosPage = async (req, res) => {
    res.render('photos/allPhotos', { photosFound });
 };
 
-middlewareObj.removePhotoAndRefernences = (req, res, next) => {
+middlewareObj.removePhotoAndRefernences = async (req, res, next) => {
    //removing photo from user's lists (allPhotos, galleries, etc)
-   photoMethods.removePhotoFromUsersLists(req.params.photoID, req.user);
+   await photoMethods.removePhotoFromUsersLists(req.params.photoID, req.user);
 
    console.log('req.user is', req.user);
    //removing photo
-   photoMethods.removeSinglePhotoFromDBAndFS(req.params.photoID);
+   await photoMethods.removeSinglePhotoFromDBAndFS(req.params.photoID);
    next();
 };
 

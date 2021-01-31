@@ -4,6 +4,7 @@ const fs = require('fs');
 var photoMethods = {};
 
 photoMethods.getPhotoListFromPhotoIds = async (photoIds) => {
+   console.log('photo ids in album are', photoIds);
    photoList = await Photo.find({ _id: { $in: photoIds } });
 
    return photoList;
@@ -62,16 +63,9 @@ photoMethods.makeGeoJSONObj = (latitude, longitude) => {
  */
 photoMethods.removeMultiplePhotosFromDBAndFS = async (photoIDList) => {
    let pathList = [];
-   let photoList = await Photo.find(
-      {
-         _id: { $in: photoIDList },
-      } /* , (err, photos) => {
-      photos.forEach((photo) => {
-         pathList.push(photo.fileLocation);
-         console.log('photo :', photo.fileLocation);
-      });
-   } */,
-   );
+   let photoList = await Photo.find({
+      _id: { $in: photoIDList },
+   });
 
    console.log('photolist is:', photoList);
    photoList.forEach((photo) => {

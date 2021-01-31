@@ -88,7 +88,7 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
          //adding photo to currrent users's photo collection
          user.allPhotos.push(newPhoto._id);
 
-         await userMidware.ASYNCaddPhotoIdToAblumsv2(albums, newPhoto._id); //TODO - rename this
+         await userMidware.ASYNCaddPhotoIdToAblums(albums, newPhoto._id);
          await userMidware.extractExifDataAndSaveToPhoto(img, newPhoto);
 
          //adding photo to list to return to user
@@ -96,7 +96,9 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
       }),
    );
 
-   await albumMethods.addFirstPhotoAsCoverImageIfNonePresent(albums);
+   //TODO -- fix this, it is looking at albums before photo added
+   let editedAlbums = await albumMethods.ASYNCrefreshAlbumList(albums);
+   await albumMethods.addFirstPhotoAsCoverImageIfNonePresent(editedAlbums);
 
    //save all albums
    // await userMidware.ASYNCsaveAllAlbums(albums);
@@ -200,24 +202,14 @@ userMidware.validatedAlbumsfromSubmittedAlbumIds = async (albumIds, user) => {
    return approvedAlbums;
 };
 
+//todo make sure will not crah --validate alb ids
 userMidware.ASYNCaddPhotoIdToAblums = async (albums, photoId) => {
    albums.forEach(async (album) => {
-      //db.foo.update({"_id" :ObjectId("...") },{$set : {"Monday.z":8}})
-      album.alb_PhotoList[photoId] = true;
-      album.alb_LastUpdate = Date.now();
-      // await album.save(); //TODO - make usre this is fine when working with several albums and additions
-   });
-};
-
-//todo make sure will not crah --validate alb ids
-userMidware.ASYNCaddPhotoIdToAblumsv2 = async (albums, photoId) => {
-   albums.forEach(async (album) => {
-      let photoIdObj = {};
       let dateObj = { alb_LastUpdate: Date.now() };
-      photoIdObj[`alb_PhotoList.${photoId}`] = true;
+      let photoIdObj = { alb_PhotoList: photoId }; //[`hotoList.${photoId}`] = true;
       await Album.updateOne(
          { _id: album._id },
-         { $set: photoIdObj },
+         { $push: photoIdObj },
          { $set: dateObj },
       );
 

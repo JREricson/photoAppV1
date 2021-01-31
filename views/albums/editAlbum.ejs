@@ -65,9 +65,23 @@
 
 
 <!-- delete button -->
+<button class="btn btn-danger btn-sm">Delete Album</button>
 <form action="/albums/<%= album._id %>?_method=DELETE" method="POST">
-   <button class="btn btn-danger btn-sm">Delete Album</button>
-</form>
+   <h2>To delete, type delete into box below</h2>
+   <label for="confirmDeleteText>">enter "delete"</label>
+
+   <input type="text" id="confirmDeleteText" value="" name="confirmDeleteText"> 
+   <br>
+   <label for="deleteAlbumOnly"> delete album only</label>
+   <input type="radio" id="deleteAlbumOnly>" value="deleteAlbumOnly" name="deleteOption"> 
+   <br>
+   <label for="deleteAlbumAndPhotos"> delete album and photos</label>
+   <input type="radio" id="deleteAlbumAndPhotos" value="deleteAlbumAndPhotos" name="deleteOption">
+   <br>
+   <button type="submit" class="btn btn-danger btn-sm">Confirm Delete </button>
+   
+
+</form >
 
 <!-- edit photos -->
 <!-- for photo -->

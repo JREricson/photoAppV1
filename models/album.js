@@ -29,9 +29,8 @@ const AlbumSchema = new mongoose.Schema({
       default: '',
    },
    alb_PhotoList: {
-      //stored this way to be used as a hashmap
-      type: { objectID: Boolean },
-      default: {},
+      type: [ObjectId],
+      default: [],
    },
 
    alb_LastUpdate: {

@@ -17,7 +17,7 @@ middlewareObj.ASYNCrenderAlbumPage = async (req, res) => {
       } else {
          console.log('alb is :', album);
          photosFound = await photoMethods.getPhotoListFromPhotoIds(
-            Object.keys(album.alb_PhotoList),
+            album.alb_PhotoList,
          );
          middlewareObj.renderPageWithCurrentUserAndContentOwner(
             req,
@@ -39,7 +39,7 @@ middlewareObj.ASYNCrenderEditAlbumPage = async (req, res) => {
       } else {
          console.log('alb is :', album);
          photosFound = await photoMethods.getPhotoListFromPhotoIds(
-            Object.keys(album.alb_PhotoList),
+            album.alb_PhotoList,
          );
 
          middlewareObj.renderPageWithCurrentUserAndContentOwner(
@@ -73,6 +73,25 @@ middlewareObj.ASYNCpostFormDataFromEditAlbumPage = async (req, res) => {
    }
 
    res.redirect('edit');
+};
+
+middlewareObj.ASYNCpostDeleteRequest = async (req, res) => {
+   let redirectPage = `/albums/${req.params.albumID}/edit`;
+   console.log('Attempting to delete photos');
+   let conditionsMet = middlewareObj.checkConditionsMet(req);
+   if (conditionsMet) {
+      console.log('condition met');
+      console.log('delmode :', req.deleteOption);
+      await middlewareObj.ASYNChandleDeleteRequest(req);
+
+      if (req.user) {
+         redirectPage = `/users/${req.user._id}/albums`;
+      }
+   } else {
+      console.log('conditions not met');
+   }
+
+   res.redirect(redirectPage); //TODO - doble check path
 };
 
 middlewareObj.renderPageWithCurrentUserAndContentOwner = (
@@ -215,11 +234,15 @@ middlewareObj.ASYNCverifyPhotosInListThenDelete = async (req) => {
       );
       !photoOwnershipVerified && console.log('NOT approved to delete files');
       //deleteing albums in list
-      photoOwnershipVerified &&
-         /*  console.log('approved to delete files') && */
-         albumMethods.deletePhotosFromAlbumsAndPhotosAndFs(
+      if (photoOwnershipVerified) {
+         console.log('approved to delete files');
+         await albumMethods.deletePhotosFromAlbumsAndPhotosAndFs(
             photoIdArrayToDelete,
          );
+         await albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList(
+            photoIdArrayToDelete,
+         );
+      }
 
       //Todo - actually delete them
    }
@@ -231,33 +254,45 @@ middlewareObj.ASYNCverifyPhotosInListThenDelete = async (req) => {
 middlewareObj.ASYNCchangeAlbumCoverToUsersSelectionOrFirstPhotoInListIfEmpty = async (
    req,
 ) => {
-   let { photoIdForAlbumCover } = req.body;
-   let albumId = req.params.albumID;
-   console.log('editing cover photo');
-   if (photoIdForAlbumCover) {
-      console.log('looking for photo with id:', photoIdForAlbumCover);
-      let photo = await Photo.findById(photoIdForAlbumCover);
-      if (photo) {
-         //Todo extract to seperate method
-         console.log('PHOTO was found, attempiting to update cover');
-         await Album.findByIdAndUpdate(albumId, {
-            alb_coverPhoto: {
-               coverID: photo._id,
-               coverFileName: photo.fileName,
-            },
-         });
-      } else {
-         //Todo extract to seperate method
-         console.log(
-            'could not find photo, attempting to et photo to first in album list',
-         );
-         let album = Album.findById(albumId);
-         console.log('cannot find  photo in collection');
-         albumMethods.addFirstPhotoAsCoverImageIfNonePresent([album]);
-         console.log('alb_coverPhoto is ', album.alb_coverPhoto);
+   //TODO -- only excecute if alb id not in delete or remove list
+   let {
+      photoIdForAlbumCover,
+      photoIdsToDelete,
+      photoIdsToRemoveFromAlbum,
+   } = req.body;
+   let inRemovalLists = middlewareObj.iteminLists(photoIdForAlbumCover, [
+      photoIdsToDelete,
+      photoIdsToRemoveFromAlbum,
+   ]);
+   console.log('InRemovalLists:', inRemovalLists);
+   if (!inRemovalLists) {
+      let albumId = req.params.albumID;
+      console.log('in editing cover photo func');
+      if (photoIdForAlbumCover) {
+         console.log('looking for photo with id:', photoIdForAlbumCover);
+         let photo = await Photo.findById(photoIdForAlbumCover);
+         if (photo) {
+            //Todo extract to seperate method
+            console.log('PHOTO was found, attempiting to update cover');
+            await Album.findByIdAndUpdate(albumId, {
+               alb_coverPhoto: {
+                  coverID: photo._id,
+                  coverFileName: photo.fileName,
+               },
+            });
+         } else {
+            //Todo extract to seperate method
+            console.log(
+               'could not find photo, attempting to et photo to first in album list',
+            );
+            let album = await Album.findById(albumId);
+            console.log('cannot find  photo in collection');
+            await albumMethods.addFirstPhotoAsCoverImageIfNonePresent([album]);
+            console.log('alb_coverPhoto is ', album.alb_coverPhoto);
+         }
       }
+      console.log('aLB iD IS ', albumId);
    }
-   console.log('aLB iD IS ', albumId);
 };
 
 //TODO extract below to Album methods
@@ -321,7 +356,8 @@ middlewareObj.ASYNCverifyPhotosInListThenRemoveFromAlbum = async (req) => {
       //removing albums in list
       if (photoOwnershipVerified) {
          console.log('approved to remove files');
-         await albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs(
+
+         await albumMethods.ASYNCremoveAllAlbumReferencesToPhotosInList(
             [req.params.albumID],
             photoIdsToRemoveFromAlbum,
          );
@@ -346,6 +382,49 @@ middlewareObj.removeDuplicatesInDeleteList = (
       );
    }
    return photoIdsToRemoveFromAlbum;
+};
+
+middlewareObj.iteminLists = (item, listOfLists) => {
+   let retBool = false;
+   listOfLists.forEach((list) => {
+      if (list && list.includes(item)) {
+         console.log('item in list-- !!!!!!!!!!!!!!!! ');
+         retBool = true;
+      }
+   });
+   return retBool;
+};
+
+middlewareObj.checkConditionsMet = (req) => {
+   const { confirmDeleteText, deleteOption } = req.body;
+   console.log(req.body);
+
+   if (confirmDeleteText.toUpperCase() === 'DELETE' && deleteOption) {
+      return true;
+   } else {
+      return false;
+   }
+};
+
+middlewareObj.ASYNChandleDeleteRequest = async (req) => {
+   let { deleteOption } = req.body;
+   if (deleteOption === 'deleteAlbumAndPhotos') {
+      albumMethods.ASYNCfindAndRemoveAllReferencesToPhotosInAlbum(
+         req.params.albumID,
+      );
+
+      let album = await Album.findByIdAndRemove(req.params.albumID);
+      console.log('removing this album:\n', album);
+
+      album &&
+         photoMethods.removeMultiplePhotosFromDBAndFS(album.alb_PhotoList);
+   } else if (deleteOption === 'deleteAlbumOnly') {
+      console.log('deleteing dat alb');
+      let album = await Album.findByIdAndRemove(req.params.albumID);
+      console.log('only deleteing dis album', album);
+   } else {
+      console.log('gr, del mode is', deleteOption);
+   }
 };
 module.exports = middlewareObj;
 
