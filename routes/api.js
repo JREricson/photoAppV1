@@ -264,11 +264,12 @@ router.get('/photos', async (req, res) => {
          .limit(limit); // ignores limit if it is null
       res.json({ photos: photosObj, errors: errorList });
    } catch {
-      console.log('problem with query');
+      console.log('probem with query');
       res.json({
          photos: {},
-         errors:
-            'unknow error(s), possible that query was not in excepted format',
+         errors: {
+            'unknown errors': 'possible that query was not in excepted format',
+         },
       }); //change response to be more compatable with ui????
    }
 
@@ -335,7 +336,7 @@ function createMinMaxQuery(min, max) {
    return queryObj;
 }
 
-function createDateFromQuery(dateString) {
+createDateFromQuery = (dateString) => {
    try {
       let dateAr = dateString.split('-');
       let date = new Date(dateAr[0], dateAr[1] - 1, dateAr[2]);
@@ -343,7 +344,7 @@ function createDateFromQuery(dateString) {
    } catch {
       return null;
    }
-}
+};
 
 validateQueriesFromFuncList = (query, validationFunctions) => {
    let approvedQueries = {};
@@ -461,10 +462,10 @@ validateExposure = (query) => {
       errorList = errorListFromMaxMin(
          query,
          0,
-         10800,
+         10800, //given val of 3 hr
          'expTimeMin',
          'expTimeMax',
-      ); //given val of 3 hr
+      );
 
       if (errorList.length > 0) {
          errorList = { exposureErrors: errorList };

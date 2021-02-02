@@ -20,6 +20,9 @@
 <H1></H1>
 <!-- search bar for photos -->
 
+<!-- dataset to hold query -->
+<p id="photoQuery" data-path ="/photos/map?" data-query="<%=  JSON.stringify(query) %>" hidden></p>
+
 
    <button id="loadResults" class="btn btn-pimary btn-sm">search</button>
    <input type="text" id="photoSearch" placeholder="Serach name and description" />
@@ -64,10 +67,31 @@
 </div>
 
 
+<div id="ErrorList">
+   <% if( Object.keys(errors).length >0 ){%>
+      <h2>errors found in query: </h2>
+      <%  Object.keys(errors).forEach((errorType, ndx) =>{%>
+         <h3><%= errorType%></h3>
+         <p><%=errors[errorType]%></p>
+   <% })} %>
+</div>
+
 <!-- map  --><!-- TODO -- hide map if no images with GPS tags or have it show home location -->
-<h1 class="sectionTitle">Photos around the world</h1>
+
+
+<% if( photosFound.length >0 ){%>
+   <h1 class="sectionTitle">Photos around the world</h1>
+
+   <% } else{%>
+      <h1 class="sectionTitle">No photos found</h1>
+
+  <% } %>
+
 
 <div id="mapid"></div>
+
+
+
 
 
 <% let photoList = photosFound %>
@@ -86,6 +110,9 @@
 
 <!-- loading map script-->
 <script src="../../scripts/profileMapScript.js"></script>   
+
+
+<script src="../../scripts/photoSearchReload.js"></script>
 
 
 

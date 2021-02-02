@@ -197,21 +197,23 @@ middlewareObj.getTagsFromString = (tagString) => {
 ///////////////////////////////
 //methods for rendering page
 
+//TODO - much of this and render profile is non dry code, can extract as functions
 middlewareObj.renderMapPage = async (req, res) => {
    //esentialy same code as all photos page -- TODO refactor!!!!
    searchObj = {};
+   const query = req.query;
 
-   console.log('query is:', querystring.stringify(req.query));
+   console.log('query is:', querystring.stringify(query));
 
-   //TODO-- make env variable
-   let server = 'http://localhost:3001';
+   const SERVER = process.env.SERVER;
 
    //getting photo obj from api
    let photoRes = await fetch(
-      `${server}/api/photos/?${querystring.stringify(req.query)}`,
+      `${SERVER}/api/photos/?${querystring.stringify(query)}`,
    );
    //will be photo objs sent to user-- empty by default
    let photosFound = {};
+   let errors = {};
    //if ok, generating JSON
    if (photoRes.ok) {
       photoJSON = await photoRes.json();
@@ -221,12 +223,15 @@ middlewareObj.renderMapPage = async (req, res) => {
          photosFound = photoJSON.photos;
          console.log('---------->>>photosFound', photosFound);
       }
+      if (photoJSON.errors) {
+         errors = photoJSON.errors;
+      }
    } else {
       photosFound = {}; //await Photo.find(searchObj);
       console.log('problem getting photos');
    }
 
-   res.render('photos/map', { photosFound });
+   res.render('photos/map', { photosFound, query, errors });
 };
 
 middlewareObj.renderPageWithUserAndPhoto = async (
@@ -259,15 +264,15 @@ middlewareObj.loadAllPhotosPage = async (req, res) => {
 
    console.log('query is:', querystring.stringify(req.query));
 
-   //TODO-- make env variable
-   let server = 'http://localhost:3001';
+   const SERVER = process.env.SERVER;
 
    //getting photo obj from api
    let photoRes = await fetch(
-      `${server}/api/photos/?${querystring.stringify(req.query)}`,
+      `${SERVER}/api/photos/?${querystring.stringify(req.query)}`,
    );
    //will be photo objs sent to user-- empty by default
    let photosFound = {};
+   let errors = {};
    //if ok, generating JSON
    if (photoRes.ok) {
       photoJSON = await photoRes.json();
@@ -277,6 +282,9 @@ middlewareObj.loadAllPhotosPage = async (req, res) => {
          photosFound = photoJSON.photos;
          console.log('---------->>>photosFound', photosFound);
       }
+      if (photoJSON.errors) {
+         errors = photoJSON.errors;
+      }
    } else {
       photosFound = {}; //await Photo.find(searchObj);
       console.log('problem getting photos');
@@ -285,14 +293,7 @@ middlewareObj.loadAllPhotosPage = async (req, res) => {
 
    //////////////////////
 
-   /*search criteria will be added to searchObj if found in query*/
-   // query.search && (searchObj['$text'] = { $search: query.search }); ////
-   // query.search && (searchObj['$tags'] = { $search: query.tags }); ////
-
-   //console.log('searchObj is now ' + searchObj);
-
-   // let photosList = await Photo.find(searchObj);
-   res.render('photos/allPhotos', { photosFound });
+   res.render('photos/allPhotos', { photosFound, query, errors });
 };
 
 middlewareObj.removePhotoAndRefernences = async (req, res, next) => {

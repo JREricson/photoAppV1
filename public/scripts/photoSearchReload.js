@@ -17,19 +17,23 @@
 
 //make above seperate script
 //search fields
-contentSearch = document.getElementById('photoSearch');
-tagSearch = document.getElementById('tagSearch');
+const contentSearch = document.getElementById('photoSearch');
+const tagSearch = document.getElementById('tagSearch');
 
-userSearch = document.getElementById('userSearch');
-longSearch = document.getElementById('longSearch');
-latSearch = document.getElementById('latSearch');
-distSearch = document.getElementById('distSearch');
-maxIso = document.getElementById('maxIso');
-minIso = document.getElementById('minIso');
-maxExp = document.getElementById('maxExp');
-minExp = document.getElementById('minExp');
-maxFStop = document.getElementById('maxFStop');
-minFStop = document.getElementById('minFStop');
+const userSearch = document.getElementById('userSearch');
+const longSearch = document.getElementById('longSearch');
+const latSearch = document.getElementById('latSearch');
+const distSearch = document.getElementById('distSearch');
+const maxIso = document.getElementById('maxIso');
+const minIso = document.getElementById('minIso');
+const maxExp = document.getElementById('maxExp');
+const minExp = document.getElementById('minExp');
+const maxFStop = document.getElementById('maxFStop');
+const minFStop = document.getElementById('minFStop');
+
+const photoQuery = document.getElementById('photoQuery'); //.photos;
+const query = JSON.parse(photoQuery.dataset.query);
+const routePath = photoQuery.dataset.path;
 
 let queryList = [
    contentSearch,
@@ -54,10 +58,10 @@ let queryKeyList = [
    'dist',
    'maxIso',
    'minIso',
-   'expTimeMin',
    'expTimeMax',
-   'fNumberMin',
+   'expTimeMin',
    'fNumberMax',
+   'fNumberMin',
 ];
 
 //search button
@@ -70,7 +74,8 @@ powerSearch.style.display = 'none';
 
 const ReloadWithQueryString = () => {
    queryString = generateQueryStringFromSearchFields();
-   window.location.href = '/photos?' + queryString;
+   // window.location.href = '/photos?' + queryString;
+   window.location.href = routePath + queryString;
 };
 
 loadResults.addEventListener('click', ReloadWithQueryString);
@@ -108,8 +113,32 @@ const searchIfEnterPressed = (event) => {
 };
 
 //adding enter listener to search fields
-queryList.forEach((searchFeild) => {
-   searchFeild.onkeydown = searchIfEnterPressed;
+queryList.forEach((searchField) => {
+   searchField.onkeydown = searchIfEnterPressed;
+});
+
+/**
+ *
+ * @param {*} ndx
+ */
+const showPowerSearchIfNeeded = (ndx) => {
+   if (ndx > 0) {
+      if (powerSearch.style.display != 'block') {
+         powerSearch.style.display = 'block';
+         powerSearchBtn.innerHTML = 'Hide Power Search Options';
+      }
+   }
+};
+
+//generting search fields from query
+queryList.forEach((searchField, ndx) => {
+   if (query) {
+      let queryKey = queryKeyList[ndx];
+      if (query[queryKey]) {
+         showPowerSearchIfNeeded(ndx);
+         searchField.value = query[queryKey];
+      }
+   }
 });
 
 //vaildation methods would go here

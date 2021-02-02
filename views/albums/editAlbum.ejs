@@ -4,6 +4,8 @@
 <%- include("../users/headerUser") %> <%- include("../users/navbarProfile") %>
 <link rel="stylesheet" href="../../styles/editAlbum.css" />
 
+<link rel="stylesheet" href="/scripts/albumScripts/editAlbum.css">
+
 <h1>Edit Album</h1>
 <!-- create class to center dice -->
 <div class=""> 
@@ -65,7 +67,8 @@
 
 
 <!-- delete button -->
-<button class="btn btn-danger btn-sm">Delete Album</button>
+<button id="deleteOptionToggleBtn" class="btn btn-danger btn-sm">Delete Album</button>
+<div id="deleteOptions">
 <form action="/albums/<%= album._id %>?_method=DELETE" method="POST">
    <h2>To delete, type delete into box below</h2>
    <label for="confirmDeleteText>">enter "delete"</label>
@@ -79,13 +82,14 @@
    <input type="radio" id="deleteAlbumAndPhotos" value="deleteAlbumAndPhotos" name="deleteOption">
    <br>
    <button type="submit" class="btn btn-danger btn-sm">Confirm Delete </button>
+
+</div>
    
 
 </form >
 
-<!-- edit photos -->
-<!-- for photo -->
- <!--show photo, dlete check, album cover radio -->
+<script src="../../scripts/showHideDeleteOptions.js"></script>
+
 
 
 <%- include("../users/footerUser") %>

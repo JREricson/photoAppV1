@@ -135,8 +135,11 @@
 </div>
 
 <!-- map  --><!-- TODO -- hide map if no images with GPS tags or have it show home location -->
+<% if(photoList && ( photoList.length >0 )){%>
+
 <h1 class="sectionTitle">Places where <%= contentOwner.name%> has photographed</h1>
 
+<% }%>
 <div id="mapid"></div>
 
 <!-- iamge gallery -->
@@ -147,9 +150,10 @@
 <p id="photoData" data-photos="<%= JSON.stringify(photoList)%>" hidden></p>
 
 <div id="mapid"></div>
+
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 
-<p><%= %></p>
+
 
 <!-- TODO make sure images are loading with low bandwidth and not using too much resources -->
 <!-- TODO-- exctract script file -->

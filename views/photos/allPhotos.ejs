@@ -23,8 +23,9 @@
    <button id="loadResults" class="btn btn-pimary btn-sm">search</button>
    <input type="text" id="photoSearch" placeholder="Serach name and description" />
 
-
-
+  
+<!-- dataset to hold query -->
+   <p id="photoQuery" data-path ="/photos?" data-query="<%=  JSON.stringify(query) %>" hidden></p>
    <!-- powerSearch holds additional search options-- hidden by default   -->
 <button id="powerSearchBtn" class="btn btn-pimary btn-xs">Show Power Search Options</button>
 <div id="powerSearch" class="hiddenOnLoad">
@@ -63,6 +64,14 @@
 </div>
 
 
+<div id="ErrorList">
+   <% if( Object.keys(errors).length >0 ){%>
+      <h2>errors found in query: </h2>
+      <%  Object.keys(errors).forEach((errorType, ndx) =>{%>
+         <h3><%= errorType%></h3>
+         <p><%=errors[errorType]%></p>
+   <% })} %>
+</div>
 
 
 <!-- iamge gallery -->

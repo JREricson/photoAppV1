@@ -15,22 +15,22 @@ loadMoreButton.style.display = 'none';
 
 data.dataset.limit = 20;
 
-userSearch.addEventListener('input', () => {
+userSearch.addEventListener('input', async () => {
    data.dataset.searchType = 'name'; //searchs usernames only
    data.dataset.page = 0;
    //page = 0;
    userInfo.innerHTML = '';
 
-   searchUsers();
+   await searchUsers();
 });
 
-profileSearch.addEventListener('input', () => {
+profileSearch.addEventListener('input', async () => {
    data.dataset.searchType = 'search'; //searches all searchable feilds
    data.dataset.page = 0;
    //page = 0;
    userInfo.innerHTML = '';
 
-   searchUsers();
+   await searchUsers();
 });
 
 //calls users api to genterate list of users and add it to screen
@@ -56,7 +56,7 @@ const searchUsers = async () => {
       //contains entire JSON
       let userJSON = await usersRes.json();
 
-      showResultsOnPage(userJSON.users);
+      await showResultsOnPage(userJSON.users);
    } else {
       console.log('problem gettingJSON'); //TODO  -- better err handling
    }
@@ -65,7 +65,6 @@ const searchUsers = async () => {
 };
 
 const showResultsOnPage = async (users) => {
-   // TODO --fully test this function
    let html = '';
    console.log('cur html', userInfo.innerHTML);
 
@@ -75,7 +74,7 @@ const showResultsOnPage = async (users) => {
          html += `<div class="card card-body">
          <h3> Name:  ${user.name}</h3>
          <h4> \Bio: ${user.bio}</h4>
-         <h3> photoList ${user.allPhotos}</h3> <span class="photoHolder"> 
+          <span class="photoHolder"> 
         `;
 
          if (user.allPhotos && user.allPhotos.length > 0) {
@@ -162,13 +161,10 @@ const generatePhotoImage = async (photoId) => {
 
    if (photoRes.ok) {
       photoJSON = await photoRes.json();
-      //       console.log('photo res ok');
       console.log(photoJSON);
       if (photoJSON.photos && photoJSON.photos.length > 0) {
          imgElement += `<img class="searchUserPhoto"  src="/uploads/${photoJSON.photos[0].fileName}"></img> `;
       }
-
-      //       //html += ` <img class="searchUserPhoto" src="https://pocket-syndicated-images.s3.amazonaws.com/5f480254484fa.jpg" </img> `;
    } else {
       imgElement += '<h2>No photos added</h2>';
    }

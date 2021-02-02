@@ -1,5 +1,5 @@
 /*jshint esversion: 6 */
-require('dotenv').config();
+const env = require('dotenv').config();
 const express = require('express');
 const app = express();
 const expressLayouts = require('express-ejs-layouts');

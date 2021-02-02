@@ -9,6 +9,30 @@
 />
 <h1></h1>
 
+<!-- adding leaflet map links -->
+<link
+   rel="stylesheet"
+   href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"
+/>
+
+
+
+<!-- edit button -->
+<% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
+   <a class="btn btn-primary btn-md " href="/albums/<%= album._id%>/edit/">edit album</a>
+   <%  } %>
+
+
+   <!--gettting data to use in script --- might need to find better way to do this-- data esposed and looks ugly-->
+<p id="photoData" data-photos="<%= JSON.stringify(photoList)%>" hidden></p>
+   <!-- map  --><!-- TODO -- hide map if no images with GPS tags or have it show home location -->
+
+<% if(photoList && ( photoList.length >0 )){%>
+
+   <h1 class="sectionTitle">location of photos from album</h1>
+   
+   <% }%>
+   <div id="mapid"></div>
 
 
 <!-- iamge gallery -->
@@ -47,13 +71,12 @@
 <!-- script for including justified gallery -->
 <script src="../../JustifiedGalleryFiles/jquery.justifiedGallery.min.js"></script>
 
-<!-- script to get photos from search and generate html -- will include if -->
-<!-- <script src="../../scripts/photoSearch.js"></script> -->
-
-<script src="../../scripts/photoSearchReload.js"></script>
-
 <!-- justified gallery script for page -->
 <script src="../../scripts/resizeJustGalScript.js"></script>
+<!-- loading map script-->
+<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+<script src="../../scripts/profileMapScript.js"></script>   
+
 
 
 
