@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/scripts/albumScripts/editAlbum.css">
 
 <h1>Edit Album</h1>
+<a href="/users/<%= user.id%>/photos/upload " class="btn btn-primary btm-sm">Add photos</a>
 <!-- create class to center dice -->
 <div class=""> 
 <form action="/albums/<%= album._id %>/edit?_method=PUT" method="post">
@@ -51,6 +52,7 @@
       <br>
    </div>
       <%})%>
+      <button class="btn btn-primary btn-sm" type="submit">Update</button>
 
 
     

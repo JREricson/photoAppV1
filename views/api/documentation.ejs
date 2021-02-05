@@ -1,0 +1,444 @@
+<%- include("../partials/header") %> 
+
+<h1>API information</h1>
+<h2>This page is Stub --- documentation coming soon!</h2>
+<p>There are currently two api endpoints "photos" and "users". Each end point will take in queries the typical ?key=value&key2=value2 format. if keys do not meet conttrainsts, such as upper bounds for the value, this portion of the query will be ignored and the querie will run as if that key value pair was not there. when errors are encountered, they will be returned in a list along ith the list of values found </p>
+
+
+<br>
+<br>
+<h2>Photos endpoint</h2>
+
+<h3><strong>location: </strong>api/photos</h3>
+
+<H3>Information returned:</H3>
+<p>Information is returned as a JSON in the format {photos:[], errors:{}}</p>
+<p>Photos will contain a list of photos with the following infomtation, if present:</p>
+<p>      
+    <ul>
+     <li>   "location_2dsphere": Location with coordinates used for searches</li>
+     <li>   "caption": Caption given to a photo</li>
+     <li>   "description": A description given to the photo</li>
+     <li>   "longitude": Decimal format</li>
+     <li>   "latitude": Decimal format</li>
+     <li>   "tags": An array of tags the user has provided for the photo</li>
+     <li>   "_id": The id for the photo </li>
+     <li>   "author": The person who submitted the photo</li>
+     <li>   "SubmittedByID":</li>
+     <li>   "fileName": </li>
+     <li>   "fileLocation": Location in file system </li>
+     <li>   "dateSubmitted": Date photo was uploaded </li>
+     <li>   "dateTaken": Date photo was taken</li>
+     <li>   "exifMetaData": Data from the exif file attached to photo-not filtered, so be careful what you post</li>
+
+    </ul>
+        
+ };</p>
+
+ <p><strong>example of returned JSON:</strong> {
+    "photos": [
+    {
+    "location_2dsphere": {
+    "type": "Point",
+    "coordinates": [
+    -139,
+    -30
+    ]
+    },
+    "caption": "",
+    "description": "",
+    "longitude": "",
+    "latitude": "",
+    "tags": [],
+    "_id": "6013cee0cb0d6945789a1fc7",
+    "author": "Quilbet Szhezelgued",
+    "SubmittedByID": "6013ce63cb0d6945789a1fc5",
+    "fileName": "userImage-1611910906444DSC_0002.jpg",
+    "fileLocation": "public\\uploads\\userImage-1611910906444DSC_0002.jpg",
+    "dateSubmitted": "2021-01-29T09:01:20.659Z",
+    "dateTaken": "2019-02-03T05:40:33.000Z",
+    "exifMetaData": {
+    "Make": "Sony",
+    "Model": "E5823",
+    "Orientation": "Rotate 90 CW",
+    "XResolution": 72,
+    "YResolution": 72,
+    "ResolutionUnit": "inches",
+    "Software": "32.4.A.1.54_0_f500",
+    "ModifyDate": "2019-02-03T05:40:33.000Z",
+    "YCbCrPositioning": 1,
+    "ExposureTime": 0.03125,
+    "FNumber": 2,
+    "ISO": 640,
+    "ExifVersion": "2.2",
+    "DateTimeOriginal": "2019-02-03T05:40:33.000Z",
+    "CreateDate": "2019-02-03T05:40:33.000Z",
+    "ComponentsConfiguration": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 0
+    },
+    "ShutterSpeedValue": 5,
+    "ExposureCompensation": 0,
+    "MeteringMode": "Pattern",
+    "LightSource": "Unknown",
+    "Flash": "Flash did not fire, compulsory flash mode",
+    "FocalLength": 4.23,
+    "SubSecTime": "697392",
+    "SubSecTimeOriginal": "697392",
+    "SubSecTimeDigitized": "697392",
+    "FlashpixVersion": "1.0",
+    "ColorSpace": 1,
+    "ExifImageWidth": 3840,
+    "ExifImageHeight": 2160,
+    "CustomRendered": "Normal",
+    "ExposureMode": "Auto",
+    "WhiteBalance": "Auto",
+    "DigitalZoomRatio": 1,
+    "SceneCaptureType": "Standard",
+    "SubjectDistanceRange": "Unknown"
+    },
+    "__v": 0
+    }
+    ],
+    "errors": {}
+    }
+    </p>
+
+
+    <h3>Accepted queries:</h3>
+
+    <ul>
+        <li>search
+            <ul>
+                <li><strong>Description:</strong>!!!!!! complete this.  </li>
+                <li><strong>ExampleQuery:</strong> fNumberMax=4.5</li>
+                <li><strong>Limits:</strong> Char limit is 300 </li>
+                <li><strong>Error catagory:</strong> isoErrors</li>
+            </ul>
+        </li>
+        <li>id:
+            <ul>
+                <li><strong>Description:</strong> search for a single phot by id</li>
+                
+                <li><strong>ExampleQuery:</strong> id=6013cee0cb0d6945789a1fc7</li>
+                <li><strong>Limits:</strong> 30 char max, although Ids are typiclly 20 char</li>
+                <li><strong>Error catagory:</strong> id</li>
+            </ul>
+        </li>
+        <li>fNumberMin and fNumberMax
+            <ul>
+                <li><strong>Description:</strong>Min and max values for f-stop taken from exif data. Can be use seperatley</li>
+                <li><strong>ExampleQuery:</strong> fNumberMax=4.5</li>
+                <li><strong>Limits:</strong> both only accept values in between 0 and 200</li>
+                <li><strong>Error catagory:</strong> fStopErrors</li>
+            </ul>
+        </li>
+        <li>isoMin and isoMax
+            <ul>
+                <li><strong>Description:</strong>Min and max values for iso taken from exif data. Can be use seperatley</li>
+                <li><strong>ExampleQuery:</strong> fNumberMax=4.5</li>
+                <li><strong>Limits:</strong> Both only accept values in between 0 and 100000</li>
+                <li><strong>Error catagory:</strong> isoErrors</li>
+            </ul>
+        </li>
+        <li>expTimeMin and expTimeMax
+            <ul>
+                <li><strong>Description:</strong>Min and max values for exposure time in seconds taken from exif data. Can be use seperatley</li>
+                <li><strong>ExampleQuery:</strong> expTimeMax=0.01</li>
+                <li><strong>Limits:</strong> Both only accepts values in between 0 and 10800 (3 hrs)</li>
+                <li><strong>Error catagory:</strong> exposureErrors</li>
+            </ul>
+        </li>
+        <li>user
+            <ul>
+                <li><strong>Description:</strong>Searches by user name, not sesitive to case. Spaces are allowed</li>
+                <li><strong>ExampleQuery:</strong> user=sam, will return users with "sam" in the name, such as Sam, and samantha</li>
+                <li><strong>Limits:</strong> Both only accepts values in between 0 and 10800 (3 hrs)</li>
+                <li><strong>Error catagory:</strong> exposureErrors</li>
+            </ul>
+        </li>  
+
+
+        <li>lat, lon, and dist:           
+            <ul>
+                <li><strong>Description:</strong> lat and lon specify latitude and longitude coordinates in decimal format, respectively. dist represents the distance from that coordinate point in Km. </li>
+                <li><strong>Limits:</strong> Will not accept dates with wrong format. Date in formats that do not exist, such as 2020-02-29, may lead to unpredictable behavior. Query may run with a different date or it may return other errors.</li>
+                <!-- Vegreville egg at gps below-->
+                <li><strong>ExampleQuery:</strong> ?lat=53.49157036341888&lon=-112.03641564154985&dist=0.25, who doesn't love eggs? </li>
+                <li><strong>Error catagory:</strong> gpsErrors</li>
+            </ul>
+        </li>
+        <li>dateAfter and dateBefore:           
+            <ul>
+                <li><strong>Description:</strong> Searches for photos TAKEN before and after dates inputed. dates looked at are all in UTC. Date format is yyyy-mm-dd. If bothd dateAfter and dateBefore are the same value, searches will be done for a range between taht value and 1 day after that value.   </li>
+                <li><strong>Limits:</strong> Will not accept dates with wrong format. Date in formats that do not exist, such as 2020-02-29, may lead to unpredictable behavior. Query may run with a different date or it may return other errors.</li>
+                <li><strong>ExampleQuery:</strong> dateBefore=2020-11-09 </li>
+                <li><strong>Error catagory:</strong> dateErrors</li>
+            </ul>
+        </li>
+        <li>caption:           
+            <ul>
+                <li><strong>Description:</strong> Searches for substring within caption text, case-insensitive. Spaces are allowed  </li>
+                <li><strong>Limits:</strong>char limit of 100</li>
+          
+                <li><strong>ExampleQuery:</strong> caption=in england </li>
+                <li><strong>Error catagory:</strong> captionErrors</li>
+            </ul>
+        </li>
+        <li>tags:           
+            <ul>
+                
+                <li><strong>Description:</strong> Searches for all photos that contain a tag in string of tags delimiated by a space char</li>
+                <li><strong>Limits:</strong></li>          
+                <li><strong>ExampleQuery:</strong> tags=cute dog - returns any photos with the tag "cute" or "dog" </li>
+                <li><strong>Error catagory:</strong> tagErrors</li>
+            </ul>
+        </li>
+        <li>limit:
+            <ul>
+                <li><strong>Description:</strong> Limits number of results returned. Used in conjuction with page. Add query "page=0" for first set of results</li>
+               <li><strong>ExampleQuery:</strong>limit=2&page=1, this will give the 3rd and 4th results if they exist.</li>
+               <li><strong>Limits:</strong> Values for both page and limit must be provided as integers. Max value or page is 10000 and max value for limit is 500</li>
+               <li><strong>Error catagory:</strong> pageLimits</li>
+           </ul>   
+        </li>
+        <li>page:
+
+            <ul>
+                <li><strong>Description:</strong> used for pagation. Must be used with limit query. Pagation starts at page 0. </li>
+                <li><strong>ExampleQuery:</strong>limit=2&page=1, this will give the 3rd and 4th results if they exist.</li>
+               <li><strong>Limits:</strong> Values for both page and limit must be provided as integers. Max value or page is 10000 and max value for limit is 500</li>
+               <li><strong>Error catagory:</strong> pageLimits</li>
+             </ul>  
+        </li> 
+      
+        <li>sort:
+           <ul>
+                <li><strong>Description:</strong> Used to sort results. Entered in the following format: {"sortKey1":"sortOrder","sortKey2":"sortOrder"},
+                     where sortOrder is either "d" for decending or "a" for accending. Sorts by the first key in the list, 
+                     then by the second. Sort keys do not need to be included in the query. No limit on num of serach keys. Collation is done using English ordering rules.</li>
+                <li><strong>ExampleQuery:</strong>?name=sam&sort={"author":"1","dateSubmitted":"-1"} - This will return results
+                     where the name contains the sustring 'sam' ordered by author (accending), then by dateSubmitted (decending). </li>
+               <li><strong>Limits:</strong> Search keys currently allowed are: author, dateSubmitted, dateTaken. </li>
+               <li><strong>Error catagory:</strong> sortErrors</li>
+             </ul>  
+        </li> 
+
+    </ul>
+
+
+
+
+
+    <h3>Error messages</h3>
+    <p>If an error is detected in a query, the search will run as if that key value pair in the query was not there. Some queries need more than one key value pair to work 
+   limit and page are an example of this.
+
+    </p>
+    <p><Strong>Example Query: </Strong> ?lat=53.4&dateBefore=1-3-2020&fNumberMax=500</p>
+    <p><strong>resulting errors</strong>
+        {
+            "photos": [],
+            "errors": {
+            "fStopErrors": [
+            "fNumberMax out of range, min val is 0, max val is 200"
+            ],
+            "GPSErrors": [
+            "need lat, lon, and dist queries for GPS search"
+            ],
+            "dateErrors": [
+            "dateBefore not valid --  enter in yyyy-mm-dd format"
+            ]
+            }
+            }
+        </p>
+
+<h2>Users endpoint</h2>
+
+<h3><strong>location: </strong>api/users</h3>
+
+<H3>Information returned:</H3>
+<p>information is returned as a JSON in the format {users:[], errors:{}}</p>
+<p>users will contain a list of users with the following infomtation, if present:</p>
+    <ul>
+        <li>_id</li>
+        <li>name</li>
+        <li>allPhotos</li>
+        <li>socialMediaAcnts</li>
+        <li>website</li>
+        <li>bio</li>
+        <li>homeLocation</li>
+        <li>dateJoined</li>
+
+    </ul>  
+
+
+
+ <p><strong>example of returned JSON:</strong> 
+     {
+    "users": [
+    {
+    "_id": "6013ce63cb0d6945789a1fc5",
+    "name": "Quilbet Szhezelgued",
+    "allPhotos": [
+    "60151c6b5c7afd36800880a4",
+    "60152687aec2f8392c85a960",
+    "60152687aec2f8392c85a961",
+    "6016216bd70e251e7c4ef6f7",
+    "6016216bd70e251e7c4ef6f8",
+    "60162192d70e251e7c4ef6f9"
+    ],
+    "socialMediaAcnts": {},
+    "website": "",
+    "bio": "",
+    "dateJoined": "2021-01-29T08:59:15.152Z"
+    },
+    {
+    "_id": "60163ce70999592594be3f82",
+    "name": "j",
+    "allPhotos": [],
+    "socialMediaAcnts": {},
+    "website": "",
+    "bio": "",
+    "dateJoined": "2021-01-31T05:15:19.185Z"
+    }
+    ],
+    "errors": {}
+    }</p>
+
+
+    <h3>Accepted queries:</h3>
+
+    <ul>
+        <li>id:
+            <ul>
+            <li><strong>Description:</strong> search for a single user by id</li>
+           <li><strong>ExampleQuery:</strong> id=6013ce63cb0d6945789a1fc5</li>
+           <li><strong>Limits:</strong> 30 char max, although Ids are typiclly 20 char</li>
+           <li><strong>Error catagory:</strong> idErrors</li>
+       </ul>
+   </li>
+
+        <li>search:
+             <ul>
+            <li><strong>Description:</strong> searches for full words in name, brandName,
+                    website, bio, and homeLocation</li>
+
+            <li><strong>Limits:</strong> </li>
+            <li><strong>Error catagory:</strong> searchErrors</li>
+        </ul>
+    </li>
+
+        <li>bio:     
+        <ul>
+            <li><strong>Description:</strong> Searches for whole string in bio. Ignores case.</li>
+           <li><strong>ExampleQuery:</strong>bio=from england</li>
+           <li><strong>Limits:</strong> 150 char max. </li>
+           <li><strong>Error catagory:</strong> bioErrors</li>
+       </ul>
+     </li>
+   
+       <li>dateAfter and dateBefore:           
+        <ul>
+            <li><strong>Description:</strong> searches for photos TAKEN before and after dates inputed. dates looked at are all in UTC. Date format is yyyy-mm-dd. If bothd dateAfter and dateBefore are the same value, searches will be done for a range between taht value and 1 day after that value.   </li>
+            <li><strong>Limits:</strong> Will not accept dates with wrong format. Date in formats that do not exist, such as 2020-02-29, may lead to unpredictable behavior. Query may run with a different date or it may return other errors.</li>
+            <li><strong>Error catagory:</strong> dateErrors</li>
+        </ul>
+        </li>
+        <li>name:
+            <ul>
+                <li><strong>Description:</strong> Searches for whole string in name. Ignores case.</li>
+               <li><strong>ExampleQuery:</strong>name=jack</li>
+               <li><strong>Limits:</strong> 60 char max. </li>
+               <li><strong>Error catagory:</strong> name</li>
+           </ul>    
+        
+        </li>
+        <li>homeLocation:
+            <ul>
+                <li><strong>Description:</strong> Searches for whole string in user's home location. Ignores case.</li>
+               <li><strong>ExampleQuery:</strong>homeLocation=españa</li>
+               <li><strong>Limits:</strong> 60 char max. </li>
+               <li><strong>Error catagory:</strong> homeLocation</li>
+           </ul>   
+        </li>
+        <li>website: 
+            <ul>
+                <li><strong>Description:</strong> Searches for whole string in user's website. Ignores case.</li>
+               <li><strong>ExampleQuery:</strong>website=nature, this will users with websites such as www.zahnatueloverfromthemountains.com.</li>
+               <li><strong>Limits:</strong> 30 char max. </li>
+               <li><strong>Error catagory:</strong> website</li>
+           </ul>   
+        </li>
+        <li>limit:
+            <ul>
+                <li><strong>Description:</strong> Limits number of results returned. Used in conjuction with page. Add query "page=0" for first set of results</li>
+               <li><strong>ExampleQuery:</strong>limit=2&page=1, this will give the 3rd and 4th results if they exist.</li>
+               <li><strong>Limits:</strong> Values for both page and limit must be provided as integers. Max value or page is 10000 and max value for limit is 500</li>
+               <li><strong>Error catagory:</strong> pageLimits</li>
+           </ul>   
+        </li>
+        <li>page:
+
+            <ul>
+                <li><strong>Description:</strong> used for pagation. Must be used with limit query. Pagation starts at page 0. </li>
+                <li><strong>ExampleQuery:</strong>limit=2&page=1, this will give the 3rd and 4th results if they exist.</li>
+               <li><strong>Limits:</strong> Values for both page and limit must be provided as integers. Max value or page is 10000 and max value for limit is 500</li>
+               <li><strong>Error catagory:</strong> pageLimits</li>
+             </ul>  
+        </li> 
+      
+        <li>sort:
+           <ul>
+                <li><strong>Description:</strong> Used to sort results. Entered in the following format: {"sortKey1":"sortOrder","sortKey2":"sortOrder"},
+                     where sortOrder is either "d" for decending or "a" for accending. Sorts by the first key in the list, 
+                     then by the second. Sort keys do not need to be included in the query. No limit on num of serach keys. Collation is done using English ordering rules.</li>
+                <li><strong>ExampleQuery:</strong>?bio=England&sort={"name":"1","dateJoined":"-1"} - This will return results
+                     where the bio contains england ordered by name (accending), then by dateJoined (decending). </li>
+               <li><strong>Limits:</strong> Search keys currently allowed are: name, website, homeLocation, and dateJoined. </li>
+               <li><strong>Error catagory:</strong> sortErrors</li>
+             </ul>  
+        </li> 
+
+    </ul>
+
+    <h3>Error messages</h3>
+    <p>If an error is detected in a query, the search will run as if that key value pair in the query was not there. Some queries need more than one key value pair to work 
+   limit and page are an example of this.
+
+    </p>
+    <p><Strong>Example Query: </Strong> &sort={"bio":"1","name":"-4"}&limit=5&website=123456789012345678901234567890</p>
+    <p><strong>resulting errors</strong>{
+        "users": [...],
+        "errors": {
+        "websiteErrors": [
+        "website string needs to be less than 30 char"
+        ],
+        "pageLimits": [
+        "need page and limit in interger format for pagation. limit must be <=500 and page mst be <=10000"
+        ],
+        "sortErrors": [
+        "bio is not approved",
+        "improper order(-4) for key = name"
+        ]
+        }
+        }</p>
+
+    <%- include("../partials/footer") %> 
+   
+    {
+        "photos": [],
+        "errors": {
+        "fStopErrors": [
+        "fNumberMax out of range, min val is 0, max val is 200"
+        ],
+        "GPSErrors": [
+        "need lat, lon, and dist queries for GPS search"
+        ],
+        "dateErrors": [
+        "dateBefore not valid --  enter in yyyy-mm-dd format"
+        ]
+        }
+        }

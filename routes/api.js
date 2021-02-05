@@ -5,21 +5,18 @@ const { Mongoose, SchemaTypes } = require('mongoose');
 //middleware
 // const authMidware = require('../middleware/authMiddle');
 const userMidware = require('../middleware/userMiddle');
+const apiMidware = require('../middleware/apiMiddle');
 
 //mongoDB SchemaTypes
 const User = require('../models/user');
 const Photo = require('../models/photo');
 const { query } = require('express');
 
-// router.get('/users', (req, res) => {
-//    var userJSON = { test: 'test' };
-
-//    res.json(userJSON);
-// });
-
 ////////////////////////////////
 //        user route
 ////////////////////////////////
+
+router.get('/', apiMidware.showApiInfoPage);
 
 router.get('/users', async (req, res) => {
    const query = req.query;
@@ -46,6 +43,7 @@ router.get('/users', async (req, res) => {
 
    //defines functions used to generate queries that will be added to search obj
    let queryFunctions = [
+      makeIdSearchObj,
       makeSearchObj, //doubleCheck if correct
       makeBioObj,
       makeDateObj, //us
@@ -55,6 +53,7 @@ router.get('/users', async (req, res) => {
    ];
    //this is a list of names for keys to be be approved -- must be in same order of corresponding function in above list
    let approvalKeys = [
+      'id',
       'search',
       'bio',
       'date',
@@ -111,6 +110,7 @@ router.get('/users', async (req, res) => {
    errorList = { ...errorList, ...sortErrors };
 
    let origUsersObj = await User.find(searchObj)
+      .collation({ locale: 'en' }) //This can be changed to meet other languages should such a need arise
       .sort(sortObj)
       .skip(page * limit) //will ignore skip when both are null
       .limit(limit); // ignores limit if it is null
@@ -241,7 +241,6 @@ router.get('/photos', async (req, res) => {
    //these are keys that the user is allowed to sort by
    let approvedSortKeys = {
       author: true,
-
       dateSubmitted: true,
       dateTaken: true,
    };
@@ -259,6 +258,7 @@ router.get('/photos', async (req, res) => {
    let photosObj;
    try {
       photosObj = await Photo.find(searchObj)
+         .collation({ locale: 'en' })
          .sort(sortObj)
          .skip(page * limit) //will ignore skip when both are null
          .limit(limit); // ignores limit if it is null
@@ -324,7 +324,7 @@ function keyAndValApproved(searchOrdering, approvedKeysFromUserObj, key, val) {
  * @returns object to be used in seach query
  */
 
-function createMinMaxQuery(min, max) {
+const createMinMaxQuery = (min, max) => {
    let minNum = Number.parseFloat(min);
    let maxNum = Number.parseFloat(max);
 
@@ -334,9 +334,9 @@ function createMinMaxQuery(min, max) {
    maxNum && (queryObj = { ...queryObj, ...{ $lte: maxNum } });
 
    return queryObj;
-}
+};
 
-createDateFromQuery = (dateString) => {
+const createDateFromQuery = (dateString) => {
    try {
       let dateAr = dateString.split('-');
       let date = new Date(dateAr[0], dateAr[1] - 1, dateAr[2]);
@@ -346,7 +346,7 @@ createDateFromQuery = (dateString) => {
    }
 };
 
-validateQueriesFromFuncList = (query, validationFunctions) => {
+const validateQueriesFromFuncList = (query, validationFunctions) => {
    let approvedQueries = {};
    let errorList = {};
 
@@ -438,11 +438,11 @@ const validateFNumber = (query) => {
    return { approvedQuery, errorList };
 };
 
-validateISO = (query) => {
+const validateISO = (query) => {
    let approvedQuery = {};
    let errorList = {};
    if (query.isoMax || query.isoMin) {
-      errorList = errorListFromMaxMin(query, 0, 50000, 'isoMin', 'isoMax');
+      errorList = errorListFromMaxMin(query, 0, 100000, 'isoMin', 'isoMax');
 
       if (errorList.length > 0) {
          errorList = { isoErrors: errorList };
@@ -477,9 +477,9 @@ validateExposure = (query) => {
    return { approvedQuery, errorList };
 };
 
-validateSearch = (query) => {
+const validateSearch = (query) => {
    //currently only validates length
-   return validateLength(query.search, 'search', 300);
+   return validateLength(query.search, 'search', 300); //tODO check want this length?
 };
 
 const validateID = (query) => {
@@ -491,11 +491,11 @@ const validateCaption = (query) => {
    return validateLength(query.caption, 'caption', 100);
 };
 
-validateUser = (query) => {
+const validateUser = (query) => {
    return validateLength(query.user, 'user', 60);
 };
 
-validateGPS = (query) => {
+const validateGPS = (query) => {
    errorList = {};
    approvedQuery = {};
 
@@ -559,7 +559,7 @@ validateTags = (query) => {
 /**
  * main reason for validation id to limit large queries
  */
-validatePageAndLimit = (query) => {
+const validatePageAndLimit = (query) => {
    console.log('in pagation function');
    let page = null;
    let limit = null;
@@ -574,7 +574,7 @@ validatePageAndLimit = (query) => {
       if (query.page || query.limit) {
          errorList = {
             pageLimits: [
-               'need page and limit in interger format for pagation. limit must be <=500 and page mst be <=10000',
+               'need page and limit in interger format for pagation. limit must be <=500 and page must be <=10000',
             ],
          };
       }
@@ -633,14 +633,14 @@ validateDate = (query) => {
 
 //general validation methods
 validateLength = (queryParam, queryName, maxChar) => {
-   errorList = {};
+   errorList = [];
    approvedQuery = {};
    if (queryParam) {
       //checking search is too long
       if (queryParam && queryParam.length >= maxChar) {
-         errorList[
-            `${queryName}Errors`
-         ] = `${queryName} string needs to be less than ${maxChar} char`;
+         errorList[`${queryName}Errors`] = [
+            `${queryName} string needs to be less than ${maxChar} char`,
+         ];
       } else {
          approvedQuery[queryName] = true;
       }
@@ -653,7 +653,7 @@ validateLength = (queryParam, queryName, maxChar) => {
 ///////////////////////////////////////////
 
 validateBio = (query) => {
-   return validateLength(query.bio, 'bio', 100);
+   return validateLength(query.bio, 'bio', 150);
 };
 
 validateName = (query) => {
@@ -663,7 +663,7 @@ validateHomeLocation = (query) => {
    return validateLength(query.homeLocation, 'homeLocation', 60);
 };
 validateWebsite = (query) => {
-   return validateLength(query.website, 'website', 40);
+   return validateLength(query.website, 'website', 30);
 };
 
 /////////////////////////////////////
@@ -706,16 +706,13 @@ makeSortObj = (query, approvedList) => {
          );
          sortObj = approvedSortObj;
          errorList = errors;
-         //searchOrdering[key] = sortObj[key];
-
-         // console.log('!!!!!no probs' + JSON.stringify(searchOrdering));
       } catch {
          console.log('problem getting keys');
          errorList.push('cannot process sort');
       }
    }
    if (errorList.length > 0) {
-      sortErrors['sort errors'] = errorList;
+      sortErrors['sortErrors'] = errorList;
    }
 
    console.log('sort errors in makesortobj', sortErrors);
@@ -730,7 +727,7 @@ validateSearchObj = (userSortObj, approvedList) => {
    for (let key in userSortObj) {
       if (approvedList[key]) {
          console.log(`${key} found in approve list`);
-         if (userSortObj[key] === 1 || userSortObj[key] === -1) {
+         if (userSortObj[key] === '1' || userSortObj[key] === '-1') {
             sortObj[key] = userSortObj[key];
             console.log('key approved');
          } else {
@@ -749,7 +746,7 @@ validateSearchObj = (userSortObj, approvedList) => {
    return { sortObj, errors };
 };
 
-makeFNumberObj = (query) => {
+const makeFNumberObj = (query) => {
    curSearchObj = {
       'exifMetaData.FNumber': createMinMaxQuery(
          query.fNumberMin,
@@ -759,14 +756,14 @@ makeFNumberObj = (query) => {
 
    return curSearchObj;
 };
-makeISOObj = (query) => {
+const makeISOObj = (query) => {
    curSearchObj = {
       'exifMetaData.ISO': createMinMaxQuery(query.isoMin, query.isoMax),
    };
    return curSearchObj;
 };
 
-makeExposureObj = (query) => {
+const makeExposureObj = (query) => {
    /*search exposureTime*/
    //accept num only-- TODO - autosuggest from  on frontend
 
@@ -779,7 +776,7 @@ makeExposureObj = (query) => {
    return curSearchObj;
 };
 
-makeUserObj = (query) => {
+const makeUserObj = (query) => {
    /*search user*/
    curSearchObj = {
       author: {
@@ -790,7 +787,7 @@ makeUserObj = (query) => {
    return curSearchObj;
 };
 
-makeNameObj = (query) => {
+const makeNameObj = (query) => {
    /*search user*/
    curSearchObj = {
       name: {
@@ -801,7 +798,7 @@ makeNameObj = (query) => {
    return curSearchObj;
 };
 
-makeGPSObj = (query) => {
+const makeGPSObj = (query) => {
    let lat = parseFloat(query.lat),
       lon = parseFloat(query.lon);
    //turning m to km -- mongo searches my meters
@@ -828,7 +825,7 @@ makeGPSObj = (query) => {
    return curSearchObj;
 };
 
-makeDateObj = (query) => {
+const makeDateObj = (query) => {
    //might entering 2020-11-32 might create a valid date obj --does not handle all improper dates
    //accepted yyyy-mm-dd only for now
    let dateAfter = query.dateAfter,

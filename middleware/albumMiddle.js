@@ -33,6 +33,7 @@ middlewareObj.ASYNCrenderAlbumPage = async (req, res) => {
 middlewareObj.ASYNCrenderEditAlbumPage = async (req, res) => {
    //TODO - code here is almost same as in display  album page -- extract
    Album.findById(req.params.albumID, async (err, album) => {
+      const user = req.user;
       if (err) {
          console.log(err);
          res.render('404');
@@ -47,7 +48,7 @@ middlewareObj.ASYNCrenderEditAlbumPage = async (req, res) => {
             res,
             album.alb_AuthorId,
             'albums/EditAlbum',
-            { album, photosFound },
+            { album, photosFound, user },
          );
       }
    });
