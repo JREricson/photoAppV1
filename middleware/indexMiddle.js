@@ -29,9 +29,9 @@ indexMidware.logout = (req, res) => {
  * @param {*} res
  * @param {*} next
  */
-indexMidware.loginPost = (req, res, next) => {
-   passport.authenticate('local', {
-      successRedirect: `/users/`, //TODO -- change route
+indexMidware.loginPost = async (req, res, next) => {
+   await passport.authenticate('local', {
+      successRedirect: `/users/`, //${req.user._id}/profile`, //TODO -- change route
       failureRedirect: '/login/',
       failureFlash: true,
    })(req, res, next);

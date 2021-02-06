@@ -28,11 +28,19 @@
       <i href="#" class="fab fa-instagram"  alt="instagram"/></i></a>
 </li>
 
+
+
  
 <i class="fab fa-500px nav-link" aria-hidden="true"></i></li>
  <li>   <i class="fab fa-flickr nav-link" aria-hidden="true"></i></li>
 
   <li><i class="fab fa-github nav-link" aria-hidden="true"></i></li>
+
+  <% if(currentUser) {%>
+    <li class="nav-item  active">
+      <a class="nav-link   " href="/users/<%= currentUser._id %>/profile">logged in as <%= currentUser.name %> </a>
+    </li>
+    <%}%>
  
 <% if(currentUser) {%>
 
@@ -42,6 +50,7 @@
   <li class="nav-item  active">
     <a class="nav-link   " href="/users/<%= currentUser._id %>/settings">Settings </a>
   </li>
+
 
   <%} else{%>
 

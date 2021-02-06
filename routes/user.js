@@ -96,7 +96,7 @@ router.get(
    '/:id/about',
 
    (req, res) => {
-      userMidware.renderPage(req, res, 'users/about');
+      userMidware.renderPageWithUser(req, res, 'users/about');
    },
 );
 
@@ -111,7 +111,7 @@ router.put('/:id/photos', authMidware.isCurUserContentOwner, (req, res) => {
 });
 
 router.get('/:id/settings', authMidware.isCurUserContentOwner, (req, res) => {
-   userMidware.renderPage(req, res, 'users/settings');
+   userMidware.renderPageWithUser(req, res, 'users/settings');
 });
 
 //Delete user

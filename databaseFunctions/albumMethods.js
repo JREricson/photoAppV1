@@ -153,7 +153,7 @@ albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs = async (
    albumIdList,
    photoIdList,
 ) => {
-   console.log('attempting to delete photos  from album(s) ');
+   console.log('attempting to delete photos from album(s) ');
    let photoListObj = {};
    // let photoIdList = [];
 
@@ -178,9 +178,15 @@ albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs = async (
 albumMethods.deletePhotosFromAlbumsAndPhotosAndFs = async (photoIdList) => {
    console.log('attempt to delete all photos from fs');
 
-   let albumIdList = await albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList(
+   let albumList = await albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList(
       photoIdList,
    );
+   let albumIdList = [];
+   albumList &&
+      albumList.forEach((album) => {
+         albumIdList.push(album._id);
+      });
+   console.log('photo is found in these albums', albumIdList);
 
    await albumMethods.ASYNCremoveAllAlbumReferencesToPhotosInList(
       albumIdList,

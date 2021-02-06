@@ -62,6 +62,20 @@ userMethods.addPhotoToUserList = async (req, newPhotoId) => {
    req.user.save();
 };
 
+userMethods.ASYNCremovephotosFromUserList = async (req, photoList) => {
+   console.log(
+      'attempting to remove photos from user list with id ',
+      req.user._id,
+   );
+   console.log('photolist', photoList);
+   await User.update(
+      { _id: req.user._id },
+      {
+         $pull: { allPhotos: { $in: photoList } },
+      },
+   );
+};
+
 ///////////////////////////
 
 module.exports = userMethods;

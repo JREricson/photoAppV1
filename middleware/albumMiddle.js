@@ -2,7 +2,7 @@ const User = require('../models/user');
 const Photo = require('../models/photo');
 const Album = require('../models/album');
 
-const userMidware = require('../middleware/userMiddle');
+const userMethods = require('../databaseFunctions/userMethods');
 const photoMethods = require('../databaseFunctions/photoMethods');
 const albumMethods = require('../databaseFunctions/albumMethods');
 const { all } = require('../routes/user');
@@ -419,6 +419,8 @@ middlewareObj.ASYNChandleDeleteRequest = async (req) => {
 
       album &&
          photoMethods.removeMultiplePhotosFromDBAndFS(album.alb_PhotoList);
+
+      album && userMethods.ASYNCremovephotosFromUserList(album.alb_PhotoList);
    } else if (deleteOption === 'deleteAlbumOnly') {
       console.log('deleteing dat alb');
       let album = await Album.findByIdAndRemove(req.params.albumID);

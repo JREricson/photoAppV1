@@ -30,6 +30,8 @@ const maxExp = document.getElementById('maxExp');
 const minExp = document.getElementById('minExp');
 const maxFStop = document.getElementById('maxFStop');
 const minFStop = document.getElementById('minFStop');
+const caption = document.getElementById('caption');
+const desc = document.getElementById('desc');
 
 const photoQuery = document.getElementById('photoQuery'); //.photos;
 const query = JSON.parse(photoQuery.dataset.query);
@@ -48,6 +50,8 @@ let queryList = [
    minExp,
    maxFStop,
    minFStop,
+   caption,
+   desc,
 ];
 let queryKeyList = [
    'search',
@@ -62,6 +66,8 @@ let queryKeyList = [
    'expTimeMin',
    'fNumberMax',
    'fNumberMin',
+   'caption',
+   'desc',
 ];
 
 //search button

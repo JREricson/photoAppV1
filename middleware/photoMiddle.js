@@ -10,7 +10,8 @@ const querystring = require('querystring');
 const { findById } = require('../models/user');
 
 const photoMethods = require('../databaseFunctions/photoMethods');
-
+const albumMethods = require('../databaseFunctions/albumMethods');
+const userMethods = require('../databaseFunctions/userMethods');
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
 //////////////////////////////////
@@ -298,11 +299,14 @@ middlewareObj.loadAllPhotosPage = async (req, res) => {
 
 middlewareObj.removePhotoAndRefernences = async (req, res, next) => {
    //removing photo from user's lists (allPhotos, galleries, etc)
-   await photoMethods.removePhotoFromUsersLists(req.params.photoID, req.user);
-
+   // await photoMethods.removePhotoFromUsersLists(req.params.photoID, req.user);
+   await albumMethods.deletePhotosFromAlbumsAndPhotosAndFs([
+      req.params.photoID,
+   ]);
+   await userMethods.ASYNCremovephotosFromUserList(req, [req.params.photoID]);
    console.log('req.user is', req.user);
    //removing photo
-   await photoMethods.removeSinglePhotoFromDBAndFS(req.params.photoID);
+   // await photoMethods.removeSinglePhotoFromDBAndFS(req.params.photoID);
    next();
 };
 

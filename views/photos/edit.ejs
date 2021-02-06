@@ -49,11 +49,12 @@
    <br>
    <label for="description">Enter a description for your photo </label>
    <br>
-   <textarea
+   <input
       name="description"
       type="text"
-      placeholder="enter a description here"
-   ></textarea>
+      value="<%= photo.description %>"
+      />
+   </input>
    <br>
    <button class="btn btn-primary" type="submit">submit Changes</button>
 </form>

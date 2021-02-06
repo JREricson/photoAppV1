@@ -182,6 +182,7 @@ router.get('/photos', async (req, res) => {
       validateDate,
       validateTags,
       validateCaption,
+      validateDescription,
    ];
 
    //checking queries to pass -- any query that is not approved will be skipped
@@ -206,6 +207,7 @@ router.get('/photos', async (req, res) => {
       makeDateObj,
       makeTagsObj,
       makeCaptionObj,
+      makeDescObj,
    ];
    //this is a list of names for keys to be be approved -- must be in same order of corresponding function in above list
    //will be added to generateQueryObjAndErrors function as param
@@ -221,6 +223,7 @@ router.get('/photos', async (req, res) => {
       'date',
       'tags',
       'caption',
+      'desc',
    ];
 
    //adding queries to search if approved
@@ -479,7 +482,7 @@ validateExposure = (query) => {
 
 const validateSearch = (query) => {
    //currently only validates length
-   return validateLength(query.search, 'search', 300); //tODO check want this length?
+   return validateLength(query.search, 'search', 100); //tODO check want this length?
 };
 
 const validateID = (query) => {
@@ -534,15 +537,13 @@ const validateGPS = (query) => {
    return { approvedQuery, errorList };
 };
 
-validateTags = (query) => {
+const validateTags = (query) => {
    //TODO -- this is a stub
-   errorList = {};
-   approvedQuery = {};
-   if (query.tags) {
-      approvedQuery = { tags: true };
-   }
-
-   return { approvedQuery, errorList };
+   return validateLength(query.tags, 'tags', 150);
+};
+const validateDescription = (query) => {
+   //TODO -- this is a stub
+   return validateLength(query.desc, 'desc', 100);
 };
 
 // validateSort = (query) => {
@@ -792,6 +793,15 @@ const makeNameObj = (query) => {
    curSearchObj = {
       name: {
          $regex: `${query.name}`,
+         $options: 'i', // i - ignore case
+      },
+   };
+   return curSearchObj;
+};
+const makeDescObj = (query) => {
+   curSearchObj = {
+      description: {
+         $regex: `${query.desc}`,
          $options: 'i', // i - ignore case
       },
    };

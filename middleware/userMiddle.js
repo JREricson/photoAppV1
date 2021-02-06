@@ -22,7 +22,7 @@ var userMidware = {};
 // page rendering methods
 /////////////////////////////
 
-userMidware.renderPage = (req, res, pagePath, objOfValToBeSent) => {
+userMidware.renderPageWithUser = (req, res, pagePath, objOfValToBeSent) => {
    //add other params to render with page
 
    ///Finding routes
@@ -49,14 +49,16 @@ userMidware.renderPage = (req, res, pagePath, objOfValToBeSent) => {
 userMidware.renderUploadPage = async (req, res) => {
    //getting all ablbums by user
    let albumIds = await albumMethods.ASYNCfindAllAlbumsByUserId(req.user._id);
-   userMidware.renderPage(req, res, 'users/upload', { albumIds: albumIds });
+   userMidware.renderPageWithUser(req, res, 'users/upload', {
+      albumIds: albumIds,
+   });
 };
 
 userMidware.ASYNCgetProfile = async (req, res) => {
    const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
    console.log('photoList is ', photoList.length);
 
-   userMidware.renderPage(req, res, 'users/profile', { photoList });
+   userMidware.renderPageWithUser(req, res, 'users/profile', { photoList });
 };
 
 //TODO - rename this function
@@ -161,14 +163,14 @@ userMidware.renderProfile = (req, res, next) => {
 
 userMidware.renderPhotoPage = async (req, res, next) => {
    const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
-   userMidware.renderPage(req, res, 'users/photos', { photoList });
+   userMidware.renderPageWithUser(req, res, 'users/photos', { photoList });
 };
 
 userMidware.renderUserAlbumsPage = async (req, res) => {
    try {
       let albumList = await albumMethods.getAlbumsFromUserId(req.params.id);
 
-      userMidware.renderPage(req, res, 'users/userAlbums', {
+      userMidware.renderPageWithUser(req, res, 'users/userAlbums', {
          albumList,
       });
    } catch {
@@ -283,7 +285,7 @@ userMidware.createNewAlbumAndIdObj = (newAlbum) => {
 
 userMidware.redirectToEditPhotosPage = (req, res, newPhotos) => {
    let albumIdObj = userMidware.createNewAlbumAndIdObj(newAlbum);
-   userMidware.renderPage(req, res, 'users/editSubmitted', {
+   userMidware.renderPageWithUser(req, res, 'users/editSubmitted', {
       newPhotos,
       albumIdObj,
    });

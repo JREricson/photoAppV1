@@ -18,53 +18,13 @@
 
 <!-- temp to get feilds below nav bar, delete and alter CSS -->
 <H1></H1>
-<!-- search bar for photos -->
-
-<!-- dataset to hold query -->
-<p id="photoQuery" data-path ="/photos/map?" data-query="<%=  JSON.stringify(query) %>" hidden></p>
 
 
-   <button id="loadResults" class="btn btn-pimary btn-sm">search</button>
-   <input type="text" id="photoSearch" placeholder="Serach name and description" />
+   
+<%- include("../partials/photos/powerSearch") %>
 
 
 
-   <!-- powerSearch holds additional search options-- hidden by default   -->
-<button id="powerSearchBtn" class="btn btn-pimary btn-xs">Show Power Search Options</button>
-<div id="powerSearch" class="hiddenOnLoad">
-
-   <label for="tagSearch">Search by tags</label>
-<input type="text" id="tagSearch" placeholder="Seperate tag each with a space" />
-<label for="userSearch">Search by user name</label>
-<input type="text" id="userSearch" placeholder="Enter name or part of name" />
-
-<div id="GPSgroup">
-<label for="GPSgroup">Search for distance from GPS coordinates. Latitude, longitude, and distance are all require for GPS search</label>
-<label for="longSearch">Longitude</label>
-
-<input type="text" id="longSearch" placeholder="Value between -180 and 180" />
-<label for="latSearch">Latitude</label>   
-<input type="text" id="latSearch" placeholder="Value between -90 and 90" />
-<label for="distSearch">Distance from Coordinates in Km </label>   
-<input type="text" id="distSearch" placeholder="km from coordinates" />
-</div>
-
-
-<label for="maxIso">Max ISO</label>   
-<input type="text" id="maxIso" placeholder="Value between 0 and 50000" />
-<label for="minIso">Min ISO</label>   
-<input type="text" id="minIso" placeholder="Value between 0 and 50000" />
-
-<label for="maxExp">Max Exposure time in seconds </label> 
-<input type="text" id="maxExp" placeholder="Value between 0 and 10800" />
-<label for="minExp">Min Exposure time in seconds </label> 
-<input type="text" id="minExp" placeholder="Value between 0 and 10800" />
-
-<label for="maxFStop">Max F-Stop </label>   
-<input type="text" id="maxFStop" placeholder="Value between 0 and 200" />
-<label for="minFStop">Min F-Stop </label>   
-<input type="text" id="minFStop" placeholder="Value between 0 and 200" />
-</div>
 
 
 <div id="ErrorList">
