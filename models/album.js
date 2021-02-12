@@ -10,7 +10,7 @@ const AlbumSchema = new mongoose.Schema({
       required: true,
    },
    alb_AuthorId: {
-      type: ObjectId, //TODO removed brackets - did it break  anyting
+      type: ObjectId,
       required: true,
    },
    alb_Name: {

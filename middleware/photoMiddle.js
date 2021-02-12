@@ -26,7 +26,7 @@ middlewareObj.ASYNCgetOwnerPhotoIds = (req, res) => {
             console.log(err);
             reject;
          } else if (!contentOwner) {
-            res.render('404');
+            res.status(404).render('404');
             //I believe below should fix error in TODO above
             //rejecting promise in the event that the photo had been deleted during session
             reject;

@@ -23,27 +23,36 @@ var userMidware = {};
 /////////////////////////////
 
 userMidware.renderPageWithUser = (req, res, pagePath, objOfValToBeSent) => {
-   //add other params to render with page
-
-   ///Finding routes
-
    User.findById(req.params.id, (err, contentOwner) => {
       if (err) {
          console.log(err);
-         // res.status(404).render('404');
+         res.status(500).render('server error');
       } else {
          currentUser = req.user;
          let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
-         res.render(pagePath, vals); //add other params
+         res.render(pagePath, vals);
       }
    });
+};
 
-   //Deleting routes
-   //first getting all of user's photos
-
-   //removing photos
-
-   //removing users
+userMidware.renderPageWithUserRedirectIfNoContentOwner = (
+   req,
+   res,
+   pagePath,
+   objOfValToBeSent,
+) => {
+   User.findById(req.params.id, (err, contentOwner) => {
+      if (err) {
+         console.log(err);
+         res.status(500).render('server error');
+      } else if (contentOwner) {
+         currentUser = req.user;
+         let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
+         res.render(pagePath, vals);
+      } else {
+         res.status(404).render('404');
+      }
+   });
 };
 
 userMidware.renderUploadPage = async (req, res) => {
@@ -56,9 +65,16 @@ userMidware.renderUploadPage = async (req, res) => {
 
 userMidware.ASYNCgetProfile = async (req, res) => {
    const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
-   console.log('photoList is ', photoList.length);
+   const albumList = await albumMethods.ASYNCfindAllAlbumsByUserId(
+      req.params.id,
+   );
+   // console.log('photoList is ', photoList.length);
+   console.log('albumList is ', albumList);
 
-   userMidware.renderPageWithUser(req, res, 'users/profile', { photoList });
+   userMidware.renderPageWithUser(req, res, 'users/profile', {
+      photoList,
+      albumList,
+   });
 };
 
 //TODO - rename this function
@@ -170,14 +186,20 @@ userMidware.renderUserAlbumsPage = async (req, res) => {
    try {
       let albumList = await albumMethods.getAlbumsFromUserId(req.params.id);
 
-      userMidware.renderPageWithUser(req, res, 'users/userAlbums', {
-         albumList,
-      });
+      userMidware.renderPageWithUserRedirectIfNoContentOwner(
+         req,
+         res,
+         'users/userAlbums',
+         {
+            albumList,
+         },
+      );
    } catch {
-      res.render('404');
+      res.status(404).render('404');
    }
 };
 
+//TODO - finsih or delete addPhotoToAlbums
 userMidware.addPhotoToAlbums = (user, newAlbumName, albumList) => {
    //crates a new album if needed
    if (newAlbumName) {

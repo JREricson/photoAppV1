@@ -124,6 +124,11 @@ albumMethods.updateAlbum = async (userId, albumId, objOfItemsToUpdate) => {
    });
 };
 
+albumMethods.removeAllAlbumsWithUserId = async (userId) => {
+   console.log('attemping to delete all albums wth id:', userId);
+   await Album.deleteMany({ alb_AuthorId: userId });
+};
+
 albumMethods.ASYNCisUserOwnerOfAlbum = async (userId, albumId) => {
    let returnBool = false;
    await Album.findById(albumId, (err, album) => {

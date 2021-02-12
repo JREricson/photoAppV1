@@ -12,6 +12,16 @@
    href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"
 />
 
+
+
+<!-- creating list to hold cover photos -->  
+<%let coverPhotoList %>
+<% if (photoList.length>=5){%>
+<% coverPhotoList = photoList.slice(0,5)%>
+<% } else { %>
+   <%  coverPhotoList = photoList}%>
+
+
 <!-- carousel  at top of page-->
 <div id="topImageCarousel" class="carousel slide" data-ride="carousel">
    <ol class="carousel-indicators">
@@ -24,16 +34,20 @@
       <li data-target="#topImageCarousel" data-slide-to="2"></li>
    </ol>
    <div class="carousel-inner">
-      <div class="carousel-item active">
-         <img class="caroImg" src="/images/_DSC0074-3.jpg" alt="First slide" />
-      </div>
-      <div class="carousel-item">
-         <img class="caroImg" src="/images/_DSC0060.jpg" alt="Second slide" />
-      </div>
-      <div class="carousel-item">
-         <img class="caroImg" src="/images/_DSC0058.jpg" alt="Third slide" />
-      </div>
-   </div>
+<%coverPhotoList.forEach((photo, ndx)=>{ %>
+   <% let active="" %>
+   <% if (ndx===1){active="active"} %>
+
+ <div class="carousel-item <%= active %>"> 
+    <div class="caroImgContainer">
+   <img class="caroImg"   src="/uploads/<%= photo.fileName %>" alt=" slide <%= ndx %>" />
+</div>
+</div>
+
+   <%}) %>
+
+
+
    <a
       class="carousel-control-prev"
       href="#topImageCarousel"
@@ -61,78 +75,51 @@
    <%  } %>
 
 
-<!-- container for top user galleries -->
-<!-- TODO -- have carousel for mobile size -->
-<div class="container galleryContainer">
-   <h1 class="sectionTitle">Galleries</h1>
+   <!-- container for top user galleries -->
+   <!-- TODO -- have carousel for mobile size -->
+ 
+   <div class="container galleryContainer">
+      <h1 class="sectionTitle">Galleries</h1>
+      <div class="row">
+         <%let albumListCut = albumList %>
+         <% if (albumList.length>=3){ %>
+            <% albumListCut = albumList.slice(0,3) %>
+         <%} %>
 
-   <div class="row">
-      <figure class="col-lg-4 col-sm-12 img-fluid galleryfig">
-         <a
-            href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(117).jpg"
-         >
-            <img alt="picture" src="/images/_DSC0074-3.jpg" class="img-fluid" />
-         </a>
+<% albumListCut  && albumListCut.forEach((album)=>{ %>
 
-         <h4>Nature</h4>
-         <p>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-         </p>
+   <% if(album.alb_coverPhoto.coverFileName){%>
+    <% var photopath = '../../uploads/' +album.alb_coverPhoto.coverFileName%>
+       <%  } else { %>
+          <% var photopath = "/images/folder-2103508_1280.png" %>
+       <%}%>
+       <figure class="col-lg-4 col-sm-12 img-fluid galleryfig mx-auto">
+       <a href="/albums/<%= album._id %>">
+          <img
+             class="img-fluid"
+             alt="<%=  album.alb_Name %>"
+             src="<%= photopath %>"
+          />
+       </a>
+       <h4><%= album.alb_Name%></h4>
+       <p>
+         <%=album.alb_description%>
+      </p>
 
-         <button
-            type="button"
-            class="btn btn-primary btn-sm"
-            href="#"
-            name="button"
-         >
-            View Gallery
-         </button>
       </figure>
+     
+       <%})%>
 
-      <figure class="col-lg-4 col-sm-12 img-fluid galleryfig">
-         <a
-            href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(117).jpg"
-         >
-            <img alt="picture" src="/images/_DSC0074-3.jpg" class="img-fluid" />
-         </a>
+   
 
-         <h4>Nature</h4>
-         <p>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-         </p>
-      </figure>
-      <figure class="col-lg-4 col-sm-12 img-fluid galleryfig">
-         <a
-            href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(117).jpg"
-         >
-            <img alt="picture" src="/images/_DSC0074-3.jpg" class="img-fluid" />
-         </a>
+         </div>
 
-         <h4>Nature</h4>
-         <p>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-         </p>
-      </figure>
-   </div>
-</div>
+         <a href="albums" class="btn btn-primary">View all galleries</a>
+         </div>
+
+
+
+
 
 <!-- map  --><!-- TODO -- hide map if no images with GPS tags or have it show home location -->
 <% if(photoList && ( photoList.length >0 )){%>
@@ -161,7 +148,7 @@
 
 
 <!-- loading map script-->
-<script src="../../scripts/profileMapScript.js"></script>   
+<script src="/scripts/profileMapScript.js"></script>   
 
 
 
@@ -173,10 +160,10 @@
 ></script>
 
 <!-- script for including justified gallery -->
-<script src="../../JustifiedGalleryFiles/jquery.justifiedGallery.min.js"></script>
+<script src="/JustifiedGalleryFiles/jquery.justifiedGallery.min.js"></script>
 
 <!-- justified gallery script for page -->
 
-<script src="../../scripts/resizejustGalScript.js"></script>
+<script src="/scripts/resizejustGalScript.js"></script>
 
 <%- include("footerUser") %>

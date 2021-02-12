@@ -7,6 +7,7 @@ const passport = require('passport');
 
 ///
 const photoMethods = require('./photoMethods');
+const albumMethods = require('./albumMethods');
 
 var userMethods = {};
 
@@ -36,16 +37,20 @@ userMethods.createUser = async (name, password, email) => {
 
 /////////////////////////////////////
 
-userMethods.deleteUser = (user) => {
+//TODO - extract to userMiddle
+userMethods.deleteUser = async (user) => {
    //TODO include error checking
    //get photolist
    var photoList = user.allPhotos;
 
    //remove photos in list from database
-   photoMethods.removeMultiplePhotosFromDBAndFS(photoList);
+   await photoMethods.removeMultiplePhotosFromDBAndFS(photoList);
+
+   //remove all albums
+   await albumMethods.removeAllAlbumsWithUserId(user._id);
 
    //remove user
-   userMethods.deleteUserOnly(user._id);
+   await userMethods.deleteUserOnly(user._id);
 };
 
 userMethods.deleteUserOnly = (userID) => {

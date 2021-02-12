@@ -8,8 +8,20 @@ max-width:100%;
 
 } */
 .caroImg {
+   object-fit: contain;
+
    width: 100vw;
-   /* todo--set max height */
+   overflow: auto;
+   margin: auto;
+   position: absolute;
+   top: 0;
+   left: 0;
+   bottom: 0;
+   right: 0;
+}
+.caroImgContainer {
+   width: 100vw;
+   height: 100vh;
 }
 
 .navbar {

@@ -13,7 +13,7 @@ middlewareObj.ASYNCrenderAlbumPage = async (req, res) => {
    Album.findById(req.params.albumID, async (err, album) => {
       if (err) {
          console.log(err);
-         res.render('404');
+         res.status(500).send('Server error');
       } else {
          console.log('alb is :', album);
          photosFound = await photoMethods.getPhotoListFromPhotoIds(
@@ -105,11 +105,19 @@ middlewareObj.renderPageWithCurrentUserAndContentOwner = (
    User.findById(albumOwnerId, (err, contentOwner) => {
       if (err) {
          console.log(err);
-         //res.status(404).render('404');
+         res.status(500).render('server error');
       } else {
-         currentUser = req.user;
-         let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
-         res.render(pagePath, vals); //add other params
+         if (contentOwner) {
+            console.log('za ownah iz, ', contentOwner);
+            currentUser = req.user;
+            let vals = {
+               ...{ contentOwner, currentUser },
+               ...objOfValToBeSent,
+            };
+            res.render(pagePath, vals);
+         } else {
+            res.status(404).render('404');
+         }
       }
    });
 };
@@ -422,7 +430,7 @@ middlewareObj.ASYNChandleDeleteRequest = async (req) => {
 
       album && userMethods.ASYNCremovephotosFromUserList(album.alb_PhotoList);
    } else if (deleteOption === 'deleteAlbumOnly') {
-      console.log('deleteing dat alb');
+      console.log('deleting dat alb');
       let album = await Album.findByIdAndRemove(req.params.albumID);
       console.log('only deleteing dis album', album);
    } else {
