@@ -1,4 +1,4 @@
-<%- include("../partials/header") %> <%- include("../partials/navbar") %>
+<%- include("../partials/header") %> <%- include("../partials/siteNavbar") %>
 
 <h1 class="photoSubmissionTitle">
    Edit Photo
@@ -15,18 +15,18 @@
    <br>
 <!-- TODO -- have boot starp box for pic on right and other stuff on left -->
    <label for="latitude">Enter a caption for your photo </label>
-   <input name="caption" type="text" value="<%= photo.caption %>" />
+   <input class="form-control" name="caption" type="text" value="<%= photo.caption %>" />
    <br>
 
    <label for="latitude">Latitude </label>
-   <input
+   <input class="form-control"
       name="latitude"
       type="text"
       value="<%= (photo.latitude.length>0)? photo.latitude: photo.exifMetaData.latitude %>"
    />
    
-   <label for="longitude">Longitude </label>
-   <input
+   <label  for="longitude">Longitude </label>
+   <input class="form-control"
       name="longitude"
       type="text"
       value="<%= photo.exifMetaData.longitude %>"
@@ -44,12 +44,12 @@
    <label for="tagString"
       >enter tags -- no need for the ugly octothorp (#)
    </label>
-   <input name="tagString" type="text" placeholder="ex: macro insect nature" />
+   <input  class="form-control"name="tagString" type="text" placeholder="ex: macro insect nature" />
    
    <br>
    <label for="description">Enter a description for your photo </label>
    <br>
-   <input
+   <input class="form-control"
       name="description"
       type="text"
       value="<%= photo.description %>"

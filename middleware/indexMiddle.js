@@ -7,6 +7,7 @@ const User = require('../models/user');
 
 //
 const userMethods = require('../databaseFunctions/userMethods');
+const userMidware = require('../middleware/userMiddle');
 
 var indexMidware = {};
 
@@ -123,6 +124,18 @@ const getValidationErrors = (name, email, password, password2) => {
       });
    }
    return errors;
+};
+
+indexMidware.renderRegisterPage = (req, res) => {
+   userMidware.renderPageWithUser(req, res, 'auth/register');
+};
+
+indexMidware.renderLoginPage = (req, res) => {
+   userMidware.renderPageWithUser(req, res, 'auth/login');
+};
+
+indexMidware.renderLandingPage = (req, res) => {
+   userMidware.renderPageWithUser(req, res, 'auth/landing');
 };
 
 /////////////////////

@@ -32,9 +32,7 @@ router.delete(
 router.get(
    '/:photoID/edit',
    authMidware.checkUserPhotoOwner,
-   async (req, res) => {
-      photoMidware.renderPageWithUserAndPhoto(req, res, 'photos/edit');
-   },
+   photoMidware.renderPhotoPage,
 );
 
 //show map page
@@ -42,6 +40,6 @@ router.get('/map', photoMidware.renderMapPage);
 
 //view all photos
 
-router.get('/', photoMidware.loadAllPhotosPage);
+router.get('/', photoMidware.renderAllPhotosPage);
 
 module.exports = router;

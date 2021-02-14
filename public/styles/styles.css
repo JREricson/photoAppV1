@@ -7,6 +7,13 @@ max-width:100%;
   color:green;
 
 } */
+.myNavText {
+   color: rgb(255, 255, 255);
+
+   /* font-weight: 800; */
+   text-shadow: 0px 0px 0 #000, 0px 0px 0 #000, 0px 1px 0 #000, 1px 1px 0 #000;
+}
+
 .caroImg {
    object-fit: contain;
 
@@ -38,12 +45,16 @@ max-width:100%;
 .galleryContainer {
    padding-top: 5em;
 }
+.centerItem {
+   margin: o auto;
+   text-align: center;
+}
 
 #profileNav {
-   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+   /* text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
    outline-width: 1px;
    outline-color: gray;
-   background-color: rgba(255, 255, 255, 0.5);
+   background-color: rgba(255, 255, 255, 0.5); */
    text-decoration-color: white;
 }
 
@@ -170,6 +181,17 @@ p {
 .myTag {
    margin-right: 0.8em;
 }
+
+.ContentOwnerNav {
+   margin-left: 100px;
+}
+
+.topImageCarousel {
+   position: relative;
+   background: none;
+   top: 0;
+}
+
 /* todo  -- zoom on image with hover
 img.justifiedGalImg {
    -webkit-transition: 0.3s ease-in-out;
@@ -179,3 +201,20 @@ img.justifiedGalImg {
 img.justifiedGalImg :hover {
    transform: scale(1.1);
 } */
+
+/*user uploads */
+/* .uploadBox {
+   display: flex;
+}
+.fillBox {
+   flex-grow: 100;
+} */
+
+.existingAlbums {
+   border: 2px solid #ccc;
+   width: auto;
+   height: 100px;
+   overflow-y: scroll;
+}
+
+/* //// */

@@ -23,7 +23,7 @@ var storage = multer.diskStorage({
    },
    filename: function (req, file, cb) {
       const uniqueSuffix =
-         Date.now() + Math.floor(Math.random() * 100000) + file.originalname; //IMPROVE -- use crypto generate unique string
+         Date.now() + Math.floor(Math.random() * 100000) + file.originalname;
       cb(null, file.fieldname + '-' + uniqueSuffix);
    },
 });
@@ -62,7 +62,7 @@ const { resolve } = require('path');
 router.get('/:id/profile', userMidware.ASYNCgetProfile);
 
 router.get('/', (req, res) => {
-   res.render('users/users');
+   userMidware.renderPageWithUser(req, res, 'users/users');
 });
 
 ////////////////////////

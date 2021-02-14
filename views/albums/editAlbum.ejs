@@ -1,7 +1,8 @@
 
 <!-- make form -- fill in with cur vals -->
 
-<%- include("../users/headerUser") %> <%- include("../users/navbarProfile") %>
+<%- include("../users/headerUser") %> <%- include("../partials/siteNavbar") %>
+
 <link rel="stylesheet" href="/styles/editAlbum.css" />
 
 <link rel="stylesheet" href="/scripts/albumScripts/editAlbum.css">
@@ -15,6 +16,7 @@
 
     <label for="albumName">Album name</label>
     <input
+    class="form-control"
        name="albumName"
        type="text"
        value="<%=
@@ -24,6 +26,7 @@
 
    <label for="albumDescription">Album desscription</label>
    <input
+   class="form-control"
       name="albumDescription"
       type="text"
       value="<%=
@@ -43,11 +46,11 @@
    <label for="a<%= ndx%>"> Make album cover </label>
    <input type="radio" id="a<%= ndx%>" value="<%=photo._id%>" name="photoIdForAlbumCover">
    <br>
-      <label for="d<%= ndx%>"> delete photo and remove from album</label>
+      <label for="d<%= ndx%>"> Delete photo and remove from album</label>
       <input type="checkBox" id="d<%= ndx%>" value="<%=photo._id%>" name="photoIdsToDelete">
       <br>
 
-      <label for="r<%= ndx%>"> remove photo from album (does not remove from photos)</label>
+      <label for="r<%= ndx%>"> Remove photo from album (does not remove from photos)</label>
       <input type="checkBox" id="r<%= ndx%>" value="<%=photo._id%>" name="photoIdsToRemoveFromAlbum">
       <br>
    </div>

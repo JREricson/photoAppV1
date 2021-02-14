@@ -12,6 +12,7 @@ const { findById } = require('../models/user');
 const photoMethods = require('../databaseFunctions/photoMethods');
 const albumMethods = require('../databaseFunctions/albumMethods');
 const userMethods = require('../databaseFunctions/userMethods');
+const userMidware = require('../middleware/userMiddle');
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
 //////////////////////////////////
@@ -232,7 +233,17 @@ middlewareObj.renderMapPage = async (req, res) => {
       console.log('problem getting photos');
    }
 
-   res.render('photos/map', { photosFound, query, errors });
+   middlewareObj.renderPageWithUser(req, res, 'photos/map', {
+      photosFound,
+      query,
+      errors,
+   });
+
+   // res.render('photos/map',);
+};
+
+middlewareObj.renderPhotoPage = (req, res) => {
+   middlewareObj.renderPageWithUserAndPhoto(req, res, 'photos/edit');
 };
 
 middlewareObj.renderPageWithUserAndPhoto = async (
@@ -249,16 +260,16 @@ middlewareObj.renderPageWithUserAndPhoto = async (
    if (photo) {
       //photo found so rendering page with values for ejs doc
       currentUser = req.user;
-      let vals = { ...{ photo, currentUser }, ...objOfValToBeSent };
+      let vals = { ...{ photo /* , currentUser  */ }, ...objOfValToBeSent };
 
-      res.render(pagePath, vals);
+      middlewareObj.renderPageWithUser(req, res, pagePath, vals);
    } else {
       //send 404 if no photo with ID
       res.status(404).render('404');
    }
 };
 
-middlewareObj.loadAllPhotosPage = async (req, res) => {
+middlewareObj.renderAllPhotosPage = async (req, res) => {
    var query = req.query;
 
    searchObj = {};
@@ -294,7 +305,32 @@ middlewareObj.loadAllPhotosPage = async (req, res) => {
 
    //////////////////////
 
-   res.render('photos/allPhotos', { photosFound, query, errors });
+   let objOfValToBeSent = { photosFound, query, errors };
+
+   middlewareObj.renderPageWithUser(
+      req,
+      res,
+      'photos/allPhotos',
+      objOfValToBeSent,
+   );
+};
+middlewareObj.renderPageWithUser = async (
+   req,
+   res,
+   pagePath,
+   objOfValToBeSent,
+) => {
+   let contentOwner;
+
+   let photo = await Photo.findById(req.params.photoID);
+
+   if (photo) {
+      contentOwner = await User.findById(photo.SubmittedByID);
+   }
+
+   currentUser = req.user;
+   let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
+   res.render(pagePath, vals);
 };
 
 middlewareObj.removePhotoAndRefernences = async (req, res, next) => {

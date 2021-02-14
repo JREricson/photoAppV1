@@ -4,21 +4,21 @@
 const express = require('express');
 const router = express.Router();
 
-//midleware
+//middleware
 const indexMidware = require('../middleware/indexMiddle');
 
 //landing
-router.get('/', (req, res) => res.render('auth/landing'));
+router.get('/', indexMidware.renderLandingPage);
 
 //login
-router.get('/login', (req, res) => res.render('auth/login'));
+router.get('/login', indexMidware.renderLoginPage);
 router.post('/login', indexMidware.loginPost);
 
 //logout
 router.get('/logout', indexMidware.logout);
 
 //Register
-router.get('/register', (req, res) => res.render('auth/register'));
+router.get('/register', indexMidware.renderRegisterPage);
 router.post('/register', indexMidware.registerPost);
 
 //easter egg

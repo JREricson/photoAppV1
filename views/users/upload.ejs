@@ -1,4 +1,4 @@
-<%- include("headerUser") %>
+<%- include("headerUser") %><%- include("../partials/siteNavbar") %>
 <!-- TODO --//site nav bar??? -->
 
 <!-- script tage for obtainging EXIF data -->
@@ -14,25 +14,24 @@
 
 
 
-<div class="container">
-   <div class="row">
-      <div class="col-md-6 m-auto">
+<div class="container ">
+   <div class="row uploadBox">
+      <div class="col-md-6 m-auto ">
          <h1 class="text-center display-4 my-4">Add to your portfolio</h1>
          <form
             action="/users/<%= contentOwner._id %>/photos/upload"
             method="POST"
             enctype="multipart/form-data"
          >
-         <!-- TODO extract style -->
-         <!-- dropdown menue to select album -->
-         <style>.existingAlbums { border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll; }</style>
+  
+
          <label for="existingAlbumsToAddTo"> Add to Existing Album(s)</label>
      
 
    
-            <div id="existingAlbumsToAddTo" class="existingAlbums">
+            <div id="existingAlbumsToAddTo" class="existingAlbums  ">
                <%  albumIds.forEach((album)=>{%>
-                  <input name="existingAblums" value="<%= album._id%>"type="checkbox" /><%= album.alb_Name%> <br />
+                  <input class="fillBox" name="existingAblums" value="<%= album._id%>"type="checkbox" /><%= album.alb_Name%> <br />
                   <% });%>
            </div>
 
@@ -45,10 +44,10 @@
      
         <br>
         <label for="newAlbumTitle">New album title</label>
-        <input name ="newAlbumTitle" id="newAlbumTitle" type="text">
+        <input class="form-control" name ="newAlbumTitle" id="newAlbumTitle" type="text">
         <br>
         <label for="newAlbumDescription"> Album description</label>
-        <input name="newAlbumDescription"  id="newAlbumDescription" type="text">
+        <input class="form-control" name="newAlbumDescription"  id="newAlbumDescription" type="text">
 
        
          

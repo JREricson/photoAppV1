@@ -1,6 +1,6 @@
 
 
-<%- include("../partials/header") %> <%- include("../partials/navbar") %>
+<%- include("../partials/header") %> <%- include("../partials/siteNavbar") %>
 
 <!-- css for justified Gallery -->
 <link
@@ -15,12 +15,15 @@
    href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"
 />
 
+<link
+   rel="stylesheet"
+   href="/styles/albumStyles/album.css"
+/>
+<h1 class="albumName"> <strong><%= album.alb_Name%></strong></h1>
+<h2 class="albumDesc"> <%= album.alb_description%></h2>
 
 
-<!-- edit button -->
-<% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
-   <a class="btn btn-primary btn-md " href="/albums/<%= album._id%>/edit/">edit album</a>
-   <%  } %>
+
 
 
    <!--gettting data to use in script --- might need to find better way to do this-- data esposed and looks ugly-->
@@ -29,7 +32,6 @@
 
 <% if(photoList && ( photoList.length >0 )){%>
 
-   <h1 class="sectionTitle">location of photos from album</h1>
    
    <% }%>
    <div id="mapid"></div>
@@ -37,10 +39,7 @@
 
 <!-- iamge gallery -->
 
-<h1 class="albumName"> <%= album.alb_Name%></h1>
-<h2 class="albumDesc"> <%= album.alb_description%></h2>
-<h3>Submitted by <a href="../users/<%= album.alb_AuthorId%>/profile"</a><%= album.alb_AuthorName%></a> on <%= album.alb_DateCreated%></h3>
-<h3>Last update: <%= album.alb_LastUpdate%> </h3>
+
 <div id="photoGallery">
     <% if( photosFound.length >0 ){ photosFound.forEach((photo, ndx) =>{%>
  
@@ -56,6 +55,14 @@
        <h2>No results to display</h2>
        <% }%>
  </div>
+<!-- edit button -->
+<% if(currentUser && currentUser._id.equals(contentOwner._id)){ %>
+   <a class="btn btn-primary btn-md " href="/albums/<%= album._id%>/edit/">edit album</a>
+   <%  } %>
+
+ <h3>Submitted by <a href="../users/<%= album.alb_AuthorId%>/profile"</a><%= album.alb_AuthorName%></a> on <%= album.alb_DateCreated%></h3>
+<h3>Last update: <%= album.alb_LastUpdate%> </h3>
+
 
 <!--//////////////////////  -->
 <!-- Scripts  -->
@@ -72,10 +79,10 @@
 <script src="../../JustifiedGalleryFiles/jquery.justifiedGallery.min.js"></script>
 
 <!-- justified gallery script for page -->
-<script src="scripts/resizeJustGalScript.js"></script>
+<script src="../../scripts/resizeJustGalScript.js"></script>
 <!-- loading map script-->
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-<script src="scripts/profileMapScript.js"></script>   
+<script src="../../scripts/profileMapScript.js"></script>   
 
 
 

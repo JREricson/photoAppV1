@@ -1,5 +1,4 @@
-<%- include("headerUser") %> <%- include("navbarProfile") %>
-
+<%- include("headerUser") %> <%- include("../partials/siteNavbar") %>
 <h1>about page</h1>
 
 <h1><%= contentOwner.name %></h1>
@@ -9,7 +8,7 @@
 <p><%= contentOwner.bio %></p>
 
 <a href="/users/<%= contentOwner._id %>/settings" class="btn btn-primary btn-sm"
-   >editacount info</a
+   >edit account info</a
 >
 <% if (contentOwner.socialMediaAcnts["instagram"] ) {%>
 <p>
@@ -36,4 +35,4 @@ contentOwner.socialMediaAcnts.fiveHundredpix.length>0) {%>
 </p>
 <% } %> <%- include("footerUser") %> s
 
-<!-- include users stats -->
+

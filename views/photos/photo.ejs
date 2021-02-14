@@ -2,7 +2,7 @@
 <!-- TODO -- add links to nearby photos -->
 <!-- if current user is owner --add button to change photo -->
 
-<%- include("../partials/header") %> <%- include("../partials/navbar") %>
+<%- include("../partials/header") %> <%- include("../partials/siteNavbar") %>
 <!-- adding leaflet map links -->
 <link
    rel="stylesheet"
@@ -20,7 +20,7 @@
    <!-- author and description -->
    <div class="photoDetails">
       <p class="photoCaption"><%=photo.caption%></p>
-      <p class="photoAuthor">Photograper -- <%=photo.author%></p>
+      <p class="photoAuthor">Photograper -- <a href="/users/<%=photo.SubmittedByID%>/profile"><%=photo.author%></a></p>
    </div>
 
    <!-- photo details  -->

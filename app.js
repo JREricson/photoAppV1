@@ -74,7 +74,6 @@ mongoose.set('useFindAndModify', false);
 //Routes
 //////////////////
 app.use('/', require('./routes/index'));
-app.use('/allusers', require('./routes/allUsers'));
 app.use('/users', require('./routes/user'));
 app.use('/photos', require('./routes/photos'));
 app.use('/api', require('./routes/api'));

@@ -1,4 +1,4 @@
-<%- include("headerUser") %> <%- include("../partials/navbar") %>
+<%- include("headerUser") %><%- include("../partials/siteNavbar") %>
 <!-- style sheet for page -->
 
 <link rel="stylesheet" href="../../styles/searchUsers.css" />
@@ -12,14 +12,16 @@
 
 <label for="profileSearch"> search by profile details</label>
 <input
+class="form-control"
    id="profileSearch"
    type="text"
-   placeholder="search by profile"
+   placeholder="search by profile (use full words)"
    data-page="0"
 />
 <br>
 <label for="userSearch"> search by user name</label>
 <input
+class="form-control"
    id="userSearch"
    type="text"
    placeholder="enter user name"
@@ -28,7 +30,7 @@
 <div id="userInfo"></div>
 
 <!-- <div id="loadMoreButtonHolder"></div> -->
-<button id="loadMore" >Load more results</button>
+<button class="btn  btn-info" id="loadMore" >Load more results</button>
 
 
 

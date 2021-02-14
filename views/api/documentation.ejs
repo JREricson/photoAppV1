@@ -8,7 +8,7 @@
        such as upper bounds for the value, this portion of the query will be 
        ignored and the query will run as if that key-value pair was not there.
         When errors are encountered, they will be returned in a list along
-         with the list of values found. Currently, no keys will be generated 
+         with the list of values found. Currently, no errors will be generated 
         if an unrecognized query is entered.  </p>
 
 
@@ -16,7 +16,7 @@
 <br>
 <h2><strong>Photos endpoint</strong> </h2>
 
-<h3><strong>location </strong></h3>
+<h3><strong>Endpoint location </strong></h3>
 <p>api/photos</p>
 
 <H3><strong>Information returned</strong></H3>
@@ -266,7 +266,7 @@
 
     </p>
     <p><Strong>Example Query: </Strong> ?lat=53.4&dateBefore=1-3-2020&fNumberMax=500</p>
-    <p><strong>resulting errors</strong>
+    <p><strong>Resulting errors</strong>
         {
             "photos": [],
             "errors": {
@@ -284,11 +284,11 @@
         </p>
 
 <h2><strong>Users endpoint</strong></h2>
-
-<h3><strong>location: </strong>api/users</h3>
+<h3><strong>Endpoint location </strong></h3>
+<p>api/users</p>
 
 <H3>Information returned:</H3>
-<p>information is returned as a JSON in the format {users:[], errors:{}}</p>
+<p>ISnformation is returned as a JSON in the format {users:[], errors:{}}</p>
 <p>users will contain a list of users with the following infomtation, if present:</p>
     <ul>
         <li>_id</li>
