@@ -45,21 +45,23 @@ indexMidware.loginPost = async (req, res, next) => {
  * @param {*} res
  */
 indexMidware.registerPost = (req, res) => {
-   const { name, email, password, password2 } = req.body;
+   const { name, email, password, password2, authKey } = req.body;
 
    //errors -- will hold a list of all caught errors in registration precess
    let errors = [];
 
-   errors = getValidationErrors(name, email, password, password2);
+   errors = getValidationErrors(name, email, password, password2, authKey);
 
    if (errors.length > 0) {
       //rendering page with user info to put in fields and errors for flash images
-      res.render('auth/register', {
+
+      userMidware.renderPageWithUser(req, res, 'auth/register', {
          errors,
          name,
          email,
          password,
          password2,
+         authKey,
       });
    } else {
       User.findOne({ email: email }).then((user) => {
@@ -100,7 +102,7 @@ indexMidware.teapot = (req, res) => {
 /////////////////
 //helper functions
 /////////////////
-const getValidationErrors = (name, email, password, password2) => {
+const getValidationErrors = (name, email, password, password2, authKey) => {
    errors = [];
 
    //check required fields
@@ -121,6 +123,17 @@ const getValidationErrors = (name, email, password, password2) => {
    if (password.length < 9) {
       errors.push({
          msg: 'all fields are required',
+      });
+   }
+
+   if (!authKey) {
+      errors.push({
+         msg: 'authorization key is needed',
+      });
+   } else if (authKey !== process.env.AUTH_KEY) {
+      //console.log(authKey, ' ', process.env.AUTH_KEY);
+      errors.push({
+         msg: 'authorization key is not valid',
       });
    }
    return errors;

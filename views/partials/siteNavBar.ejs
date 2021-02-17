@@ -63,7 +63,7 @@
 
           <%}%>
 
-          <% console.log('c owner is', contentOwner) %>
+         
 
       </ul>
       <!-- content owner links -->
@@ -72,7 +72,7 @@
       <% if(contentOwner) {%>
         <li class="nav-item active"><a class="nav-link myNavText"><strong>Viewing <%=contentOwner.name %>'s: </strong></a></li>
         <li class="nav-item active">
-          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/profile"> profile</a>
+          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/profile"> Profile</a>
         </li>
         <li class="nav-item active"> 
           <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/photos">Photos </a>
