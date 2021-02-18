@@ -68,7 +68,7 @@ indexMidware.registerPost = (req, res) => {
          if (user) {
             errors.push({ msg: 'Email is already registered' });
             //rerendering page with saved values
-            res.render('auth/register', {
+            userMidware.renderPageWithUser(req, res, 'auth/register', {
                errors,
                name,
                email,
@@ -96,7 +96,7 @@ indexMidware.registerPost = (req, res) => {
  * @param {*} res
  */
 indexMidware.teapot = (req, res) => {
-   res.status(418).send('I am a teapot---you found an easter egg!!');
+   res.status(418).send('I am a teapot');
 };
 
 /////////////////

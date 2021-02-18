@@ -3,6 +3,7 @@ const Photo = require('../models/photo');
 const Album = require('../models/album');
 
 const path = require('path');
+var parentDir = __dirname;
 
 //used to extract photo details
 var exifr = require('exifr');
@@ -29,7 +30,10 @@ userMidware.renderPageWithUser = (req, res, pagePath, objOfValToBeSent) => {
          res.status(500).render('server error');
       } else {
          currentUser = req.user;
-         let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
+         let vals = {
+            ...{ contentOwner, currentUser, parentDir },
+            ...objOfValToBeSent,
+         };
          res.render(pagePath, vals);
       }
    });

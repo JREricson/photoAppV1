@@ -207,6 +207,11 @@ middlewareObj.renderMapPage = async (req, res) => {
 
    console.log('query is:', querystring.stringify(query));
 
+   if (process.env.SITE_URL) {
+      const SERVER = process.env.SITE_URL;
+   } else {
+      const SERVER = process.env.SERVER;
+   }
    const SERVER = process.env.SERVER;
 
    //getting photo obj from api
