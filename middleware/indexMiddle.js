@@ -131,7 +131,7 @@ const getValidationErrors = (name, email, password, password2, authKey) => {
          msg: 'authorization key is needed',
       });
    } else if (authKey !== process.env.AUTH_KEY) {
-      //console.log(authKey, ' ', process.env.AUTH_KEY);
+      //girconsole.log(authKey, ' ', process.env.AUTH_KEY);
       errors.push({
          msg: 'authorization key is not valid',
       });
