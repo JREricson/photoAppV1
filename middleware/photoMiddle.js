@@ -217,7 +217,7 @@ middlewareObj.renderMapPage = async (req, res) => {
 
    //getting photo obj from api
    let photoRes = await fetch(
-      `${SERVER}/api/photos/?${querystring.stringify(query)}`,
+      `${server}/api/photos/?${querystring.stringify(query)}`,
    );
    //will be photo objs sent to user-- empty by default
    let photosFound = {};
@@ -282,11 +282,11 @@ middlewareObj.renderAllPhotosPage = async (req, res) => {
 
    console.log('query is:', querystring.stringify(req.query));
 
-   const SERVER = process.env.SERVER;
+   //const SERVER = process.env.SERVER;
 
    //getting photo obj from api
    let photoRes = await fetch(
-      `${SERVER}/api/photos/?${querystring.stringify(req.query)}`,
+      `${server}/api/photos/?${querystring.stringify(req.query)}`,
    );
    //will be photo objs sent to user-- empty by default
    let photosFound = {};
