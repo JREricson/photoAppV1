@@ -6,6 +6,8 @@ const Photo = require('../models/photo');
 var middlewareObj = {};
 
 const fetch = require('node-fetch');
+const fetchAbsolute = require('fetch-absolute');
+
 const querystring = require('querystring');
 const { findById } = require('../models/user');
 
@@ -14,6 +16,14 @@ const albumMethods = require('../databaseFunctions/albumMethods');
 const userMethods = require('../databaseFunctions/userMethods');
 const userMidware = require('../middleware/userMiddle');
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
+
+if (process.env.SITE_URL) {
+   const SERVER = process.env.SITE_URL;
+   console.log('===================\narrrrrr');
+} else {
+   const SERVER = process.env.SERVER;
+}
+//const SERVER = process.env.SERVER;
 
 //////////////////////////////////
 //Methods for finding information
@@ -206,14 +216,6 @@ middlewareObj.renderMapPage = async (req, res) => {
    const query = req.query;
 
    console.log('query is:', querystring.stringify(query));
-
-   if (process.env.SITE_URL) {
-      const SERVER = process.env.SITE_URL;
-      console.log('===================\narrrrrr');
-   } else {
-      const SERVER = process.env.SERVER;
-   }
-   const SERVER = process.env.SERVER;
 
    //getting photo obj from api
    let photoRes = await fetch(
