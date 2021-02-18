@@ -17,9 +17,9 @@ const userMethods = require('../databaseFunctions/userMethods');
 const userMidware = require('../middleware/userMiddle');
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
-const SERVER = process.env.SERVER;
+var server = process.env.SERVER;
 if (process.env.SITE_URL) {
-   SERVER = process.env.SITE_URL;
+   server = process.env.SITE_URL;
    console.log('===================\narrrrrr');
 }
 
