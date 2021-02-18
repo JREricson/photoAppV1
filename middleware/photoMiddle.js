@@ -17,13 +17,11 @@ const userMethods = require('../databaseFunctions/userMethods');
 const userMidware = require('../middleware/userMiddle');
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
+const SERVER = process.env.SERVER;
 if (process.env.SITE_URL) {
-   const SERVER = process.env.SITE_URL;
+   SERVER = process.env.SITE_URL;
    console.log('===================\narrrrrr');
-} else {
-   const SERVER = process.env.SERVER;
 }
-//const SERVER = process.env.SERVER;
 
 //////////////////////////////////
 //Methods for finding information
