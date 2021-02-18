@@ -37,6 +37,10 @@ const store = new MongoDBStore({
    touchAfter: 24 * 60 * 60, // 1 day
 });
 
+store.on('error', (err) => {
+   console.log('err storing session: ', err);
+});
+
 //Express session
 const sessionConfig = {
    store,
