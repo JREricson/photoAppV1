@@ -209,6 +209,7 @@ middlewareObj.renderMapPage = async (req, res) => {
 
    if (process.env.SITE_URL) {
       const SERVER = process.env.SITE_URL;
+      console.log('===================\narrrrrr');
    } else {
       const SERVER = process.env.SERVER;
    }
