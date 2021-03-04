@@ -13,7 +13,7 @@
    <div class="photoContainer">
       <img
          class="photoImg"
-         src="../../uploads/<%= photo.fileName %>"
+         src="/resources/photos/<%=photo.fileName %>"
          alt="cannnot display image"
       />
    </div>
@@ -39,16 +39,11 @@
                ><strong> Submitted on: </strong>
                <%=photo.dateSubmitted%>
             </p>
-
+         <% if(photo.exifMetaData ){%>
             <p class="photoCameraModel">
                <i class="las la-camera-retro"></i
                ><strong> Camera Model: </strong><%=photo.exifMetaData.Make %>
                <%=photo.exifMetaData.Model%>
-            </p>
-
-            <p class="photoTaken">
-               <i class="lar la-calendar"></i><strong> Time Taken: </strong><%=
-               photo.dateTaken%>
             </p>
 
             <div class="photoSettings">
@@ -61,6 +56,13 @@
                <!-- jam icons has an iris/aperature -->
                <p><span class="your-custom-class" data-jam="aperture" data-fill="#222"></span><span class="jam jam-backpack"></span><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
             </div>
+         <%}%>
+            <p class="photoTaken">
+               <i class="lar la-calendar"></i><strong> Time Taken: </strong><%=
+               photo.dateTaken%>
+            </p>
+
+
 
             <p class="tagList">
                <i class="las la-tags"></i><strong> Tags </strong><%

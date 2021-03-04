@@ -66,6 +66,8 @@
                   ><span id="fileUploadText">Choose jpgs or tiff to upload</span></label
                >
             </div>
+            <!-- holds exif data from script -->
+            <input id="exifData" type="text" name="exifData" value="" hidden>
             <input
                type="submit"
                value="Submit"
@@ -79,9 +81,14 @@
 <!-- TODO is needed??? -->
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <!-- script for generating loaded names -->
-<script src="../../../scripts/uploadScript.js"></script>
+<!-- <script src="/scripts/uploadScript.js"></script> -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
+<script src="/scripts/getExif.js"></script>
 
 
 
 <%- include("footerUser") %>
+
 

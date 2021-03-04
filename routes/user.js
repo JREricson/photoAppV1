@@ -81,9 +81,10 @@ router.post(
    '/:id/photos/upload',
    authMidware.isCurUserContentOwner,
    //putting photos from into an array
-   upload.array('userImage'),
+   // upload.array('userImage'),
+   userMidware.uploadImages,
    //TODO -- make sure no images are saved without being added database
-   userMidware.savePhotosToDBandRenderEditPhotoPage,
+   // userMidware.renderEditPhotoPage,
 );
 
 //edit upload routes

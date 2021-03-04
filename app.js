@@ -98,6 +98,7 @@ app.use('/users', require('./routes/user'));
 app.use('/photos', require('./routes/photos'));
 app.use('/api', require('./routes/api'));
 app.use('/albums', require('./routes/albums'));
+app.use('/resources', require('./routes/resources'));
 
 app.use((req, res, next) => {
    res.status(404).render('404');

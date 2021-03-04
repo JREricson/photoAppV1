@@ -47,7 +47,7 @@
        <img
           class="justifiedGalImg"
           alt="<%= photo.caption %>"
-          src="/uploads/<%= photo.fileName %>"
+          src="/resources/photos/<%= photo.fileName %>"
        />
     </a>
  
@@ -60,7 +60,7 @@
    <a class="btn btn-primary btn-md " href="/albums/<%= album._id%>/edit/">edit album</a>
    <%  } %>
 
- <h3>Submitted by <a href="../users/<%= album.alb_AuthorId%>/profile"</a><%= album.alb_AuthorName%></a> on <%= album.alb_DateCreated%></h3>
+ <h3>Submitted by <a href="../users/<%= album.alb_AuthorId %>/profile"><%= album.alb_AuthorName%></a> on <%= album.alb_DateCreated%></h3>
 <h3>Last update: <%= album.alb_LastUpdate%> </h3>
 
 

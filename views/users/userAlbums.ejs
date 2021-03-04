@@ -14,12 +14,12 @@
 
         <div id="photoGallery">
             
-   
+       
     <% albumList  && albumList.forEach((album)=>{ %>
         <% if(album.alb_coverPhoto.coverFileName){%>
-         <% var photopath = '../../uploads/' +album.alb_coverPhoto.coverFileName%>
+         <% var photopath ="/resources/photos/" + album.alb_coverPhoto.coverFileName%>
             <%  } else { %>
-               <% var photopath = "/images/folder-2103508_1280.png" %>
+               <% var photopath = "/resources/photos/appImgs%2Ffolder-2103508_1280.png" %>
             <%}%>
             <a href="/albums/<%= album._id %>">
                <img

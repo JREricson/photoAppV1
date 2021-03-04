@@ -1,4 +1,4 @@
-<%- include("headerUser") %> <%- include("../partials/nav") %>
+ <%- include("headerUser") %> <%- include("../partials/nav") %>
 
 
 <!-- css for justified Gallery -->
@@ -41,7 +41,7 @@
 
  <div class="carousel-item <%= active %>"> 
     <div class="caroImgContainer">
-   <img class="caroImg"   src="/uploads/<%= photo.fileName %>" alt=" slide <%= ndx %>" />
+   <img class="caroImg"   src="/resources/photos/<%= photo.fileName %>" alt=" slide <%= ndx %>" />
 </div>
 </div>
 
@@ -90,9 +90,9 @@
 <% albumListCut  && albumListCut.forEach((album)=>{ %>
 
    <% if(album.alb_coverPhoto.coverFileName){%>
-    <% var photopath = '../../uploads/' +album.alb_coverPhoto.coverFileName%>
+    <% var photopath = album.alb_coverPhoto.coverFileName%>
        <%  } else { %>
-          <% var photopath = "/images/folder-2103508_1280.png" %>
+          <% var photopath = "https://photoappuploads.s3-us-west-1.amazonaws.com/appImgs/folder-2103508_1280.png" %>
        <%}%>
        <figure class="col-lg-4 col-sm-12 img-fluid galleryfig mx-auto">
          <h4 class="centerItem"><strong><%= album.alb_Name%></strong></h4>
@@ -121,7 +121,8 @@
          <a id=moreGalerriesBtn href="albums" class="btn btn-primary centerItem ">View all galleries</a>
 
 
-<!-- map  --><!-- TODO -- hide map if no images with GPS tags or have it show home location -->
+<!-- map  -->
+<!-- TODO -- hide map if no images with GPS tags or have it show home location -->
 <% if(photoList && ( photoList.length >0 )){%>
 
 <h1 class="sectionTitle">Places where <%= contentOwner.name%> has photographed</h1>

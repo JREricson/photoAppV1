@@ -30,12 +30,4 @@ router.delete(
    albumMidware.ASYNCpostDeleteRequest,
 );
 
-//edit single album
-router.get(
-   '/:albumID/edit' /* authMidware.checkUserPhotoOwner, */,
-   async (req, res) => {
-      //photoMidware.renderPageWithUserAndPhoto(req, res, 'photos/edit');
-   },
-);
-
 module.exports = router;
