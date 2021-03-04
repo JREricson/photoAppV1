@@ -92,12 +92,11 @@
          <%} %>
 
 <% albumListCut  && albumListCut.forEach((album)=>{ %>
-
    <% if(album.alb_coverPhoto.coverFileName){%>
-    <% var photopath = album.alb_coverPhoto.coverFileName%>
-       <%  } else { %>
-          <% var photopath = "https://photoappuploads.s3-us-west-1.amazonaws.com/appImgs/folder-2103508_1280.png" %>
-       <%}%>
+      <% var photopath ="/resources/photos/" + album.alb_coverPhoto.coverFileName%>
+         <%  } else { %>
+            <% var photopath = "/resources/photos/appImgs%2Ffolder-2103508_1280.png" %>
+         <%}%>
        <figure class="col-lg-4 col-sm-12 img-fluid galleryfig mx-auto">
          <h4 class="centerItem"><strong><%= album.alb_Name%></strong></h4>
          <p class="centerItem">
@@ -107,8 +106,8 @@
           <img
              class="img-fluid"
              alt="<%=  album.alb_Name %>"
-             src="/resources/photos/<%=photo.fileName %>"
-          />
+             src="<%= photopath %>"
+  
        </a>
   
 
