@@ -14,7 +14,7 @@ middlewareObj.userFuzzyAutoCompleteSearch = async (req, res) => {
             $search: {
                autocomplete: {
                   query: `${req.query.search}`,
-                  path: ['name', 'bio', 'website'],
+                  path: 'name', // 'bio', 'website'],
                   fuzzy: { maxEdits: 2 },
                },
             },
