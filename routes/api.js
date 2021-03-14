@@ -18,6 +18,8 @@ const { query } = require('express');
 
 router.get('/', apiMidware.showApiInfoPage);
 
+router.get('/users/auto', apiMidware.userFuzzyAutoCompleteSearch);
+
 router.get('/users', async (req, res) => {
    const query = req.query;
 
