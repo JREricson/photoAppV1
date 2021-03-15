@@ -74,7 +74,7 @@ if (photosJSON[0]) {
                maxHeight +
                'px" src="/resources/photos/' + //TODO would want to change to a thumbnail
                photo.fileName +
-               '"/> <a/>' +
+               '/thumb/200"/> <a/>' +
                //photo caption
                '<h3>' +
                photo.caption +

@@ -80,12 +80,13 @@ const PhotoSchema = new Schema({
 PhotoSchema.plugin(textSearch);
 
 //adding indexes
-PhotoSchema.index({ location_2dsphere: '2dsphere' });
+
 PhotoSchema.index(
    { tags: 'text' },
    { author: 'text' },
    { description: 'text' },
    { caption: 'text' },
+   { location_2dsphere: '2dsphere' },
 );
 
 const Photo = mongoose.model('Photo', PhotoSchema);

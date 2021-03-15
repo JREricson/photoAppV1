@@ -56,7 +56,7 @@ const generatePhotoHtml = (photoJSON) => {
              <img
                 class="justifiedGalImg"
                 alt="${photo.caption}"
-                src="/resources/photos/${photo.fileName}"
+                src="/resources/photos/${photo.fileName}/thumbs/500"
              />
           </a>`;
       });

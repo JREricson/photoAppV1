@@ -72,7 +72,11 @@ photoMethods.removeMultiplePhotosFromDBAndFS = async (photoIDList) => {
    let keyList = [];
    photoList.forEach((photo) => {
       //errorList = { ...errorList, ...eList };;
-      keyList.push({ Key: photo.fileName }); //{ ...keyObj, ...{ Key: photo.fileName } };
+      keyList.push({ Key: photo.fileName });
+      //extract below to function
+      keyList.push({ Key: 'thumb-200/' + photo.fileName });
+      keyList.push({ Key: 'thumb-500/' + photo.fileName });
+      keyList.push({ Key: 'thumb-2000/' + photo.fileName });
       console.log('removing photo :', photo.fileName);
    });
 

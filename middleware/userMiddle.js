@@ -351,15 +351,22 @@ async function addPhotosToDB(req, user, albums, newPhotos) {
    console.log('files', req.files);
    await Promise.all(
       req.files.map(async (img, ndx) => {
-         console.log('------->', img);
-         console.log('loc------->', img.location);
-         console.log('key------->', img.key);
+         console.log('tran------->', img.transforms[0].location);
+         let str = img.transforms[0].location;
+         let lastSlash = str.lastIndexOf('/');
+
+         let fileName = str.substring(lastSlash + 1);
+         let fileLocation =
+            `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/` +
+            fileName;
+         console.log('loc------->', fileLocation);
+         console.log('key------->', fileName);
 
          let newPhotoParams = {
             author: user.name,
             SubmittedByID: user._id,
-            fileName: img.key,
-            fileLocation: img.location,
+            fileName,
+            fileLocation,
          };
 
          let exif = userMidware.getExifDataFromForm(req, img, ndx);

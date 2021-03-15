@@ -30,14 +30,16 @@
     "justifiedGallery": "^3.8.1",
     "method-override": "^3.0.0",
     "mocha": "^8.2.1",
-    "mongoose": "^5.9.22",
+    "mongoose": "^5.12.0",
     "mongoose-text-search": "0.0.2",
     "multer": "^1.4.2",
     "multer-gridfs-storage": "^4.2.0",
     "multer-s3": "^2.9.0",
+    "multer-s3-transform": "^2.10.3",
     "node-fetch": "^2.6.1",
     "passport": "^0.4.1",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "sharp": "^0.27.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

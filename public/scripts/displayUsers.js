@@ -9,12 +9,28 @@ let profileSearch = document.getElementById('profileSearch');
 let userInfo = document.getElementById('userInfo');
 let data = document.getElementById('variables');
 let done = true;
+const TIMER_MAX = 1000;
+let timer = TIMER_MAX;
 
 const userSearchClickListener = async () => {
    data.dataset.searchType = 'name';
    data.dataset.page = 0;
-   userInfo.innerHTML = '';
-   await searchUsers();
+
+   await setCountDown();
+};
+
+const setCountDown = async () => {
+   if (timer == TIMER_MAX) {
+      console.log('timer st.');
+      while (timer != 0) {
+         timer--;
+      }
+      userInfo.innerHTML = '';
+      await searchUsers();
+      timer = TIMER_MAX;
+   } else {
+      timer = TIMER_MAX;
+   }
 };
 
 // let page = data.dataset.page;
@@ -31,7 +47,7 @@ profileSearch.addEventListener('input', async () => {
 
    userInfo.innerHTML = '';
 
-   await searchUsers();
+   await setCountDown();
 });
 
 //calls users api to genterate list of users and add it to screen
@@ -50,15 +66,14 @@ const searchUsers = async () => {
       const usersRes = await fetch(
          `../api/users/?${data.dataset.searchType}=${searchText}&page=${data.dataset.page}&limit=${data.dataset.limit}`,
       );
-      // console.log(
-      //    `../api/users/?${data.dataset.searchType}=${searchText}&page=${data.dataset.page}&limit=${data.dataset.limit}`,
-      // );
 
       //if users data is good -- add users details to search results on screen
       if (usersRes.ok) {
          //contains entire JSON
          let userJSON = await usersRes.json();
-
+         if (data.dataset.page == 0) {
+            userInfo.innerHTML = '';
+         }
          await showResultsOnPage(userJSON.users);
       } else {
          console.log('problem gettingJSON'); //TODO  -- better err handling
@@ -73,32 +88,11 @@ const searchUsers = async () => {
 const showResultsOnPage = async (users) => {
    let html = '';
 
-   if (users.length > 0) {
-      users.forEach(async (user, ndx) => {
-         //TODO -- test this with more data
-         html += `<div class="card card-body">
-         <h3> Name:  ${user.name}</h3>
-         <h4> \Bio: ${user.bio}</h4>
-          <span class="photoHolder"> 
-        `;
-
-         if (user.allPhotos && user.allPhotos.length > 0) {
-            for (i = 0; i < user.allPhotos.length && i < 3; i++) {
-               html += await generatePhotoImage(user.allPhotos[i]);
-            }
-         } else {
-            html += `<h3>${user.name} has not added any photos</h3>`;
-         }
-
-         html += ` </span> 
-               <a href="/users/${user._id}/profile" class="btn btn-primary">View Profile</a>
-               </div>`;
-
-         userInfo.innerHTML += html;
-      });
-
-      //console.log('cur html', userInfo.innerHTML);
+   for (const user of users) {
+      await generateSeachHtml(user);
    }
+
+   //console.log('cur html', userInfo.innerHTML);
 
    //Toggling show more button based on user list size
    if (users.length > 0) {
@@ -116,6 +110,30 @@ loadMoreButton.addEventListener('click', async () => {
    await searchUsers();
 });
 
+const generateSeachHtml = async (user) => {
+   console.log('html func');
+   //TODO -- test this with more data
+   html = `<div class="card card-body">
+<h3> Name:  ${user.name}</h3>
+<h4> \Bio: ${user.bio}</h4>
+ <span class="photoHolder"> 
+`;
+
+   if (user.allPhotos && user.allPhotos.length > 0) {
+      for (i = 0; i < user.allPhotos.length && i < 3; i++) {
+         html += await generatePhotoImage(user.allPhotos[i]);
+      }
+   } else {
+      html += `<h3>${user.name} has not added any photos</h3>`;
+   }
+
+   html += ` </span> 
+      <a href="/users/${user._id}/profile" class="btn btn-primary">View Profile</a>
+      </div>`;
+
+   userInfo.innerHTML += html;
+};
+
 const generatePhotoImage = async (photoId) => {
    imgElement = '';
 
@@ -126,7 +144,7 @@ const generatePhotoImage = async (photoId) => {
       photoJSON = await photoRes.json();
       console.log(photoJSON);
       if (photoJSON.photos && photoJSON.photos.length > 0) {
-         imgElement += `<img class="searchUserPhoto"  src="/uploads/${photoJSON.photos[0].fileName}"></img> `;
+         imgElement += `<img class="searchUserPhoto"  src="resources/photos/${photoJSON.photos[0].fileName}/thumb/200"></img> `;
       }
    } else {
       imgElement += '<h2>No photos added</h2>';

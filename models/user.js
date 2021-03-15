@@ -1,7 +1,8 @@
 /*jshint esversion: 6 */
 const mongoose = require('mongoose'),
    Schema = mongoose.Schema,
-   ObjectId = Schema.ObjectId;
+   ObjectId = Schema.ObjectId,
+   textSearch = require('mongoose-text-search');
 
 const UserSchema = new Schema({
    name: {
@@ -63,11 +64,17 @@ const UserSchema = new Schema({
    },
    homeLocation: {
       type: String,
-      //index: true,
    },
 });
 
 //UserSchema.index({ name: 'text', brandName: 'text' });
-
+UserSchema.plugin(textSearch);
+UserSchema.index({
+   name: 'text',
+   brandName: 'text',
+   website: 'text',
+   bio: 'text',
+   homeLocation: 'text',
+});
 const User = mongoose.model('User', UserSchema);
 module.exports = User;

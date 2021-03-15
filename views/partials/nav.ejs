@@ -2,10 +2,10 @@
 
 <nav id="profileNav" class="navbar navbar-fixed-top navbar-expand-md navbar-dark bg-dark">
   <a class="navbar-brand CompanyBrand  myNavText" href="/">PhotoAdventures</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menueItems" aria-controls="menueItems" aria-expanded="false" aria-label="Toggle navigation">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuItems" aria-controls="menuItems" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon  "></span>
   </button>
-  <div class="collapse navbar-collapse " id="menueItems">
+  <div class="collapse navbar-collapse " id="menuItems">
           <!-- auth links -->
       <!-- <div class="authItems"> -->
         <ul class=" navbar-nav ">
@@ -46,6 +46,11 @@
       <li class="nav-item active">
         <a class="nav-link myNavText" href="/photos/map">Mapped Exploration</a>
       </li>
+
+      
+      <li class="nav-item active">
+        <a class="nav-link myNavText" href="/api">API</a>
+      </li>
     </ul>
     <ul class=" navbar-nav mr-auto">
 
@@ -84,7 +89,7 @@
   
   
         <li class="nav-item active">
-          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/contact">Contact</a>
+          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/settings">Settings</a>
         </li>
   
          <!--only show if user has these-->

@@ -288,7 +288,7 @@
 <p>api/users</p>
 
 <H3>Information returned:</H3>
-<p>ISnformation is returned as a JSON in the format {users:[], errors:{}}</p>
+<p>Information is returned as a JSON in the format {users:[], errors:{}}</p>
 <p>users will contain a list of users with the following infomtation, if present:</p>
     <ul>
         <li>_id: Id of user.</li>
@@ -379,7 +379,7 @@
    
        <li>dateAfter and dateBefore:           
         <ul>
-            <li><strong>Description:</strong> Searches for photos TAKEN before and after dates inputed. Dates in query are all in UTC. Date format is yyyy-mm-dd. If bothd dateAfter and dateBefore are the same value, searches will be done for a range between taht value and 1 day after that value.   </li>
+            <li><strong>Description:</strong> Searches for photos TAKEN before and after dates inputed. Dates in query are all in UTC. Date format is yyyy-mm-dd. If both dateAfter and dateBefore are the same value, searches will be done for a range between taht value and 1 day after that value.   </li>
             <li><strong>Limits:</strong> Will not accept dates with wrong format. Date in formats that do not exist, such as 2020-02-29, may lead to unpredictable behavior. Query may run with a different date or it may return other errors.</li>
             <li><strong>Error catagory:</strong> dateErrors</li>
         </ul>
@@ -412,7 +412,7 @@
         <li>limit:
             <ul>
                 <li><strong>Description:</strong> Limits number of results returned. Used in conjuction with page. Add query "page=0" for first set of results</li>
-               <li><strong>Example query:</strong>limit=2&page=1, this will give the 3rd and 4th results if they exist.</li>
+               <li><strong>Example query:</strong>?limit=2&page=1, this will give the 3rd and 4th results if they exist.</li>
                <li><strong>Limits:</strong> Values for both page and limit must be provided as integers. Max value or page is 10000 and max value for limit is 500</li>
                <li><strong>Error catagory:</strong> pageLimits</li>
            </ul>   

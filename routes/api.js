@@ -48,8 +48,8 @@ router.get('/users', async (req, res) => {
       makeIdSearchObj,
       makeSearchObj, //doubleCheck if correct
       makeBioObj,
-      makeDateObj, //us
-      makeNameObj, //use user obj
+      makeDateObj,
+      makeNameObj,
       makeHomeLocationObj,
       makeWebsiteObj,
    ];
@@ -262,11 +262,16 @@ router.get('/photos', async (req, res) => {
    console.log('looking for============>' + JSON.stringify(searchObj));
    let photosObj;
    try {
-      photosObj = await Photo.find(searchObj)
+      photosObj = await Photo.find(
+         searchObj /*  {
+         projection: { _id: 1, exifMetaData: 1, SubmittedByID: 1 },
+      } */,
+      )
          .collation({ locale: 'en' })
          .sort(sortObj)
          .skip(page * limit) //will ignore skip when both are null
          .limit(limit); // ignores limit if it is null
+
       res.json({ photos: photosObj, errors: errorList });
    } catch {
       console.log('probem with query');
@@ -678,9 +683,18 @@ validateWebsite = (query) => {
 /**
  * need to make $text index in database for function to work
  */
-makeSearchObj = (query) => {
-   (curSearchObj = { $text: { $search: query.search } }),
-      { score: { $meta: 'textScore' } }; //used for sorting
+// makeSearchObj = (query) => {
+//    (curSearchObj = { $text: { $search: query.search } }),
+//       { score: { $meta: 'textScore' } }; //used for sorting
+//    return curSearchObj;
+// };
+
+makeSearchObj = (query, pathArray) => {
+   curSearchObj = {
+      $text: {
+         $search: query.search,
+      },
+   };
    return curSearchObj;
 };
 
