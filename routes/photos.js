@@ -1,17 +1,14 @@
 const express = require('express');
-
 const router = express.Router();
 const { Mongoose, SchemaTypes } = require('mongoose');
 
 //middleware
-// const authMidware = require('../middleware/authMiddle');
 const authMidware = require('../middleware/authMiddle');
-const userMidware = require('../middleware/userMiddle');
 const photoMidware = require('../middleware/photoMiddle');
 
-//mongoDB SchemaTypes
-const User = require('../models/user');
-const Photo = require('../models/photo');
+//////////////
+//routes
+//////////////
 
 //show photo
 router.get('/:photoID/photo', (req, res) => {
@@ -39,7 +36,6 @@ router.get(
 router.get('/map', photoMidware.renderMapPage);
 
 //view all photos
-
 router.get('/', photoMidware.renderAllPhotosPage);
 
 module.exports = router;

@@ -51,6 +51,9 @@ const PhotoSchema = new Schema({
    //       loc  : { type: [Number], index: '2dsphere' }
    //   });
 
+   /**
+    *
+    */
    location_2dsphere: {
       type: { type: String, default: 'Point' },
       //CAUTION -- stored as [long, lat] in geoJSON
@@ -77,10 +80,8 @@ const PhotoSchema = new Schema({
    },
 });
 
-PhotoSchema.plugin(textSearch);
-
 //adding indexes
-
+PhotoSchema.plugin(textSearch);
 PhotoSchema.index(
    { tags: 'text' },
    { author: 'text' },

@@ -3,7 +3,6 @@ const User = require('../models/user');
 
 //for encription
 const bcrypt = require('bcryptjs');
-const passport = require('passport');
 
 ///
 const photoMethods = require('./photoMethods');
@@ -11,8 +10,12 @@ const albumMethods = require('./albumMethods');
 
 var userMethods = {};
 
-/** createUser
- *
+///////////////
+//create methods
+///////////////
+
+/**
+ *Creates a new user based on params. password
  * @param {*} name
  * @param {*} password
  * @param {*} email
@@ -25,60 +28,69 @@ userMethods.createUser = async (name, password, email) => {
    });
 
    //encrypting password
-   bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(newUser.password, salt, (err, hash) => {
-         if (err) throw err; //TODO handle error
-         newUser.password = hash;
-         newUser.save().catch((err) => console.log(err));
-      });
-   });
+   encryptPasswordAndSaveUser(newUser);
    return newUser;
 };
 
-/////////////////////////////////////
+///////////////
+//read methods
+///////////////
 
-//TODO - extract to userMiddle
-userMethods.deleteUser = async (user) => {
-   //TODO include error checking
-   //get photolist
-   var photoList = user.allPhotos;
+///////////////
+//update methods
+///////////////
 
-   //remove photos in list from database
-   await photoMethods.removeMultiplePhotosFromDBAndFS(photoList);
+///////////////
+//delete methods
+///////////////
 
-   //remove all albums
-   await albumMethods.removeAllAlbumsWithUserId(user._id);
-
-   //remove user
-   await userMethods.deleteUserOnly(user._id);
-};
-
-userMethods.deleteUserOnly = (userID) => {
+/**
+ * Deletes user with userID from database
+ * @param {*} userID
+ */
+userMethods.deleteUser = (userID) => {
    User.findByIdAndRemove(userID, function (err) {
       if (err) {
          console.log('error removing user \n' + err);
-         // res.send('error -- contact admin');
       }
    });
 };
 
-userMethods.addPhotoToUserList = async (req, newPhotoId) => {
-   req.user.allPhotos.push(newPhotoId);
-   req.user.save();
-};
+/////////////////////////////////////
 
-userMethods.ASYNCremovephotosFromUserList = async (req, photoList) => {
-   console.log(
-      'attempting to remove photos from user list with id ',
-      req.user._id,
-   );
+//make sure not needed before delete
+// userMethods.addPhotoToUserList = async (req, newPhotoId) => {
+//    req.user.allPhotos.push(newPhotoId);
+//    req.user.save();
+// };
+
+userMethods.ASYNCremovephotosFromUserList = async (userId, photoList) => {
+   console.log('attempting to remove photos from user list with id ', userId);
    console.log('photolist', photoList);
-   await User.update(
-      { _id: req.user._id },
+   await User.updateOne(
+      { _id: userId },
       {
          $pull: { allPhotos: { $in: photoList } },
       },
    );
+};
+
+/////////////////
+//helper functions
+/////////////////
+
+/**
+ * Changes password to encrypted password and saves user to database
+ * @param {*} newUser
+ */
+const encryptPasswordAndSaveUser = (newUser) => {
+   bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(newUser.password, salt, (err, hash) => {
+         if (err) throw err;
+         newUser.password = hash;
+         newUser.save().catch((err) => console.log(err));
+      });
+   });
 };
 
 ///////////////////////////

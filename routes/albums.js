@@ -6,15 +6,7 @@ const { Mongoose, SchemaTypes } = require('mongoose');
 
 //middleware
 // const authMidware = require('../middleware/authMiddle');
-const authMidware = require('../middleware/authMiddle');
-const userMidware = require('../middleware/userMiddle');
-const photoMidware = require('../middleware/photoMiddle');
 const albumMidware = require('../middleware/albumMiddle');
-
-//mongoDB SchemaTypes
-const User = require('../models/user');
-const Photo = require('../models/photo');
-const Album = require('../models/album');
 
 //show album
 router.get('/:albumID/', albumMidware.ASYNCrenderAlbumPage);

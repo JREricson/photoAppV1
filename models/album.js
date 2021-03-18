@@ -32,7 +32,6 @@ const AlbumSchema = new mongoose.Schema({
       type: [ObjectId],
       default: [],
    },
-
    alb_LastUpdate: {
       type: Date,
       required: true,
@@ -41,7 +40,6 @@ const AlbumSchema = new mongoose.Schema({
       type: Date,
       required: true,
    },
-
    alb_coverPhoto: {
       //TODO refractor to be constistant wth cap
       coverID: { type: ObjectId },

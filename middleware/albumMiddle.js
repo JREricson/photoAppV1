@@ -245,7 +245,7 @@ middlewareObj.ASYNCverifyPhotosInListThenDelete = async (req) => {
       //deleteing albums in list
       if (photoOwnershipVerified) {
          console.log('approved to delete files');
-         await albumMethods.deletePhotosFromAlbumsAndPhotosAndFs(
+         await albumMethods.deletePhotosFromAlbumsAndDbAndFs(
             photoIdArrayToDelete,
          );
          await albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList(
@@ -428,7 +428,11 @@ middlewareObj.ASYNChandleDeleteRequest = async (req) => {
       album &&
          photoMethods.removeMultiplePhotosFromDBAndFS(album.alb_PhotoList);
 
-      album && userMethods.ASYNCremovephotosFromUserList(album.alb_PhotoList);
+      album &&
+         userMethods.ASYNCremovephotosFromUserList(
+            req.user._id,
+            album.alb_PhotoList,
+         );
    } else if (deleteOption === 'deleteAlbumOnly') {
       console.log('deleting dat alb');
       let album = await Album.findByIdAndRemove(req.params.albumID);

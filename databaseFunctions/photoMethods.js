@@ -58,9 +58,7 @@ photoMethods.makeGeoJSONObj = (latitude, longitude) => {
 //\
 
 /**
- * removeMultiplePhotosFromDBAndFS
  *
- * remove all photo obj from PhotoIDs
  * @param {*} photoIDList
  */
 photoMethods.removeMultiplePhotosFromDBAndFS = async (photoIDList) => {
@@ -90,36 +88,6 @@ photoMethods.removeMultiplePhotosFromDBAndFS = async (photoIDList) => {
       await Photo.findByIdAndDelete(id);
    });
    ndeleteFilesFromS3('photoappuploads', keyList);
-
-   //removeFilesInPathList(pathList);
-   // console.log('deleting photos in list :', photoIDList);
-   //remove from database
-};
-
-//remove photo obj from PhotoID
-photoMethods.removeSinglePhotoFromDBAndFS = async (photoID) => {
-   //removing photo from db and finding photo info
-
-   let photo = await Photo.findById(photoID);
-
-   Photo.findByIdAndRemove(photoID, function (err) {
-      if (err) {
-         console.log('error removing photo \n' + err);
-      }
-   });
-
-   console.log('photo===========> ', photo);
-
-   //removing photo from db
-   fs.unlink(photo.fileLocation, (err) => {
-      if (err) {
-         console.error('cannnot remove file,: ', err);
-      }
-   });
-
-   photoMethods.removePhotoFromFileSystem = (photopath) => {
-      //stub
-   };
 };
 
 /**
@@ -184,7 +152,8 @@ const ndeleteFilesFromS3 = (bucket, keyList) => {
    });
 };
 
-function removeFilesInPathList(pathList) {
+//old method-- saved incase using fs again
+/* function removeFilesInPathList(pathList) {
    pathList.forEach((path) => {
       //maybe do async
       fs.unlink(path, (err) => {
@@ -194,4 +163,27 @@ function removeFilesInPathList(pathList) {
          }
       });
    });
-}
+} */
+
+//old method-- saved incase using fs again
+/* //remove photo obj from PhotoID
+photoMethods.removeSinglePhotoFromDBAndFS = async (photoID) => {
+   //removing photo from db and finding photo info
+   let photo = await Photo.findById(photoID);
+
+   Photo.findByIdAndRemove(photoID, function (err) {
+      if (err) {
+         console.log('error removing photo \n' + err);
+      }
+   });
+
+   //removing photo from db
+   fs.unlink(photo.fileLocation, (err) => {
+      if (err) {
+         console.error('cannnot remove file,: ', err);
+      }
+   });
+   photoMethods.removePhotoFromFileSystem = (photopath) => {
+      //stub
+   };
+}; */

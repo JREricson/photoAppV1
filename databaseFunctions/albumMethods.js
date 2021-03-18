@@ -46,18 +46,84 @@ albumMethods.createNewAlbum = (user, albumName) => {
 ////////////
 //read methods
 ////////////////
-albumMethods.ASYNCfindAllAlbumsByUserId = async (userId) => {
-   albums = await Album.find({
+
+/**
+ * generates list of all albums
+ * @param {*} userId
+ * @returns list of album IDs
+ */
+albumMethods.ASYNCfindAllAlbumsFromUserId = async (userId) => {
+   let albums = await Album.find({
       alb_AuthorId: userId,
    });
    return albums;
 };
 
+/**
+ * Creates list of album objects that have a photo ID in photoIdList
+ * @param {*} photoIdList
+ * @returns list of album objects
+ */
+albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList = async (
+   photoIdList,
+) => {
+   console.log('creating alb list');
+   let albums = await Album.find({
+      alb_PhotoList: { $in: photoIdList },
+   });
+   //console.log('albums with Id:', albums);
+   return albums;
+};
+
+/**
+ * Creates list of album ids that have a photo ID in photoIdList
+ * @param {*} photoIdList
+ * @returns list of album ids
+ */
+albumMethods.createIdArrayForAlbumsContainingPhotoIdInPhotoList = async (
+   photoIdList,
+) => {
+   let IdList = [];
+   console.log('creating alb Id list');
+   let albums = await Album.find({
+      alb_PhotoList: { $in: photoIdList },
+   });
+   albums &&
+      albums.forEach((album) => {
+         IdList.push(album._id);
+      });
+   console.log('the list of all alb with photo in list is ', IdList);
+
+   //console.log('albums with Id:', albums);
+   return IdList;
+};
+
+/**
+ * Pulls upto date album objects from database. purpose: used if albums have changed and object list is not currentS
+ * @param {*} albums list of album objects
+ * @returns list of album objects
+ */
+albumMethods.ASYNCrefreshAlbumList = async (albums) => {
+   let albIdList = [];
+   albums.forEach((album) => {
+      albIdList.push(album._id);
+   });
+
+   let editedAlbums = await Album.find({
+      _id: { $in: albIdList },
+   });
+   return editedAlbums;
+};
 /////////////
 //update methods
 //////////////
 
 //TODO see if can clean up with less findbyId methods
+
+/**
+ * Used to make first photo in album, the cover photo if there is no current cover photo.
+ * @param {*} albumList a list of Album objs
+ */
 albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
    console.log('in adding cover func');
    albumList.forEach(async (album) => {
@@ -92,43 +158,111 @@ albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
       }
    });
 };
+////////////////////////////////////////////
+//update methods that remove data/references
+////////////////////////////////////////////
 
-/** updateAlbum
- *
- * updates album based on params that correspond to fields in album schema
- *TODO -- add validation in fucntion
- * @param {*} userId -id of content owner
- * @param {*} albumID
- * @param {*} objOfItemsToUpdate - obj in form sent to mongo  update methods - can include {alb_Name: albumName,
-      alb_shortDescription: albumShortDesc,
-      alb_description: albumDesc,
-      alb_PhotoList: photoList,
-      alb_coverPhoto:}
- *
- * @return returns updated obj
+/**
+ * Removes any reference to photos in photoIdList from albums referenced in albumIdList. (Removes cover photo if in photoIdList and removes photos from album photolist)
+ * @param {*} albumIdList
+ * @param {*} photoIdList
  */
-albumMethods.updateAlbum = async (userId, albumId, objOfItemsToUpdate) => {
-   //TODO -- write method to validate ownership
-   // let validatedAlbumBool = await albumMethods.ASYNCisUserOwnerOfAlbum(userId, albumId);
+albumMethods.ASYNCremoveAllAlbumReferencesToPhotosInList = async (
+   albumIdList,
+   photoIdList,
+) => {
+   await albumMethods.deletePhotoIdsFromAlbumsInList(albumIdList, photoIdList);
 
-   //finding album and updating all info
-   Album.findByIdAndUpdate(albumId, objOfItemsToUpdate, (err, updatedAlbum) => {
-      //TODO -- Change to update many
-      if (!updatedAlbum) {
-         console.log('\n\n!!!!!!!could not update album'); //Delete
-         console.log(err);
-      } else {
-         console.log('\n\n/////// updated album\n' + updatedAlbum); //Delete
-         return updatedAlbum;
+   await albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList(photoIdList);
+};
+
+/**
+ * Removes Ids in photoIdList from all albums in albumIdList
+ * Does NOT delete photo objs
+ * @param {*} albumIdList list of albums to remove photos from
+ * @param {*} photoIdList list of Ids to Remove
+ */
+albumMethods.deletePhotoIdsFromAlbumsInList = async (
+   albumIdList,
+   photoIdList,
+) => {
+   console.log('attempting to delete photos from album(s) ');
+   let photoListObj = {};
+
+   console.log('PhotoListObj', photoListObj);
+   console.log('alb Id List', albumIdList);
+
+   try {
+      await Album.updateMany(
+         { _id: { $in: albumIdList } },
+         { $pull: { alb_PhotoList: { $in: photoIdList } } },
+      );
+   } catch {
+      console.log('cannot delete');
+   }
+};
+
+/**
+ * Removes any reference to photos in photoIdList from album with albumId. (Removes cover photo if in photoIdList and removes photos from album photolist)
+ * @param {*} albumId
+ */
+albumMethods.ASYNCfindAndRemoveAllReferencesToPhotosInAlbum = async (
+   albumId,
+) => {
+   let album = await Album.findById(albumId);
+   let photoIdList = album.alb_PhotoList;
+   console.log('removing all references to photos in list:', photoIdList);
+   let albumIdList = await albumMethods.createIdArrayForAlbumsContainingPhotoIdInPhotoList(
+      photoIdList,
+   );
+   console.log('lb id list izzzz :', albumIdList);
+
+   await albumMethods.ASYNCremoveAllAlbumReferencesToPhotosInList(
+      albumIdList,
+      photoIdList,
+   );
+};
+/**
+ * Removes the cover photo for any album in albumList
+ * @param {*} albumList list of album objects
+ */
+albumMethods.ASYNCremoveCoverPhoto = async (albumList) => {
+   console.log(' in ASYNCremoveCoverPhoto');
+   albumList.forEach(async (album) => {
+      if (album.alb_coverPhoto.coverFileName) {
+         console.log('attempting to remove za alb cover');
+         await Album.updateOne(
+            { _id: album._id },
+            { $unset: { alb_coverPhoto: '' } },
+         );
       }
    });
 };
 
+/////////////
+//delete methods
+//////////////
+
+//todo rewrite with scess failure options
+/**
+ * Used to remove all albums belonging to a user. Does NOT delete photos in the album
+ * @param {*} userId
+ */
 albumMethods.removeAllAlbumsWithUserId = async (userId) => {
    console.log('attemping to delete all albums wth id:', userId);
    await Album.deleteMany({ alb_AuthorId: userId });
 };
 
+/////////////
+//validation methods
+//////////////
+
+/**
+ * Checks that user is the owner of the album. Originally made to safe guard againstpost  requests.
+ * @param {*} userId
+ * @param {*} albumId
+ * @returns ownership boolean
+ */
 albumMethods.ASYNCisUserOwnerOfAlbum = async (userId, albumId) => {
    let returnBool = false;
    await Album.findById(albumId, (err, album) => {
@@ -148,39 +282,44 @@ albumMethods.ASYNCisUserOwnerOfAlbum = async (userId, albumId) => {
    return returnBool;
 };
 
-//...................
-albumMethods.getAlbumsFromUserId = async (userId) => {
-   let albumList = await Album.find({ alb_AuthorId: userId });
-   return albumList;
-};
+///////////////////////////////
+//Todo -- go through func below check working properly
+///////////////////////////////
+/////////////////////////////
 
-albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs = async (
-   albumIdList,
+/**
+ * Checks if a photoID in photoIdList is the cover of an album. If it is, the first photo in the list is changed to the album cover
+ * @param {*} photoIdList
+ */
+albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList = async (
    photoIdList,
 ) => {
-   console.log('attempting to delete photos from album(s) ');
-   let photoListObj = {};
-   // let photoIdList = [];
+   let albums = await Album.find({
+      'alb_coverPhoto.coverID': { $in: photoIdList },
+   });
+   console.log('album before removal of cover', albums);
 
-   // photoIdList.forEach((id) => {
-   //    // photoListObj = { ...photoListObj, ...{ photoIdList: id } };
-   //    photoIdList.push(id);
-   //    console.log('da Is iz:', id);
-   // });
-   console.log('PhotoListObj', photoListObj);
-   console.log('alb Id List', albumIdList);
+   await albumMethods.ASYNCremoveCoverPhoto(albums);
+   let editedAlbums = await albumMethods.ASYNCrefreshAlbumList(albums);
+   //delete below
+   //
 
-   try {
-      await Album.updateMany(
-         { _id: { $in: albumIdList } },
-         { $pull: { alb_PhotoList: { $in: photoIdList } } },
-      );
-   } catch {
-      console.log('cannot delete');
-   }
+   console.log('album after removal of cover', editedAlbums);
+
+   //delete above
+
+   await albumMethods.addFirstPhotoAsCoverImageIfNonePresent(editedAlbums);
 };
 
-albumMethods.deletePhotosFromAlbumsAndPhotosAndFs = async (photoIdList) => {
+//...................
+
+//Todo-- move to album middle
+//Note! this function couples albumMethods with photoMethods
+/**
+ * removes all Photos in list from database, S3 file system, and references to ids
+ * @param {*} photoIdList
+ */
+albumMethods.deletePhotosFromAlbumsAndDbAndFs = async (photoIdList) => {
    console.log('attempt to delete all photos from fs');
 
    let albumList = await albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList(
@@ -204,107 +343,25 @@ albumMethods.deletePhotosFromAlbumsAndPhotosAndFs = async (photoIdList) => {
    //remove all album referneces
 };
 
-albumMethods.createArrayOfAlbumsContainingPhotoIdInPhotoList = async (
-   photoIdList,
-) => {
-   console.log('creating alb list');
-   let albums = await Album.find({
-      alb_PhotoList: { $in: photoIdList },
-   });
-   //console.log('albums with Id:', albums);
-   return albums;
-};
-albumMethods.createIdArrayForAlbumsContainingPhotoIdInPhotoList = async (
-   photoIdList,
-) => {
-   let IdList = [];
-   console.log('creating alb Id list');
-   let albums = await Album.find({
-      alb_PhotoList: { $in: photoIdList },
-   });
-   albums &&
-      albums.forEach((album) => {
-         IdList.push(album._id);
-      });
-   console.log('the list of all alb with photo in list is ', IdList);
+//////////////
+module.exports = albumMethods;
 
-   //console.log('albums with Id:', albums);
-   return IdList;
-};
+//method below not used -- will be removed of not used in future
+/* 
+albumMethods.updateAlbum = async (userId, albumId, objOfItemsToUpdate) => {
+   //TODO -- write method to validate ownership
+   // let validatedAlbumBool = await albumMethods.ASYNCisUserOwnerOfAlbum(userId, albumId);
 
-albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList = async (
-   photoIdList,
-) => {
-   let albums = await Album.find({
-      'alb_coverPhoto.coverID': { $in: photoIdList },
-   });
-   console.log('album before removal of cover', albums);
-
-   await albumMethods.ASYNCremoveCoverPhoto(albums);
-
-   //delete below
-   let editedAlbums = await albumMethods.ASYNCrefreshAlbumList(albums);
-
-   console.log('album after removal of cover', editedAlbums);
-
-   //delete above
-
-   await albumMethods.addFirstPhotoAsCoverImageIfNonePresent(editedAlbums);
-};
-
-albumMethods.ASYNCremoveAllAlbumReferencesToPhotosInList = async (
-   albumIdList,
-   photoIdList,
-) => {
-   await albumMethods.deletePhotosFromAlbumsNotFromPhotosOrFs(
-      albumIdList,
-      photoIdList,
-   );
-
-   await albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList(photoIdList);
-};
-
-albumMethods.ASYNCremoveCoverPhoto = async (albumList) => {
-   console.log(' in ASYNCremoveCoverPhoto');
-   albumList.forEach(async (album) => {
-      if (album.alb_coverPhoto.coverFileName) {
-         console.log('attempting to remove za alb cover');
-         await Album.updateOne(
-            { _id: album._id },
-            { $unset: { alb_coverPhoto: '' } },
-         );
+   //finding album and updating all info
+   Album.findByIdAndUpdate(albumId, objOfItemsToUpdate, (err, updatedAlbum) => {
+      //TODO -- Change to update many
+      if (!updatedAlbum) {
+         console.log('\n\n!!!!!!!could not update album'); //Delete
+         console.log(err);
+      } else {
+         console.log('\n\n/////// updated album\n' + updatedAlbum); //Delete
+         return updatedAlbum;
       }
    });
 };
-
-albumMethods.ASYNCrefreshAlbumList = async (albums) => {
-   let albIdList = [];
-   albums.forEach((album) => {
-      albIdList.push(album._id);
-   });
-
-   let editedAlbums = await Album.find({
-      _id: { $in: albIdList },
-   });
-   return editedAlbums;
-};
-
-albumMethods.ASYNCfindAndRemoveAllReferencesToPhotosInAlbum = async (
-   albumId,
-) => {
-   let album = await Album.findById(albumId);
-   let photoIdList = album.alb_PhotoList;
-   console.log('removing all references to photos in list:', photoIdList);
-   let albumIdList = await albumMethods.createIdArrayForAlbumsContainingPhotoIdInPhotoList(
-      photoIdList,
-   );
-   console.log('lb id list izzzz :', albumIdList);
-
-   await albumMethods.ASYNCremoveAllAlbumReferencesToPhotosInList(
-      albumIdList,
-      photoIdList,
-   );
-};
-
-//////////////
-module.exports = albumMethods;
+ */

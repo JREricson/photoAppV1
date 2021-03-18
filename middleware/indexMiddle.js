@@ -24,7 +24,7 @@ indexMidware.logout = (req, res) => {
 
 /** loginPost
  *
- * logs user in if authenticated
+ * logs in user if authentication is sucessful
  *
  * @param {*} req
  * @param {*} res

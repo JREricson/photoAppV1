@@ -6,21 +6,18 @@ const Photo = require('../models/photo');
 var middlewareObj = {};
 
 const fetch = require('node-fetch');
-const fetchAbsolute = require('fetch-absolute');
 
 const querystring = require('querystring');
-const { findById } = require('../models/user');
 
 const photoMethods = require('../databaseFunctions/photoMethods');
 const albumMethods = require('../databaseFunctions/albumMethods');
 const userMethods = require('../databaseFunctions/userMethods');
-const userMidware = require('../middleware/userMiddle');
+
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
 
 var server = process.env.SERVER;
 if (process.env.SITE_URL) {
    server = process.env.SITE_URL;
-   console.log('===================\narrrrrr');
 }
 
 //////////////////////////////////
@@ -61,8 +58,6 @@ middlewareObj.getPageOwnerPhotoIds = (req, res) => {
       }
    });
 };
-
-//set idList to null to use find from current user
 
 middlewareObj.ASYNCgetOwnerPhotoObjs = async (req, res, idList) => {
    var photoList = [];
@@ -342,13 +337,11 @@ middlewareObj.renderPageWithUser = async (
 middlewareObj.removePhotoAndRefernences = async (req, res, next) => {
    //removing photo from user's lists (allPhotos, galleries, etc)
    // await photoMethods.removePhotoFromUsersLists(req.params.photoID, req.user);
-   await albumMethods.deletePhotosFromAlbumsAndPhotosAndFs([
+   await albumMethods.deletePhotosFromAlbumsAndDbAndFs([req.params.photoID]);
+   await userMethods.ASYNCremovephotosFromUserList(req.user._id, [
       req.params.photoID,
    ]);
-   await userMethods.ASYNCremovephotosFromUserList(req, [req.params.photoID]);
    console.log('req.user is', req.user);
-   //removing photo
-   // await photoMethods.removeSinglePhotoFromDBAndFS(req.params.photoID);
    next();
 };
 

@@ -65,7 +65,7 @@ userMidware.renderPageWithUserRedirectIfNoContentOwner = (
 
 userMidware.renderUploadPage = async (req, res) => {
    //getting all ablbums by user
-   let albumIds = await albumMethods.ASYNCfindAllAlbumsByUserId(req.user._id);
+   let albumIds = await albumMethods.ASYNCfindAllAlbumsFromUserId(req.user._id);
    userMidware.renderPageWithUser(req, res, 'users/upload', {
       albumIds: albumIds,
    });
@@ -73,7 +73,7 @@ userMidware.renderUploadPage = async (req, res) => {
 
 userMidware.ASYNCgetProfile = async (req, res) => {
    const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
-   const albumList = await albumMethods.ASYNCfindAllAlbumsByUserId(
+   const albumList = await albumMethods.ASYNCfindAllAlbumsFromUserId(
       req.params.id,
    );
    // console.log('photoList is ', photoList.length);
@@ -178,7 +178,9 @@ userMidware.renderPhotoPage = async (req, res, next) => {
 
 userMidware.renderUserAlbumsPage = async (req, res) => {
    try {
-      let albumList = await albumMethods.getAlbumsFromUserId(req.params.id);
+      let albumList = await albumMethods.ASYNCfindAllAlbumsFromUserId(
+         req.params.id,
+      );
 
       userMidware.renderPageWithUserRedirectIfNoContentOwner(
          req,
@@ -387,6 +389,21 @@ async function addPhotosToDB(req, user, albums, newPhotos) {
       }),
    );
 }
+
+userMidware.deleteUserAndAllUserItems = async (user) => {
+   //TODO include error checking
+   //get photolist
+   var photoList = user.allPhotos;
+
+   //remove photos in list from database
+   await photoMethods.removeMultiplePhotosFromDBAndFS(photoList);
+
+   //remove all albums
+   await albumMethods.removeAllAlbumsWithUserId(user._id);
+
+   //remove user
+   await userMethods.deleteUser(user._id);
+};
 
 userMidware.getExifDataFromForm = (req, img, ndx) => {
    console.log('img', JSON.stringify(img));
