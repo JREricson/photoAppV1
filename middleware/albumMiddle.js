@@ -284,7 +284,7 @@ middlewareObj.ASYNCchangeAlbumCoverToUsersSelectionOrFirstPhotoInListIfEmpty = a
             //Todo extract to seperate method
             console.log('PHOTO was found, attempiting to update cover');
             await Album.findByIdAndUpdate(albumId, {
-               alb_coverPhoto: {
+               alb_CoverPhoto: {
                   coverID: photo._id,
                   coverFileName: photo.fileName, //TODO-makefileurl
                },
@@ -297,7 +297,7 @@ middlewareObj.ASYNCchangeAlbumCoverToUsersSelectionOrFirstPhotoInListIfEmpty = a
             let album = await Album.findById(albumId);
             console.log('cannot find  photo in collection');
             await albumMethods.addFirstPhotoAsCoverImageIfNonePresent([album]);
-            console.log('alb_coverPhoto is ', album.alb_coverPhoto);
+            console.log('alb_CoverPhoto is ', album.alb_CoverPhoto);
          }
       }
       console.log('aLB iD IS ', albumId);
@@ -316,7 +316,7 @@ middlewareObj.ASYNCupdateNameAndDescription = async (req) => {
    console.log('user desc and name: ', albumDescription, ' ', albumName);
 
    albumName && (updateObj['alb_Name'] = albumName);
-   albumDescription && (updateObj['alb_description'] = albumDescription);
+   albumDescription && (updateObj['alb_Description'] = albumDescription);
    console.log('update obj is', updateObj);
    if (albumName || albumDescription) {
       console.log('attempting to update alb');

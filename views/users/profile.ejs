@@ -92,15 +92,15 @@
          <%} %>
 
 <% albumListCut  && albumListCut.forEach((album)=>{ %>
-   <% if(album.alb_coverPhoto.coverFileName){%>
-      <% var photopath ="/resources/photos/" + album.alb_coverPhoto.coverFileName%>
+   <% if(album.alb_CoverPhoto.coverFileName){%>
+      <% var photopath ="/resources/photos/" + album.alb_CoverPhoto.coverFileName%>
          <%  } else { %>
             <% var photopath = "/resources/photos/appImgs%2Ffolder-2103508_1280.png" %>
          <%}%>
        <figure class="col-lg-4 col-sm-12 img-fluid galleryfig mx-auto">
          <h4 class="centerItem"><strong><%= album.alb_Name%></strong></h4>
          <p class="centerItem">
-           <%=album.alb_description%>
+           <%=album.alb_Description%>
         </p>
        <a href="/albums/<%= album._id %>">
           <img

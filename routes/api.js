@@ -264,7 +264,7 @@ router.get('/photos', async (req, res) => {
    try {
       photosObj = await Photo.find(
          searchObj /*  {
-         projection: { _id: 1, exifMetaData: 1, SubmittedByID: 1 },
+         projection: { _id: 1, exifMetaData: 1, submittedByID: 1 },
       } */,
       )
          .collation({ locale: 'en' })
@@ -845,7 +845,7 @@ const makeGPSObj = (query) => {
    };
    //below is the "null value" used as a work around--a better work around miht be a GPS set flag
    curSearchObj['location_2dsphere.coordinates'] = {
-      $not: { $eq: [-139, -30] },
+      $not: { $eq: [-139.3145, -30] },
    };
 
    return curSearchObj;

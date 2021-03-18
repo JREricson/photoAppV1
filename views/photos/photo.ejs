@@ -24,7 +24,7 @@
    <!-- author and description -->
    <div class="photoDetails">
       <p class="photoCaption"><%=photo.caption%></p>
-      <p class="photoAuthor">Photograper -- <a href="/users/<%=photo.SubmittedByID%>/profile"><%=photo.author%></a></p>
+      <p class="photoAuthor">Photograper -- <a href="/users/<%=photo.submittedByID%>/profile"><%=photo.author%></a></p>
    </div>
 
    <!-- photo details  -->
@@ -86,7 +86,7 @@
 </div>
 
 <!-- edit and delete button for user to delete photo -->
-<% if(currentUser && currentUser._id.equals(photo.SubmittedByID)){ %>
+<% if(currentUser && currentUser._id.equals(photo.submittedByID)){ %>
 <a href="../../photos/<%= photo._id %>/edit" class="btn btn-info">Edit photo</a>
 
 <form action="../../photos/<%= photo._id %>?_method=DELETE" method="POST">

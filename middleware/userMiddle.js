@@ -267,7 +267,7 @@ userMidware.createNewAlbumIfNeeded = async (req) => {
          alb_AuthorName: user.name,
          alb_AuthorId: user._id,
          alb_Name: newAlbumTitle,
-         alb_description: newAlbumDescription,
+         alb_Description: newAlbumDescription,
          alb_DateCreated: curDate,
          alb_LastUpdate: curDate,
       });
@@ -366,7 +366,7 @@ async function addPhotosToDB(req, user, albums, newPhotos) {
 
          let newPhotoParams = {
             author: user.name,
-            SubmittedByID: user._id,
+            submittedByID: user._id,
             fileName,
             fileLocation,
          };

@@ -33,12 +33,12 @@ photoMethods.makeGeoJSONObj = (latitude, longitude) => {
    } else {
       //work around null value -- in pacific ocean-- need to account for this in later searches
       //does not allow null value if indexed
-      coordLong = -139;
+      coordLong = -139.3145;
       coordLat = -30;
    }
 
    if (isNaN(coordLong) || isNaN(coordLat)) {
-      coordLong = -139;
+      coordLong = -139.3145;
       coordLat = -30;
    }
 
@@ -115,7 +115,7 @@ photoMethods.ASYNCverififyPhotoOwnership = async (userId, photoIdList) => {
    } else {
       photos.forEach((photo) => {
          console.log('id=========================================', photo);
-         if (photo.SubmittedByID.toString() !== userId.toString()) {
+         if (photo.submittedByID.toString() !== userId.toString()) {
             console.log('id not the same');
             returnBool = false;
          }

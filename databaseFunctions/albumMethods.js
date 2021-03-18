@@ -127,7 +127,7 @@ albumMethods.ASYNCrefreshAlbumList = async (albums) => {
 albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
    console.log('in adding cover func');
    albumList.forEach(async (album) => {
-      if (!album.alb_coverPhoto.coverFileName) {
+      if (!album.alb_CoverPhoto.coverFileName) {
          console.log('no cover file name');
          //         if (Object.keys(album.alb_PhotoList).length > 0) {
          if (album.alb_PhotoList.length > 0) {
@@ -142,7 +142,7 @@ albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
             if (photo) {
                console.log('updating album with photo');
                let updatedAlb = await Album.findByIdAndUpdate(album._id, {
-                  alb_coverPhoto: {
+                  alb_CoverPhoto: {
                      coverID: photo._id,
                      coverFileName: photo.fileName, //TODO-change all ref back to fileName
                   },
@@ -153,7 +153,7 @@ albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
       } else {
          console.log(
             'there is a cover photo: ',
-            album.alb_coverPhoto.coverFileName,
+            album.alb_CoverPhoto.coverFileName,
          );
       }
    });
@@ -229,11 +229,11 @@ albumMethods.ASYNCfindAndRemoveAllReferencesToPhotosInAlbum = async (
 albumMethods.ASYNCremoveCoverPhoto = async (albumList) => {
    console.log(' in ASYNCremoveCoverPhoto');
    albumList.forEach(async (album) => {
-      if (album.alb_coverPhoto.coverFileName) {
+      if (album.alb_CoverPhoto.coverFileName) {
          console.log('attempting to remove za alb cover');
          await Album.updateOne(
             { _id: album._id },
-            { $unset: { alb_coverPhoto: '' } },
+            { $unset: { alb_CoverPhoto: '' } },
          );
       }
    });
@@ -295,7 +295,7 @@ albumMethods.ASYNCresetCoverPhotosOfAlbumsIfInPhotoList = async (
    photoIdList,
 ) => {
    let albums = await Album.find({
-      'alb_coverPhoto.coverID': { $in: photoIdList },
+      'alb_CoverPhoto.coverID': { $in: photoIdList },
    });
    console.log('album before removal of cover', albums);
 

@@ -16,8 +16,8 @@
             
        
     <% albumList  && albumList.forEach((album)=>{ %>
-        <% if(album.alb_coverPhoto.coverFileName){%>
-         <% var photopath ="/resources/photos/" + album.alb_coverPhoto.coverFileName%>
+        <% if(album.alb_CoverPhoto.coverFileName){%>
+         <% var photopath ="/resources/photos/" + album.alb_CoverPhoto.coverFileName%>
             <%  } else { %>
                <% var photopath = "/resources/photos/appImgs%2Ffolder-2103508_1280.png" %>
             <%}%>

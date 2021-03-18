@@ -18,12 +18,11 @@ const AlbumSchema = new mongoose.Schema({
       index: true,
       required: true,
    },
-   alb_shortDescription: {
-      //TODO refractor to be constistant wth cap
+   alb_ShortDescription: {
       type: String,
       default: '',
    },
-   alb_description: {
+   alb_Description: {
       //TODO refractor to be constistant wth cap
       type: String,
       default: '',
@@ -40,13 +39,12 @@ const AlbumSchema = new mongoose.Schema({
       type: Date,
       required: true,
    },
-   alb_coverPhoto: {
-      //TODO refractor to be constistant wth cap
+   alb_CoverPhoto: {
       coverID: { type: ObjectId },
       coverFileName: { type: String },
       required: false,
    },
 });
-
+/////////////////////////////////
 const album = mongoose.model('album', AlbumSchema);
 module.exports = album;

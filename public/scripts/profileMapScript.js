@@ -81,7 +81,7 @@ if (photosJSON[0]) {
                '</h3>' +
                //author with link
                '<a href="/users/' +
-               photo.SubmittedByID +
+               photo.submittedByID +
                '/profile"><h4>submitted by ' +
                photo.author +
                '</h4></a>' +

@@ -163,7 +163,7 @@ middlewareObj.updateSinglePhoto = (req) => {
       coordLat = parseFloat(latitude);
    } else {
       //work around null value -- in pacific ocean
-      coordLong = -139;
+      coordLong = -139.3145;
       coordLat = -30;
    }
 
@@ -326,7 +326,7 @@ middlewareObj.renderPageWithUser = async (
    let photo = await Photo.findById(req.params.photoID);
 
    if (photo) {
-      contentOwner = await User.findById(photo.SubmittedByID);
+      contentOwner = await User.findById(photo.submittedByID);
    }
 
    currentUser = req.user;
