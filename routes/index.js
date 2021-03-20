@@ -21,7 +21,7 @@ router.get('/logout', indexMidware.logout);
 router.get('/register', indexMidware.renderRegisterPage);
 router.post('/register', indexMidware.registerPost);
 
-//easter egg
+//why not?
 router.get('/teapot', indexMidware.teapot);
 
 module.exports = router;

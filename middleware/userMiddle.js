@@ -19,14 +19,77 @@ const userMethods = require('../databaseFunctions/userMethods');
 const albumMethods = require('../databaseFunctions/albumMethods');
 
 const pictureUpload = require('../services/pictureUpload');
-const { ifError } = require('assert');
 
 var userMidware = {};
 
-//////////////////////////
-// page rendering methods
-/////////////////////////////
+//////////////////
+//Routes
+//////////////////
 
+/**
+ * Renders upload page
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.renderUploadPage = async (req, res) => {
+   //getting all ablbums by user
+   let albumIds = await albumMethods.ASYNCfindAllAlbumsFromUserId(req.user._id);
+   userMidware.renderPageWithUser(req, res, 'users/upload', {
+      albumIds: albumIds,
+   });
+};
+
+/**
+ * Renders profile. Sends user photoList and photoList to ejs page.
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.ASYNCgetProfile = async (req, res) => {
+   const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
+   const albumList = await albumMethods.ASYNCfindAllAlbumsFromUserId(
+      req.params.id,
+   );
+   // console.log('photoList is ', photoList.length);
+   console.log('albumList is ', albumList);
+
+   userMidware.renderPageWithUser(req, res, 'users/profile', {
+      photoList,
+      albumList,
+   });
+};
+
+/**
+ *  Renders user's about page
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.renderAboutPage = (req, res) => {
+   userMidware.renderPageWithUser(req, res, 'users/about');
+};
+
+/**
+ *  Renders page allowing user to edit photos
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.renderPhotoEditPage = (req, res) => {
+   res.render('users/editSubmitted');
+};
+
+//////////////////
+//helper functions
+//////////////////
+
+/**
+ * Renders ejs page in pagePath. Finds the user that the page belongs
+ *  to and adds that user as contentOwner. Addition vales can be sent to eje by including
+ * them in the objOfValToBeSent
+ * @param {*} req
+ * @param {*} res
+ * @param {*} pagePath path for  ejs file
+ * @param {*} objOfValToBeSent object containing additional values to be sent to
+ * ejs file
+ */
 userMidware.renderPageWithUser = (req, res, pagePath, objOfValToBeSent) => {
    User.findById(req.params.id, (err, contentOwner) => {
       if (err) {
@@ -43,6 +106,16 @@ userMidware.renderPageWithUser = (req, res, pagePath, objOfValToBeSent) => {
    });
 };
 
+/**
+ * Renders ejs page in pagePath. Finds the user that the page belongs
+ *  to and adds that user as contentOwner. Renders 404 if no contentOwner. Addition vales can be sent to eje by including
+ * them in the objOfValToBeSent
+ * @param {*} req
+ * @param {*} res
+ * @param {*} pagePath path for  ejs file
+ * @param {*} objOfValToBeSent object containing additional values to be sent to
+ * ejs file
+ */
 userMidware.renderPageWithUserRedirectIfNoContentOwner = (
    req,
    res,
@@ -60,28 +133,6 @@ userMidware.renderPageWithUserRedirectIfNoContentOwner = (
       } else {
          res.status(404).render('404');
       }
-   });
-};
-
-userMidware.renderUploadPage = async (req, res) => {
-   //getting all ablbums by user
-   let albumIds = await albumMethods.ASYNCfindAllAlbumsFromUserId(req.user._id);
-   userMidware.renderPageWithUser(req, res, 'users/upload', {
-      albumIds: albumIds,
-   });
-};
-
-userMidware.ASYNCgetProfile = async (req, res) => {
-   const photoList = await photoMidware.ASYNCgetOwnerPhotoObjs(req, res, null);
-   const albumList = await albumMethods.ASYNCfindAllAlbumsFromUserId(
-      req.params.id,
-   );
-   // console.log('photoList is ', photoList.length);
-   console.log('albumList is ', albumList);
-
-   userMidware.renderPageWithUser(req, res, 'users/profile', {
-      photoList,
-      albumList,
    });
 };
 
@@ -455,4 +506,34 @@ userMidware.generateAditionalParamsFromExif = (exif) => {
    console.log('ooooooooooooooo paramsFromExifData ', paramsFromExifData);
 
    return paramsFromExifData;
+};
+
+/**
+ * Used to delete req.user and redirect to login page
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.deleteUserRoute = (req, res) => {
+   userMidware.deleteUserAndAllUserItems(req.user);
+   // TODO send push message
+   res.redirect('/login');
+};
+
+/**
+ * Renders Settings page
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.renderSettingsPage = (req, res) => {
+   userMidware.renderPageWithUser(req, res, 'users/settings');
+};
+
+/**
+ * Updates data from req and redirects to user's photos page
+ * @param {*} req
+ * @param {*} res
+ */
+userMidware.handlePutReqForPhotoUpdates = (req, res) => {
+   photoMidware.updatePhotosFromEjsData(req); //TODO -- make Asyc???
+   res.redirect(`/users/${req.params.id}/photos`);
 };

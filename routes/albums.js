@@ -1,11 +1,9 @@
 const express = require('express');
-//const querystring = require('querystring');
 const router = express.Router();
 const { Mongoose, SchemaTypes } = require('mongoose');
-//const fetch = require('node-fetch');
 
 //middleware
-// const authMidware = require('../middleware/authMiddle');
+const authMidware = require('../middleware/authMiddle');
 const albumMidware = require('../middleware/albumMiddle');
 
 //show album
@@ -18,7 +16,7 @@ router.put('/:albumID/edit', albumMidware.ASYNCpostFormDataFromEditAlbumPage);
 //Delete album
 router.delete(
    '/:albumID',
-   /* authMidware.checkUserPhotoOwner, */
+   authMidware.checkUserPhotoOwner,
    albumMidware.ASYNCpostDeleteRequest,
 );
 

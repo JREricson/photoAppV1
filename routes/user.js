@@ -87,42 +87,41 @@ router.post(
    // userMidware.renderEditPhotoPage,
 );
 
-//edit upload routes
 // TODO -- add validation incase user does not exist
-router.get('/:id/photos/upload/edit', (req, res) => {
-   res.render('users/editSubmitted');
-});
+//edit photo uploads
+router.get('/:id/photos/upload/edit', userMidware.renderPhotoEditPage);
 
-router.get(
-   '/:id/about',
+//
+router.get('/:id/about', userMidware.renderAboutPage);
 
-   (req, res) => {
-      userMidware.renderPageWithUser(req, res, 'users/about');
-   },
-);
-
-// TODO--this
+//User's album page
 router.get('/:id/albums', userMidware.renderUserAlbumsPage);
 
+//User's photo page
 router.get('/:id/photos', userMidware.renderPhotoPage);
 
-router.put('/:id/photos', authMidware.isCurUserContentOwner, (req, res) => {
-   photoMidware.updatePhotosFromEjsData(req); //TODO -- make Asyc???
-   res.redirect(`/users/${req.params.id}/photos`);
-});
+//Put req to update user's photo page
+router.put(
+   '/:id/photos',
+   authMidware.isCurUserContentOwner,
+   userMidware.handlePutReqForPhotoUpdates,
+);
 
-router.get('/:id/settings', authMidware.isCurUserContentOwner, (req, res) => {
-   userMidware.renderPageWithUser(req, res, 'users/settings');
-});
+//Settings page
+router.get(
+   '/:id/settings',
+   authMidware.isCurUserContentOwner,
+   userMidware.renderSettingsPage,
+);
 
 //Delete user
-router.delete('/:id', authMidware.isCurUserContentOwner, (req, res) => {
-   userMidware.deleteUserAndAllUserItems(req.user);
-   res.redirect('/login'); // TODO makesure no errors with
-});
+router.delete(
+   '/:id',
+   authMidware.isCurUserContentOwner,
+   userMidware.deleteUserRoute,
+);
 
-//edit user details
-
+//Profile page
 router.put(
    '/:id/profile',
    authMidware.isCurUserContentOwner,
