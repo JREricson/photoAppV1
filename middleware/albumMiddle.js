@@ -286,7 +286,7 @@ middlewareObj.ASYNCchangeAlbumCoverToUsersSelectionOrFirstPhotoInListIfEmpty = a
             await Album.findByIdAndUpdate(albumId, {
                alb_coverPhoto: {
                   coverID: photo._id,
-                  coverFileName: photo.fileName,
+                  coverFileName: photo.fileName, //TODO-makefileurl
                },
             });
          } else {

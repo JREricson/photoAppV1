@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const Photo = require('../models/photo');
 const fs = require('fs');
+
+const deleteFilesFromS3 = require('../services/deleteFilesFromS3');
 var photoMethods = {};
 
 photoMethods.getPhotoListFromPhotoIds = async (photoIds) => {
@@ -62,36 +64,30 @@ photoMethods.makeGeoJSONObj = (latitude, longitude) => {
  * @param {*} photoIDList
  */
 photoMethods.removeMultiplePhotosFromDBAndFS = async (photoIDList) => {
-   let pathList = [];
    let photoList = await Photo.find({
       _id: { $in: photoIDList },
    });
+   //console.log('photolist is:', photoList);
 
-   console.log('photolist is:', photoList);
+   let keyList = [];
    photoList.forEach((photo) => {
-      pathList.push(photo.fileLocation);
-      console.log('photo :', photo);
+      //errorList = { ...errorList, ...eList };;
+      keyList.push({ Key: photo.fileName }); //{ ...keyObj, ...{ Key: photo.fileName } };
+      console.log('removing photo :', photo.fileName);
    });
-   console.log('pathlist: ', pathList);
+
+   //console.log('keyObj: ', JSON.stringify(keyObj));
+   console.log('keyList: ', keyList);
 
    //remove from file system
-   photoList = [];
 
-   //    Photo.deleteMany({ _id: { $in: photoIDList } }); does not work?
    photoIDList.forEach(async (id) => {
       console.log('trying to delete from db');
       await Photo.findByIdAndDelete(id);
    });
+   ndeleteFilesFromS3('photoappuploads', keyList);
 
-   pathList.forEach((path) => {
-      //maybe do async
-      fs.unlink(path, (err) => {
-         console.log('trying to remove file at: ', path);
-         if (err) {
-            console.error('cannnot remove file,: ', err);
-         }
-      });
-   });
+   //removeFilesInPathList(pathList);
    // console.log('deleting photos in list :', photoIDList);
    //remove from database
 };
@@ -159,3 +155,39 @@ photoMethods.ASYNCverififyPhotoOwnership = async (userId, photoIdList) => {
 
 ////////////////////////////////
 module.exports = photoMethods;
+
+const aws = require('aws-sdk');
+
+const s3 = new aws.S3();
+
+aws.config.update({
+   secretAccessKey: process.env.AWS_S_KEY,
+   accessKeyId: process.env.AWS_ACCESS_KEY,
+   region: process.env.AWS_REGION,
+});
+
+const ndeleteFilesFromS3 = (bucket, keyList) => {
+   let params = {
+      Bucket: bucket,
+      Delete: {
+         Objects: keyList,
+         Quiet: false,
+      },
+   };
+   s3.deleteObjects(params, (err, data) => {
+      if (err) console.log(err, err.stack);
+      else console.log(data);
+   });
+};
+
+function removeFilesInPathList(pathList) {
+   pathList.forEach((path) => {
+      //maybe do async
+      fs.unlink(path, (err) => {
+         console.log('trying to remove file at: ', path);
+         if (err) {
+            console.error('cannnot remove file,: ', err);
+         }
+      });
+   });
+}

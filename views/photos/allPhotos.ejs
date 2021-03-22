@@ -1,4 +1,4 @@
-<%- include("../partials/header") %> <%- include("../partials/siteNavbar") %>
+<%- include("../partials/header") %> <%- include("../partials/nav") %>
 
 <!-- css for justified Gallery -->
 <link
@@ -39,7 +39,7 @@
       <img
          class="justifiedGalImg"
          alt="<%= photo.caption %>"
-         src="/uploads/<%= photo.fileName %>"
+         src="/resources/photos/<%=photo.fileName %>"
       />
    </a>
 

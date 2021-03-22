@@ -78,7 +78,7 @@ albumMethods.addFirstPhotoAsCoverImageIfNonePresent = async (albumList) => {
                let updatedAlb = await Album.findByIdAndUpdate(album._id, {
                   alb_coverPhoto: {
                      coverID: photo._id,
-                     coverFileName: photo.fileName,
+                     coverFileName: photo.fileName, //TODO-change all ref back to fileName
                   },
                });
                console.log('updated alm is ', updatedAlb);

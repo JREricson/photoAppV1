@@ -1,14 +1,14 @@
 //getting content string for name and description
-contentSearch = document.getElementById('photoSearch');
-photoGallery = document.getElementById('photoGallery');
-tagSearch = document.getElementById('tagSearch');
+let contentSearch = document.getElementById('photoSearch');
+let photoGallery = document.getElementById('photoGallery');
+let tagSearch = document.getElementById('tagSearch');
 
 const searchPhotos = async (searchText) => {
    const photoRes = await fetch(`../api/photos/?search=${searchText}`);
 
    /*setting page data to zero*/
 
-   photoSearch = document.getElementById('photoSearch');
+   let photoSearch = document.getElementById('photoSearch');
 
    if (photoRes.ok) {
       let photoJSON = await photoRes.json();
@@ -56,7 +56,7 @@ const generatePhotoHtml = (photoJSON) => {
              <img
                 class="justifiedGalImg"
                 alt="${photo.caption}"
-                src="/uploads/${photo.fileName}"
+                src="/resources/photos/${photo.fileName}"
              />
           </a>`;
       });

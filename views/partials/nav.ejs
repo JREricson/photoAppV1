@@ -1,0 +1,136 @@
+
+
+<nav id="profileNav" class="navbar navbar-fixed-top navbar-expand-md navbar-dark bg-dark">
+  <a class="navbar-brand CompanyBrand  myNavText" href="/">PhotoAdventures</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menueItems" aria-controls="menueItems" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon  "></span>
+  </button>
+  <div class="collapse navbar-collapse " id="menueItems">
+          <!-- auth links -->
+      <!-- <div class="authItems"> -->
+        <ul class=" navbar-nav ">
+          <% if(currentUser) {%>
+  
+            <li class="nav-item  active">
+              <a class="nav-link  myNavText  " href="/logout">Logout </a>
+            </li>
+      
+          
+            <%} else{%>
+          
+              <li class="nav-item  ">
+                <a class="nav-link  myNavText " href="/login">Login </a>
+              </li>
+              <li class="nav-item  ">
+                <a class="nav-link  myNavText" href="/register">Register </a>
+              </li>
+              
+            <%} %>
+        </ul>
+
+    <ul class=" navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link myNavText " href="/users">Photagraphers</a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link myNavText" href="/photos">Photographs </a>
+      </li>
+      <!-- <li class="nav-item active">
+        <a class="nav-linkcmyNavText" href="/allusers/adventures">Adventures </a>
+      </li> -->
+      <li class="nav-item active">
+        <a class="nav-link myNavText" href="/"> </a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link myNavText" href="/photos/map">Mapped Exploration</a>
+      </li>
+    </ul>
+    <ul class=" navbar-nav mr-auto">
+
+      <!-- logged in as links -->
+
+      <!-- if logged in-->
+        <!--  -->
+        <% if(currentUser) {%>
+        <li class="nav-item  active">
+            <a class="nav-link   myNavText " href="/users/<%= currentUser._id%>/profile">My profile </a>
+          </li>
+          <li class="nav-item  active">
+            <a class="nav-link    myNavText" href="/users/<%= currentUser._id %>/settings">Settings </a>
+          </li>
+
+          <%}%>
+
+         
+
+      </ul>
+      <!-- content owner links -->
+    
+      <ul class="ContentOwnerNav navbar-nav mr-auto">
+      <% if(contentOwner) {%>
+        <li class="nav-item active"><a class="nav-link myNavText"><strong>Viewing <%=contentOwner.name %>'s: </strong></a></li>
+        <li class="nav-item active">
+          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/profile"> Profile</a>
+        </li>
+        <li class="nav-item active"> 
+          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/photos">Photos </a>
+        </li>
+  
+        <li class="nav-item active">
+          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/albums">Galleries </a>
+        </li>
+  
+  
+        <li class="nav-item active">
+          <a class="nav-link myNavText" href="/users/<%= contentOwner._id %>/contact">Contact</a>
+        </li>
+  
+         <!--only show if user has these-->
+         
+         <%if (contentOwner.socialMediaAcnts.instagram && contentOwner.socialMediaAcnts.instagram.length>0){ %>
+        <li>  
+        <a class="nav-item fab fa-instagram myNavText" href="https://www.instagram.com/<%=contentOwner.socialMediaAcnts.instagram%>"> </a>
+        </li>
+      <%}%>
+
+      <%if (contentOwner.socialMediaAcnts.fiveHundredpix && contentOwner.socialMediaAcnts.fiveHundredpix.length>0){ %>
+        <li>  
+          <a class="nav-item fab fa-500px  myNavText" href=https://500px.com/p/<%= contentOwner.socialMediaAcnts.fiveHundredpix %>?view=photos> </a>
+        </li>
+            <%}%>
+        <%if (contentOwner.socialMediaAcnts.flickr && contentOwner.socialMediaAcnts.flickr.length>0){ %>
+        <li>  
+            <a class="nav-item fab fa-flickr myNavText" href="https://www.flickr.com/photos/<%= contentOwner.socialMediaAcnts.flickr %>"> </a>
+        </li>
+            <%}%>
+        <%if (contentOwner.socialMediaAcnts.github && contentOwner.socialMediaAcnts.github.length>0){ %>
+        <li>  
+          <a class="nav-item fab fa-github  myNavText" href="https://www.github.com/<%= contentOwner.socialMediaAcnts.github %>"> </a>
+        </li>  
+            <%}%>  
+
+  
+  
+  
+
+
+          <%}%>
+      </ul>
+
+
+
+
+        </div>
+        
+      <!-- </div> -->
+
+      
+
+
+
+
+
+  
+</nav>

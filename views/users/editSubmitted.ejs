@@ -1,5 +1,5 @@
 <%- include("headerUser") %>
-<%- include("../partials/siteNavbar") %>
+<%- include("../partials/nav") %>
 <!-- TODO -- validate form and send flashmessages if not suitable -->
 
 <h1 class="photoSubmissionTitle">
@@ -14,20 +14,23 @@
 
    <img
       class="editThumbnail"
-      src="\uploads\<%=photo.fileName %>"
+      src="/resources/photos/<%=photo.fileName %>"
       alt="cannot display image"
    />
    <br>
 
    <label for="dateTaken">Date taken (format) </label>
  
+   <%let dateOrg=""%>
+   <%photo.exifMetaData &&( dateOrg=photo.exifMetaData.DateTimeOriginal)%>
    <input
       name="dateTaken"
       type="text"
       placeholder="enter a date in (..) format"
-      value="<%= photo.exifMetaData.DateTimeOriginal %>"
+      value="<%= dateOrg %>"
    />
-
+   <%let lat=""%>
+   <%photo.exifMetaData && (lat= photo.exifMetaData.latitude)%>
    <br>
    <label for="latitude">Enter a caption for your photo </label>
    <input name="caption" type="text" />
@@ -36,14 +39,17 @@
    <input
       name="latitude"
       type="text"
-      value="<%= photo.exifMetaData.latitude %>"
+      value="<%= lat %>"
    />
+
+   <%let lon=""%>
+   <%photo.exifMetaData && (lon= photo.exifMetaData.longitude)%>
 
    <label for="longitude">Longitude </label>
    <input
       name="longitude"
       type="text"
-      value="<%= photo.exifMetaData.longitude %>"
+      value="<%= lon %>"
    />
    <br>
    <!-- a future version would show coord on map and have the user select from map to get coord if none present or wrong -->

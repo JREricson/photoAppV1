@@ -163,7 +163,7 @@ router.get('/users', async (req, res) => {
       <img
          class="justifiedGalImg"
          alt="<%= photo.caption %>"
-         src="/uploads/<%= photo.fileName %>"
+         src="<%= photo.fileName %>"
       />
    </a>
 

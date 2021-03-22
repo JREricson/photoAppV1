@@ -2,18 +2,22 @@
 <!-- TODO -- add links to nearby photos -->
 <!-- if current user is owner --add button to change photo -->
 
-<%- include("../partials/header") %> <%- include("../partials/siteNavbar") %>
+<%- include("../partials/header") %> <%- include("../partials/nav") %>
 <!-- adding leaflet map links -->
 <link
    rel="stylesheet"
-   href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"
+   href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css
+
+
+
+"
 />
 
 <div>
    <div class="photoContainer">
       <img
          class="photoImg"
-         src="../../uploads/<%= photo.fileName %>"
+         src="/resources/photos/<%=photo.fileName %>"
          alt="cannnot display image"
       />
    </div>
@@ -39,16 +43,11 @@
                ><strong> Submitted on: </strong>
                <%=photo.dateSubmitted%>
             </p>
-
+         <% if(photo.exifMetaData ){%>
             <p class="photoCameraModel">
                <i class="las la-camera-retro"></i
                ><strong> Camera Model: </strong><%=photo.exifMetaData.Make %>
                <%=photo.exifMetaData.Model%>
-            </p>
-
-            <p class="photoTaken">
-               <i class="lar la-calendar"></i><strong> Time Taken: </strong><%=
-               photo.dateTaken%>
             </p>
 
             <div class="photoSettings">
@@ -61,6 +60,13 @@
                <!-- jam icons has an iris/aperature -->
                <p><span class="your-custom-class" data-jam="aperture" data-fill="#222"></span><span class="jam jam-backpack"></span><strong>F-Stop: </strong><%=photo.exifMetaData.FNumber%></p>
             </div>
+         <%}%>
+            <p class="photoTaken">
+               <i class="lar la-calendar"></i><strong> Time Taken: </strong><%=
+               photo.dateTaken%>
+            </p>
+
+
 
             <p class="tagList">
                <i class="las la-tags"></i><strong> Tags </strong><%
@@ -95,6 +101,7 @@
 <%- include("../partials/footer") %>
 
 <!-- scripts for leaflet map -->
-<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet-src.min.js
+"></script>
 <!-- script to generate map with photo -->
 <script src="/scripts/photoPageScript.js"></script>

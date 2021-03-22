@@ -6,6 +6,8 @@ const Photo = require('../models/photo');
 var middlewareObj = {};
 
 const fetch = require('node-fetch');
+const fetchAbsolute = require('fetch-absolute');
+
 const querystring = require('querystring');
 const { findById } = require('../models/user');
 
@@ -14,6 +16,12 @@ const albumMethods = require('../databaseFunctions/albumMethods');
 const userMethods = require('../databaseFunctions/userMethods');
 const userMidware = require('../middleware/userMiddle');
 middlewareObj.updatePhotos = (req, res, photos, objOfThingsToUpdate) => {};
+
+var server = process.env.SERVER;
+if (process.env.SITE_URL) {
+   server = process.env.SITE_URL;
+   console.log('===================\narrrrrr');
+}
 
 //////////////////////////////////
 //Methods for finding information
@@ -207,11 +215,9 @@ middlewareObj.renderMapPage = async (req, res) => {
 
    console.log('query is:', querystring.stringify(query));
 
-   const SERVER = process.env.SERVER;
-
    //getting photo obj from api
    let photoRes = await fetch(
-      `${SERVER}/api/photos/?${querystring.stringify(query)}`,
+      `${server}/api/photos/?${querystring.stringify(query)}`,
    );
    //will be photo objs sent to user-- empty by default
    let photosFound = {};
@@ -276,11 +282,11 @@ middlewareObj.renderAllPhotosPage = async (req, res) => {
 
    console.log('query is:', querystring.stringify(req.query));
 
-   const SERVER = process.env.SERVER;
+   //const SERVER = process.env.SERVER;
 
    //getting photo obj from api
    let photoRes = await fetch(
-      `${SERVER}/api/photos/?${querystring.stringify(req.query)}`,
+      `${server}/api/photos/?${querystring.stringify(req.query)}`,
    );
    //will be photo objs sent to user-- empty by default
    let photosFound = {};

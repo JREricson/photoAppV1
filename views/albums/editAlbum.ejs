@@ -1,7 +1,7 @@
 
 <!-- make form -- fill in with cur vals -->
 
-<%- include("../users/headerUser") %> <%- include("../partials/siteNavbar") %>
+<%- include("../users/headerUser") %> <%- include("../partials/nav") %>
 
 <link rel="stylesheet" href="/styles/editAlbum.css" />
 
@@ -41,7 +41,7 @@
       <img
       class="thumbnail"
       alt="<%= photo.caption %>"
-      src="/uploads/<%= photo.fileName %>"
+      src="/resources/photos/<%=photo.fileName %>"
    />
    <label for="a<%= ndx%>"> Make album cover </label>
    <input type="radio" id="a<%= ndx%>" value="<%=photo._id%>" name="photoIdForAlbumCover">

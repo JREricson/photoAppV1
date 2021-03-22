@@ -9,6 +9,9 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const expressSanitizer = require('express-sanitizer');
+const MongoDBStore = require('connect-mongo')(session);
+
+const mongoUrl = process.env.MONGO_URL;
 
 const passport = require('passport');
 const path = require('path');
@@ -28,14 +31,30 @@ require('./config/passport')(passport);
 //bodyParser
 app.use(express.urlencoded({ extended: false }));
 
+const store = new MongoDBStore({
+   url: mongoUrl,
+   secret: process.env.secret,
+   touchAfter: 24 * 60 * 60, // 1 day
+});
+
+store.on('error', (err) => {
+   console.log('err storing session: ', err);
+});
+
 //Express session
-app.use(
-   session({
-      secret: 'process.env.SECRET',
-      resave: true,
-      saveUninitialized: true,
-   }),
-);
+const sessionConfig = {
+   store,
+   secret: 'process.env.SECRET',
+   resave: true,
+   saveUninitialized: true,
+   cookie: {
+      httpOnly: true,
+      expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // one week
+      maxAge: 1000 * 60 * 60 * 24 * 7, // one week
+   },
+};
+
+app.use(session(sessionConfig));
 
 //method methodOverride
 app.use(methodOverride('_method'));
@@ -60,8 +79,9 @@ app.use((req, res, next) => {
 
 //setting up mongoDB
 ////////////////////
+/* 'mongodb://localhost:27017/photoAppV1' */
 mongoose
-   .connect('mongodb://localhost:27017/photoAppV1', {
+   .connect(mongoUrl, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
    })
@@ -78,6 +98,7 @@ app.use('/users', require('./routes/user'));
 app.use('/photos', require('./routes/photos'));
 app.use('/api', require('./routes/api'));
 app.use('/albums', require('./routes/albums'));
+app.use('/resources', require('./routes/resources'));
 
 app.use((req, res, next) => {
    res.status(404).render('404');

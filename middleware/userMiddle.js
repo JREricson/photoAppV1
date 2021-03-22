@@ -3,6 +3,8 @@ const Photo = require('../models/photo');
 const Album = require('../models/album');
 
 const path = require('path');
+var parentDir = __dirname;
+const fetch = require('node-fetch');
 
 //used to extract photo details
 var exifr = require('exifr');
@@ -15,6 +17,9 @@ const passport = require('passport');
 const photoMidware = require('./photoMiddle');
 const userMethods = require('../databaseFunctions/userMethods');
 const albumMethods = require('../databaseFunctions/albumMethods');
+
+const pictureUpload = require('../services/pictureUpload');
+const { ifError } = require('assert');
 
 var userMidware = {};
 
@@ -29,7 +34,10 @@ userMidware.renderPageWithUser = (req, res, pagePath, objOfValToBeSent) => {
          res.status(500).render('server error');
       } else {
          currentUser = req.user;
-         let vals = { ...{ contentOwner, currentUser }, ...objOfValToBeSent };
+         let vals = {
+            ...{ contentOwner, currentUser, parentDir },
+            ...objOfValToBeSent,
+         };
          res.render(pagePath, vals);
       }
    });
@@ -78,7 +86,7 @@ userMidware.ASYNCgetProfile = async (req, res) => {
 };
 
 //TODO - rename this function
-userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
+userMidware.renderEditPhotoPage = async (req, res, next) => {
    var newPhotos = [];
    console.log('existing alb', req.body.existingAblums);
 
@@ -90,29 +98,13 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
 
    console.log('cur alb list is', albums);
 
-   userMidware.redrirectToUploadPageIfNoUploads(req.files.length, res, req);
+   //
+   //TODO-add below back
+   //userMidware.redrirectToUploadPageIfNoUploads(req.files.length, res, req);
    newAlbum = await userMidware.createNewAlbumIfNeeded(req);
    newAlbum && albums.push(newAlbum);
 
-   await Promise.all(
-      req.files.map(async (img) => {
-         var newPhoto = new Photo({
-            author: user.name,
-            SubmittedByID: user._id,
-            fileName: img.filename,
-            fileLocation: path.join(img.destination, img.filename),
-         });
-
-         //adding photo to currrent users's photo collection
-         user.allPhotos.push(newPhoto._id);
-
-         await userMidware.ASYNCaddPhotoIdToAblums(albums, newPhoto._id);
-         await userMidware.extractExifDataAndSaveToPhoto(img, newPhoto);
-
-         //adding photo to list to return to user
-         newPhotos.push(newPhoto);
-      }),
-   );
+   await addPhotosToDB(req, user, albums, newPhotos);
 
    //TODO -- fix this, it is looking at albums before photo added
    let editedAlbums = await albumMethods.ASYNCrefreshAlbumList(albums);
@@ -132,6 +124,8 @@ userMidware.savePhotosToDBandRenderEditPhotoPage = async (req, res, next) => {
  * @param {*} req
  * @param {*} res
  * @param {*} next
+ *
+ *
  */
 
 userMidware.renderProfile = (req, res, next) => {
@@ -280,17 +274,27 @@ userMidware.createNewAlbumIfNeeded = async (req) => {
    } else return null; //TODO - check that this works
 };
 
+//todo- makes sep network calls. maybe have doneprior to sending
+
 userMidware.extractExifDataAndSaveToPhoto = async (img, newPhoto) => {
-   await exifr
-      .parse(path.join(img.destination, img.filename))
-      .then((output) => {
-         newPhoto.dateTaken = output.DateTimeOriginal;
-         newPhoto.exifMetaData = output;
-         newPhoto.save();
-      })
-      .catch((err) => {
-         console.log(err);
-      });
+   let imgUrl = new URL(img.location);
+   //let imgBlob = await fetch(imgUrl).then((r) => r.blob());
+
+   console.log(img.location);
+
+   if (imgUrl) {
+      await exifr
+         .parse(imgUrl)
+         .then((output) => {
+            newPhoto.dateTaken = output.DateTimeOriginal;
+            newPhoto.exifMetaData = output;
+            // newPhoto.save();
+         })
+         .catch((err) => {
+            console.log('exif error', err);
+         });
+   }
+   return newPhoto;
 };
 /**
  *
@@ -313,4 +317,118 @@ userMidware.redirectToEditPhotosPage = (req, res, newPhotos) => {
    });
 };
 
+userMidware.uploadImages = async (req, res) => {
+   // req.body.userImage.forEach((file) => {
+   //    console.log(file);
+   // });
+   console.log('files', req.body.files);
+   console.log('body', req.body);
+
+   const uploadArray = pictureUpload.array('userImage'); //can add limit -- array(fieldName: string, maxCount?: number)
+   uploadArray(req, res, async (err) => {
+      if (err) {
+         console.log('err uploading', err);
+         //TOTO-add redirect with flash msgs
+      } else {
+         console.log(req.files);
+         userMidware.renderEditPhotoPage(req, res);
+         //  await renameTestDB(req);
+      }
+      //next();
+   });
+};
+
+// const renameTestDB = async (req) => {
+//    console.log('file ar-------', req.files);
+//    req.files.forEach((file) => {
+//       console.log('file ar-------', file);
+//       console.log('f, loc  ', file.location);
+//    });
+// };
 module.exports = userMidware;
+async function addPhotosToDB(req, user, albums, newPhotos) {
+   console.log('adding pho to DB');
+   console.log('files', req.files);
+   await Promise.all(
+      req.files.map(async (img, ndx) => {
+         console.log('------->', img);
+         console.log('loc------->', img.location);
+         console.log('key------->', img.key);
+
+         let newPhotoParams = {
+            author: user.name,
+            SubmittedByID: user._id,
+            fileName: img.key,
+            fileLocation: img.location,
+         };
+
+         let exif = userMidware.getExifDataFromForm(req, img, ndx);
+         const newPhotoParamsFromExif = userMidware.generateAditionalParamsFromExif(
+            exif,
+         );
+
+         newPhotoParams = { ...newPhotoParams, ...newPhotoParamsFromExif };
+         let newPhoto = new Photo(newPhotoParams);
+         await newPhoto.save(); //adding photo to list to return to user;
+         console.log('new photo:', newPhoto);
+         //adding photo to currrent users's photo collection
+         user.allPhotos.push(newPhoto._id);
+
+         await userMidware.ASYNCaddPhotoIdToAblums(albums, newPhoto._id);
+
+         newPhotos.push(newPhoto);
+      }),
+   );
+}
+
+userMidware.getExifDataFromForm = (req, img, ndx) => {
+   console.log('img', JSON.stringify(img));
+   let exifFormData = JSON.parse(req.body.exifData);
+   console.log('fromForm', JSON.stringify(req.body));
+
+   if (
+      img.originalname === exifFormData[ndx].fileName &&
+      exifFormData[ndx].exif
+   ) {
+      const exif = exifFormData[ndx].exif;
+
+      console.log('found exif', exifFormData[ndx].exif);
+      return exif;
+   } else {
+      return null;
+   }
+
+   //check ndx and file nam
+   //if(img.OriginalName==req){}
+
+   //else{return null}
+};
+userMidware.generateAditionalParamsFromExif = (exif) => {
+   let paramsFromExifData = {};
+   if (exif) {
+      paramsFromExifData = {
+         ...paramsFromExifData,
+         ...{
+            exifMetaData: exif,
+         },
+      };
+
+      if (exif.latitude && exif.longitude && exif.DateTimeOriginal) {
+         paramsFromExifData = {
+            ...paramsFromExifData,
+            ...{
+               dateTaken: exif.DateTimeOriginal,
+               longitude: exif.longitude,
+               latitude: exif.latitude,
+               location_2dsphere: {
+                  type: 'Point',
+                  coordinates: [exif.longitude, exif.latitude],
+               },
+            },
+         };
+      }
+   }
+   console.log('ooooooooooooooo paramsFromExifData ', paramsFromExifData);
+
+   return paramsFromExifData;
+};
