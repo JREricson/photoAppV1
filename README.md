@@ -62,10 +62,10 @@ All photos on the site are searchable through either an indexed text field or a 
 
 ## Code
 - This was a learning project. The majority of what was written was learned while making the site.  	Note that while asking why I might have made the choices I made
-- I put effort into trying to make the code clean, organized, and readable; placing comments only where needed and adding descriptive variable names
+- I put effort into trying to make the code clean, organized, and readable; placing comments where needed and adding descriptive variable names
 
 ## Planned improvements
-	-this was a draft and my first time trying to make a large project. I was a learning process. I plan 	to rewrite the site in the future as site for myself to post pictures from where I have visited and 	to serve as a further learning tool
+	-this was a draft and my first time trying to make a large project. I was a learning process. I plan to rewrite the site in the future as site for myself to post pictures from where I have visited and to serve as a further learning tool
 	-The UI will have major improvements, site might only be a place fro me to showcase photos to friends.
 
 ## Other notes
